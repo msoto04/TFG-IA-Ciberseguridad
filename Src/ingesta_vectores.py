@@ -26,11 +26,11 @@ def crear_base_datos():
     
     try:
         start_time = time.time()
-        # Creamos el índice
+  
         vector_db = FAISS.from_documents(trozos, embeddings)
         print(f"4. Índice creado en {round(time.time() - start_time, 2)} segundos.")
         
-        # GUARDADO FORZOSO
+     
         print(f"5. Guardando en {db_path}...")
         vector_db.save_local(db_path)
         print("¡ÉXITO! Carpeta creada correctamente.")
