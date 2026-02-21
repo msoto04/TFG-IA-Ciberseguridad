@@ -1,0 +1,46 @@
+Guía de Vulnerabilidades Web: OWASP
+Top 10 (2021)
+El OWASP Top 10 es un documento estándar de concientización para desarrolladores y
+seguridad de aplicaciones web. Representa un consenso amplio sobre los riesgos de seguridad
+más críticos para las aplicaciones web.
+A01:2021 - Pérdida de Control de Acceso (Broken Access Control) Los usuarios pueden
+actuar fuera de sus permisos previstos. Las fallas permiten a los atacantes acceder a cuentas
+de otros usuarios, ver archivos confidenciales, modificar datos o cambiar derechos de acceso.
+Solución técnica: Implementar el control de acceso por defecto, deshabilitar el listado de
+directorios y registrar las fallas de acceso.
+A02:2021 - Fallos Criptográficos (Cryptographic Failures) Fallas relacionadas con la
+protección de datos confidenciales (contraseñas, números de tarjetas de crédito, registros de
+salud) en tránsito y en reposo, lo que lleva a la exposición de datos sensibles. Solución técnica:
+Cifrar todos los datos confidenciales en reposo y en tránsito usando protocolos seguros (TLS) y
+algoritmos de cifrado fuertes (AES).
+A03:2021 - Inyección (Injection) Ocurre cuando se envían datos no confiables a un intérprete
+como parte de un comando o consulta. Los tipos más comunes son inyección SQL, NoSQL, OS
+y LDAP. Solución técnica: Usar una API segura que evite el uso de intérpretes por completo,
+utilizar consultas parametrizadas (Prepared Statements) o usar herramientas de mapeo
+objeto-relacional (ORM) como SQLAlchemy de forma segura (ej. métodos select o text
+parametrizados).
+A04:2021 - Diseño Inseguro (Insecure Design) Se centra en los riesgos relacionados con
+defectos de diseño y arquitectura. Requiere el uso de modelado de amenazas, patrones de
+diseño seguro y arquitecturas de referencia.
+A05:2021 - Configuración de Seguridad Incorrecta (Security Misconfiguration) Es el
+resultado de configuraciones inseguras predeterminadas, configuraciones incompletas,
+almacenamiento en la nube abierto, encabezados HTTP mal configurados o mensajes de error
+detallados que contienen información confidencial.
+A06:2021 - Componentes Vulnerables y Desactualizados (Vulnerable and Outdated
+Components) Si no se conoce las versiones de todos los componentes que se utilizan (tanto
+del lado del cliente como del servidor) y sus dependencias, el sistema es vulnerable.
+A07:2021 - Fallas de Identificación y Autenticación (Identification and Authentication
+Failures) Las debilidades en la autenticación y la gestión de sesiones permiten a los atacantes
+comprometer contraseñas, claves o tokens de sesión, asumiendo temporal o permanentemente
+las identidades de los usuarios.
+A08:2021 - Fallas en el Software y en la Integridad de los Datos (Software and Data
+Integrity Failures) Ocurre cuando el código y la infraestructura no protegen contra violaciones
+de integridad, como el uso de plugins o bibliotecas de fuentes no confiables.
+A09:2021 - Fallas en el Registro y Monitoreo de Seguridad (Security Logging and
+Monitoring Failures) Sin un registro y monitoreo adecuados, las brechas no se pueden
+detectar. Los atacantes dependen de esta falta de monitoreo para mantener el acceso a los
+sistemas sin ser detectados.
+A10:2021 - Falsificación de Solicitudes del Lado del Servidor (SSRF) Los defectos SSRF
+ocurren cuando una aplicación web obtiene un recurso remoto sin validar la URL proporcionada
+por el usuario. Permite a un atacante obligar a la aplicación a enviar una solicitud manipulada a
+un destino inesperado

@@ -1,42 +1,88 @@
 import os
-import time
-from langchain_ollama import OllamaEmbeddings
+import sys
 from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+
+from langchain_community.embeddings import OllamaEmbeddings 
+
 def crear_base_datos():
-    docs_path = "D:/TFG_Ciberseguridad/docs"
-    db_path = "D:/TFG_Ciberseguridad/faiss_index"
+    docs_path = "/app/docs"
+    db_path = "/app/faiss_index"
     
-    print("1. Verificando archivos...")
-    if not os.path.exists(os.path.join(docs_path, "ENS_2022.pdf")):
-        print("ERROR: No veo el PDF en D:/TFG_Ciberseguridad/docs")
-        return
+    print("="*60)
+    print(" INICIANDO")
+    print("="*60)
+    
+    if not os.path.exists(docs_path):
+        print(f"ERROR: La carpeta {docs_path} no existe dentro de Docker.")
+        sys.exit(1)
 
-    print("2. Cargando PDF y troceando... (esto es rápido)")
-    loader = PyPDFLoader(os.path.join(docs_path, "ENS_2022.pdf"))
-    documentos = loader.load()
+    archivos_en_carpeta = os.listdir(docs_path)
+    print(f"\nArchivos detectados en la carpeta por Docker: \n{archivos_en_carpeta}\n")
+
+    documentos_totales = []
+    
+    for archivo in archivos_en_carpeta:
+        ruta = os.path.join(docs_path, archivo)
+        
+        if archivo.endswith(".pdf"):
+            print(f" leer PDF: {archivo}...")
+            try:
+                loader = PyPDFLoader(ruta)
+                docs = loader.load()
+                caracteres = sum(len(d.page_content) for d in docs)
+                print(f"EXITO: Leídas {len(docs)} páginas, {caracteres} caracteres extraídos.")
+                documentos_totales.extend(docs)
+            except Exception as e:
+                print(f"ERROR al leer PDF {archivo}: {e}")
+                
+        elif archivo.endswith(".txt"):
+            print(f"Intentando leer TXT: {archivo}...")
+            try:
+                try:
+                    loader = TextLoader(ruta, encoding='utf-8')
+                    docs = loader.load()
+                except UnicodeDecodeError:
+                    print("Aviso: Fall UTF-8, intentando con ISO-8859-1 (Latin-1)...")
+                    loader = TextLoader(ruta, encoding='iso-8859-1')
+                    docs = loader.load()
+                    
+                caracteres = sum(len(d.page_content) for d in docs)
+                
+                if caracteres == 0:
+                    print(f"ERROR CRTICO: El archivo {archivo} está vacio (0 caracteres) para la IA.")
+                else:
+                    print(f"ÉXITO: {caracteres} caracteres extraidos perfectamente.")
+                    
+                documentos_totales.extend(docs)
+                
+            except Exception as e:
+                print(f"ERROR al leer TXT {archivo}: {e}")
+        else:
+            print(f"Omitiendo archivo no soportado o extensión oculta: {archivo}")
+
+    if not documentos_totales:
+        print("\nERROR FATAL: No se ha podido extraer texto de NINGÚN archivo. Abortando.")
+        sys.exit(1)
+
+    print("\nCortando texto en fragmentos...")
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    trozos = text_splitter.split_documents(documentos)
-    print(f"   Hecho: {len(trozos)} trozos creados.")
+    trozos = text_splitter.split_documents(documentos_totales)
+    print(f"Generados {len(trozos)} fragmentos en total.")
 
-    print("3. Conectando con Ollama para Embeddings... (Aquí suele tardar)")
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")
+    print("\nGenerando Embeddings (Conectando a host.docker.internal)...")
+    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     
-    try:
-        start_time = time.time()
   
-        vector_db = FAISS.from_documents(trozos, embeddings)
-        print(f"4. Índice creado en {round(time.time() - start_time, 2)} segundos.")
-        
-     
-        print(f"5. Guardando en {db_path}...")
-        vector_db.save_local(db_path)
-        print("¡ÉXITO! Carpeta creada correctamente.")
-        
-    except Exception as e:
-        print(f"ERROR CRÍTICO: {e}")
+    embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url=ollama_url)
+    
+    vector_db = FAISS.from_documents(trozos, embeddings)
+    
+    print(f"\nGuardando índice en {db_path}...")
+    vector_db.save_local(db_path)
+    print("¡Base de datos regenerada con éxito!.")
 
 if __name__ == "__main__":
     crear_base_datos()

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENS-Audit AI | Plataforma de Seguridad Soberana</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand">
+            <i class="fas fa-shield-virus"></i> SECURE<span style="color:var(--primary)">AUDIT</span>
+        </div>
+        
+        <div class="menu-label">MENU PRINCIPAL</div>
+        <div class="nav-item active" onclick="navigate('home')"><i class="fas fa-grid-2"></i> Dashboard</div>
+        <div class="nav-item" onclick="navigate('audit')"><i class="fas fa-search-code"></i> Auditoría SAST</div>
+        <div class="nav-item" onclick="navigate('chat')"><i class="fas fa-brain"></i> Agente Legal</div>
+        
+        <div class="menu-label" style="margin-top: 20px;">HISTORIAL RECIENTE</div>
+        <div id="history-list" class="history-list">
+            <div class="history-placeholder">Sin auditorías previas</div>
+        </div>
+
+        <div class="sys-status">
+            <div class="status-dot"></div> Sistema: <strong>ONLINE</strong><br>
+            <small>RAM: Optimizada (Quantized)</small>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <header class="top-bar">
+            <h2 id="page-title">Dashboard General</h2>
+            <div class="top-actions">
+                <button class="btn-secondary" onclick="toggleSettings()"><i class="fas fa-sliders-h"></i> Parámetros IA</button>
+                <button class="btn-primary" id="btn-export-pdf" style="display:none;" onclick="generarPDF()"><i class="fas fa-file-pdf"></i> Exportar Informe</button>
+            </div>
+        </header>
+
+        <div id="view-home" class="section-view active">
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="icon-box red"><i class="fas fa-bug"></i></div>
+                    <div>
+                        <h3>Vulnerabilidades</h3>
+                        <p id="stat-vuln">0 Detectadas</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box blue"><i class="fas fa-shield-alt"></i></div>
+                    <div>
+                        <h3>Cumplimiento ENS</h3>
+                        <p id="stat-score">-- / 100</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box green"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <h3>Estado Auditoría</h3>
+                        <p id="stat-status">Esperando ZIP</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h4><i class="fas fa-radar"></i> Cobertura Dominios ENS</h4>
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h4><i class="fas fa-chart-pie"></i> Distribución de Severidad</h4>
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-audit" class="section-view">
+            <div class="upload-area" id="upload-zone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Arrastra tu Código Fuente (ZIP)</h3>
+                <p>Análisis Estático + Mapeo Legal ENS (Offline/Local)</p>
+                <input type="file" id="fileInput" hidden accept=".zip">
+                <div id="spinner" class="spinner"></div>
+            </div>
+
+            <div id="audit-workspace" class="audit-workspace" style="display:none;">
+                <div class="findings-column">
+                    <div class="col-header">Hallazgos Técnicos</div>
+                    <div id="findings-list" class="findings-list-scroll"></div>
+                </div>
+                <div class="detail-column">
+                    <div class="col-header">Razonamiento Agente Legal</div>
+                    <div id="finding-detail" class="detail-content">
+                        <div class="empty-state">Selecciona una vulnerabilidad para ver el análisis de la IA.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-chat" class="section-view">
+            <div class="chat-interface">
+                <div id="chat-history" class="chat-messages">
+                    <div class="message bot">
+                        <div class="avatar"><i class="fas fa-robot"></i></div>
+                        <div class="text">Soy tu Auditor Experto ENS. Mis respuestas incluyen citas normativas. ¿En qué puedo ayudarte?</div>
+                    </div>
+                </div>
+                <div class="chat-controls">
+                    <input type="text" id="chat-input" placeholder="Escribe tu consulta legal aquí...">
+                    <button onclick="enviarMensaje()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-cogs"></i> Configuración del Motor IA</h3>
+            <div class="setting-group">
+                <label>Temperatura (Creatividad): <span id="temp-val">0.0</span></label>
+                <input type="range" min="0" max="1" step="0.1" value="0" onchange="document.getElementById('temp-val').innerText = this.value">
+                <small>0 = Estricto (Legal), 1 = Creativo</small>
+            </div>
+	    <div class="setting-group">
+                <label>Modelo LLM:</label>
+                <select id="model-select">
+                    <option value="llama3.1:8b">Llama 3.1 (8B - Modo Experto ENS)</option>
+                    <option value="llama3.2:3b">Llama 3.2 (3B - Modo Rápido/Ligero)</option>
+                </select>
+                <small style="color: #ffaa00; display: block; margin-top: 5px;">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <b>Aviso:</b> El modelo 8B requiere al menos 8GB de RAM. Úsalo bajo tu propia responsabilidad.
+                </small>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="toggleSettings()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/audit.js"></script>
+    <script src="js/chat.js"></script>
+</body>
+</html>

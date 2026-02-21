@@ -29,5 +29,14 @@ COPY . .
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 8. Comando por defecto al ejecutar el contenedor
-CMD ["python", "main.py"]
+# CREAMOS DIRECTORIOS NECESARIOS
+RUN mkdir -p /app/auditoria /app/resultados
+
+# ABRIMOS EL PUERTO 8000 (La ventanilla de atención al cliente)
+EXPOSE 8000
+
+# COMANDO DE ARRANQUE:
+# Lanzamos Uvicorn (el servidor) apuntando al archivo api.py
+CMD ["uvicorn", "Src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+
+COPY ingesta_vectores.py /app/ingesta_vectores.py
