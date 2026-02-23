@@ -39,4 +39,3 @@ EXPOSE 8000
 # Lanzamos Uvicorn (el servidor) apuntando al archivo api.py
 CMD ["uvicorn", "Src.api:app", "--host", "0.0.0.0", "--port", "8000"]
 
-COPY ingesta_vectores.py /app/ingesta_vectores.py
