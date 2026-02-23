@@ -4,6 +4,7 @@ import uuid
 import zipfile
 import logging
 import aiofiles
+import asyncio
 from dotenv import load_dotenv
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -20,7 +21,6 @@ from langchain.chains import create_retrieval_chain
 from Src.sast_scanner import ejecutar_sast_profesional
 from Src.orquestador import app as grafo_agentes
 
-
 load_dotenv()
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "/app/uploads")
 EXTRACT_DIR = os.getenv("EXTRACT_DIR", "/app/auditoria_temp")
@@ -32,13 +32,13 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("app.log"), # Guarda en archivo
-        logging.StreamHandler()         # Muestra en terminal
+        logging.FileHandler("app.log"), 
+        logging.StreamHandler()         
     ]
 )
 logger = logging.getLogger("SecureAudit_API")
 
-# Crear directorios si no existen
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
 
@@ -52,6 +52,7 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
+
 class ChatRequest(BaseModel):
     mensaje: str
     temperature: float = 0.0
@@ -60,7 +61,7 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 async def chat_rag(request: ChatRequest):
     try:
-        logger.info(f"Petición Chat RAG recibida. Modelo: {request.modelo}") 
+        logger.info(f"Petición Chat RAG recibida. Modelo: {request.modelo}, Temperatura: {request.temperature}") 
         
         embeddings = OllamaEmbeddings(
             model="nomic-embed-text",
@@ -77,12 +78,14 @@ async def chat_rag(request: ChatRequest):
             logger.error(f"Error cargando FAISS: {e}")
             raise HTTPException(status_code=500, detail="Error: No encuentro la base de conocimientos (FAISS).")
 
-        llm = ChatOllama(
+        
+        llm_dinamico = ChatOllama(
             model=request.modelo,  
             temperature=request.temperature,
             base_url=OLLAMA_URL 
         )
 
+       
         prompt_template = ChatPromptTemplate.from_template("""
             Eres un Auditor Técnico de Ciberseguridad.
             Utiliza la información del siguiente <contexto> para construir tu respuesta.
@@ -100,11 +103,13 @@ async def chat_rag(request: ChatRequest):
             4. NO inventes leyes, artículos ni acrónimos que no estén en el texto.
         """)
         
-        document_chain = create_stuff_documents_chain(llm, prompt_template)
+        document_chain = create_stuff_documents_chain(llm_dinamico, prompt_template)
         retriever = vector_db.as_retriever(search_kwargs={"k": 5})
         rag_chain = create_retrieval_chain(retriever, document_chain)
 
-        respuesta = rag_chain.invoke({"input": request.mensaje})
+        
+        respuesta = await asyncio.to_thread(rag_chain.invoke, {"input": request.mensaje})
+        
         logger.info("Respuesta del chat generada con éxito.")
         
         return {"respuesta": respuesta["answer"]}
@@ -122,7 +127,6 @@ async def auditar_zip(file: UploadFile = File(...)):
     logger.info(f"Iniciando auditoría ID: {audit_id} para el archivo: {file.filename}")
 
     try:
-       
         content = await file.read()
         async with aiofiles.open(zip_path, 'wb') as out_file:
             await out_file.write(content)
@@ -131,17 +135,20 @@ async def auditar_zip(file: UploadFile = File(...)):
             zip_ref.extractall(work_dir)
             
         logger.info(f"Archivo descomprimido en {work_dir}. Iniciando escáner SAST.")
-        hallazgos = ejecutar_sast_profesional(work_dir)
+        
+        
+        hallazgos = await asyncio.to_thread(ejecutar_sast_profesional, work_dir)
         
         resultados_estructurados = []
         if hallazgos:
             logger.info(f"Se encontraron {len(hallazgos)} vulnerabilidades. Iniciando análisis IA.")
             for h in hallazgos:
                 try:
-                    respuesta = grafo_agentes.invoke({
-                        "hallazgos_tecnicos": [h],
-                        "tiempos": {} 
-                    })
+                  
+                    respuesta = await asyncio.to_thread(
+                        grafo_agentes.invoke, 
+                        {"hallazgos_tecnicos": [h], "tiempos": {}}
+                    )
                     analisis = respuesta['veredicto_final']
                 except Exception as e:
                     logger.error(f"Error en LangGraph analizando hallazgo: {e}", exc_info=True)
@@ -167,7 +174,6 @@ async def auditar_zip(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
     
     finally:
-       
         logger.info(f"Limpiando archivos temporales de la auditoría {audit_id}...")
         try:
             if os.path.exists(work_dir): 

@@ -1,23 +1,25 @@
 import subprocess
 import json
 import os
-import sys
+import logging
+
+
+logger = logging.getLogger("SecureAudit_SAST")
 
 def ejecutar_sast_profesional(directorio_codigo):
     """
-    Ejecuta Semgrep usando la configuración 'default' (Seguridad + Secretos + Calidad).
+    Ejecuta Semgrep de forma segura y concurrente.
     """
-    
     if not os.path.exists(directorio_codigo):
-        print(f"[ERROR SAST] El directorio no existe: {directorio_codigo}")
+        logger.error(f"El directorio a analizar no existe: {directorio_codigo}")
         return []
 
-    archivo_salida = "semgrep_results.json"
+
+    archivo_salida = os.path.join(directorio_codigo, "semgrep_results.json")
     
     comando = [
         "semgrep", "scan",
         "--config", "p/default", 
-        
         "--json",             
         "--output", archivo_salida,
         "--quiet",            
@@ -25,34 +27,47 @@ def ejecutar_sast_profesional(directorio_codigo):
         directorio_codigo
     ]
     
+    logger.info(f"Iniciando escaneo SAST en: {directorio_codigo}")
+    
     try:
-        subprocess.run(comando, check=False) 
+
+        proceso = subprocess.run(comando, check=False, capture_output=True, text=True)
         
         if os.path.exists(archivo_salida):
-            with open(archivo_salida, "r") as f:
-                datos = json.load(f)
+            with open(archivo_salida, "r", encoding="utf-8") as f:
+                try:
+                    datos = json.load(f)
+                except json.JSONDecodeError:
+                    logger.error("Error crítico: Semgrep devolvió un JSON corrupto.")
+                    return []
             
             os.remove(archivo_salida)
             
             hallazgos_limpios = []
+            resultados = datos.get("results", [])
             
-            for resultado in datos.get("results", []):
-                vuln = {
+          
+            for resultado in resultados:
+                extra = resultado.get("extra", {})
+                start = resultado.get("start", {})
                 
-                    "vulnerabilidad": resultado["check_id"].split(".")[-1], 
-                    "archivo": resultado["path"],
-                    "linea": resultado["start"]["line"],
-                    "codigo_afectado": resultado["extra"]["lines"],
-                    "severidad": resultado["extra"]["severity"],
-                    "mensaje": resultado["extra"]["message"]
+                vuln = {
+                    "vulnerabilidad": resultado.get("check_id", "Desconocida").split(".")[-1], 
+                    "archivo": resultado.get("path", "Desconocido"),
+                    "linea": start.get("line", 0),
+                    "codigo_afectado": extra.get("lines", "No disponible"),
+                    "severidad": extra.get("severity", "INFO"),
+                    "mensaje": extra.get("message", "Sin descripción")
                 }
                 hallazgos_limpios.append(vuln)
                 
+            logger.info(f"Escaneo SAST completado. Se encontraron {len(hallazgos_limpios)} vulnerabilidades.")
             return hallazgos_limpios
             
         else:
+            logger.warning(f"Semgrep no generó el archivo JSON. Código de salida: {proceso.returncode}. Error: {proceso.stderr}")
             return []
 
     except Exception as e:
-        print(f"[ERROR SAST] Fallo al ejecutar Semgrep: {e}")
+        logger.error(f"Fallo al ejecutar el binario de Semgrep: {e}", exc_info=True)
         return []

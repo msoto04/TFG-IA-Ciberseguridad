@@ -2,26 +2,26 @@ let currentAuditData = null;
 let chartRadar = null;
 let chartDoughnut = null;
 
-// Inicializar Gráficas vacías al cargar
+
 document.addEventListener('DOMContentLoaded', () => {
     initCharts();
     loadHistory();
 });
 
-// Manejo de Subida
+
 document.getElementById('upload-zone').onclick = () => document.getElementById('fileInput').click();
 document.getElementById('fileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // UI Loading
+    
     document.getElementById('spinner').style.display = 'block';
     
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-        const res = await fetch('http://localhost:8000/auditar-zip', { method: 'POST', body: formData });
+        const res = await fetch('http://127.0.0.1:8000/auditar-zip', { method: 'POST', body: formData });
         const data = await res.json();
         
         currentAuditData = data;
@@ -41,14 +41,14 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 });
 
 function processAuditResults(data) {
-    // 1. Estadísticas
+   
     document.getElementById('stat-vuln').innerText = `${data.total_vulnerabilidades} Detectadas`;
     const score = Math.max(0, 100 - (data.total_vulnerabilidades * 5));
     document.getElementById('stat-score').innerText = `${score} / 100`;
     document.getElementById('stat-status').innerText = "Finalizado";
     document.getElementById('stat-status').style.color = "#10b981";
 
-    // 2. Lista de Hallazgos
+    
     const list = document.getElementById('findings-list');
     list.innerHTML = '';
     
@@ -72,16 +72,16 @@ function processAuditResults(data) {
         list.appendChild(div);
     });
 
-    // 3. Actualizar Gráficas
+    
     updateCharts(score, severities);
 }
 
 function showDetail(item, element) {
-    // Highlight
+   
     document.querySelectorAll('.finding-item').forEach(e => e.classList.remove('active'));
     element.classList.add('active');
 
-    // Render Markdown
+   
     let content = item.analisis_legal
         .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--primary)">$1</strong>')
         .replace(/\|/g, '')
@@ -97,7 +97,7 @@ function showDetail(item, element) {
     `;
 }
 
-// --- GRÁFICAS AVANZADAS ---
+
 function initCharts() {
     const ctxRadar = document.getElementById('radarChart').getContext('2d');
     chartRadar = new Chart(ctxRadar, {
@@ -135,7 +135,7 @@ function initCharts() {
 }
 
 function updateCharts(score, severities) {
-    // Simular distribución ENS basada en score (para efecto visual)
+   
     chartRadar.data.datasets[0].data = [score, score-10, score+5, score-5, score];
     chartRadar.update();
 
@@ -149,13 +149,13 @@ async function generarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    // --- COLORES CORPORATIVOS ---
+   
     const colorPrimary = [59, 130, 246]; // Azul
     const colorDanger = [239, 68, 68];  // Rojo
     const colorDark = [15, 23, 42];     // Azul oscuro
     
-    // ================= PORTADA =================
-    // Fondo de cabecera
+ 
+  
     doc.setFillColor(...colorDark);
     doc.rect(0, 0, 210, 40, 'F');
     
@@ -189,7 +189,7 @@ async function generarPDF() {
         styles: { fontSize: 11 }
     });
     
-    // ================= DETALLE DE HALLAZGOS =================
+   
     doc.setFontSize(14);
     doc.setTextColor(...colorPrimary);
     doc.text("Detalle de Vulnerabilidades y Análisis Normativo", 14, doc.lastAutoTable.finalY + 15);
@@ -202,13 +202,12 @@ async function generarPDF() {
         doc.setTextColor(...colorDanger);
         doc.setFont("helvetica", "bold");
         
-        // Control de salto de página manual si estamos muy abajo
+      
         if (yPos > 250) { doc.addPage(); yPos = 20; }
         
         doc.text(`${index + 1}. ${item.vulnerabilidad.toUpperCase()} [${item.severidad}]`, 14, yPos);
         
-        // Preparamos datos para la tabla del hallazgo
-        // Limpiamos un poco el texto Markdown para que se vea bien en PDF plano
+
         const cleanAnalysis = item.analisis_legal
             .replace(/\|/g, '')
             .replace(/\*\*/g, '')
@@ -223,14 +222,14 @@ async function generarPDF() {
             ],
             theme: 'grid',
             styles: { fontSize: 9, cellPadding: 4 },
-            columnStyles: { 0: { fillColor: [240, 240, 240] } }, // Columna izq gris
+            columnStyles: { 0: { fillColor: [240, 240, 240] } },
             margin: { left: 14, right: 14 }
         });
         
         yPos = doc.lastAutoTable.finalY + 15;
     });
     
-    // ================= PIE DE PÁGINA =================
+  
     const pageCount = doc.internal.getNumberOfPages();
     for(let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -242,7 +241,7 @@ async function generarPDF() {
     doc.save("Informe_Oficial_ENS.pdf");
 }
 
-// --- HISTORIAL (REQUISITO CUMPLIDO) ---
+
 function saveToHistory(fileName, count) {
     let history = JSON.parse(localStorage.getItem('auditHistory') || '[]');
     history.unshift({ date: new Date().toLocaleTimeString(), file: fileName, count: count });

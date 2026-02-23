@@ -3,7 +3,7 @@ function navigate(view) {
     document.getElementById('view-' + view).classList.add('active');
     
     document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-    // Lógica simple para resaltar menú
+  
     if(view === 'home') document.querySelectorAll('.nav-item')[0].classList.add('active');
     if(view === 'audit') document.querySelectorAll('.nav-item')[1].classList.add('active');
     if(view === 'chat') document.querySelectorAll('.nav-item')[2].classList.add('active');
