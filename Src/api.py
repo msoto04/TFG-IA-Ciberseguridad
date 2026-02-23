@@ -20,14 +20,14 @@ from langchain.chains import create_retrieval_chain
 from Src.sast_scanner import ejecutar_sast_profesional
 from Src.orquestador import app as grafo_agentes
 
-# 1. CARGAR VARIABLES DE ENTORNO
+
 load_dotenv()
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "/app/uploads")
 EXTRACT_DIR = os.getenv("EXTRACT_DIR", "/app/auditoria_temp")
 FAISS_PATH = os.getenv("FAISS_PATH", "/app/faiss_index")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
 
-# 2. CONFIGURAR LOGGING
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -122,7 +122,7 @@ async def auditar_zip(file: UploadFile = File(...)):
     logger.info(f"Iniciando auditoría ID: {audit_id} para el archivo: {file.filename}")
 
     try:
-        # 3. ASINCRONÍA AL GUARDAR EL ARCHIVO
+       
         content = await file.read()
         async with aiofiles.open(zip_path, 'wb') as out_file:
             await out_file.write(content)
@@ -167,7 +167,7 @@ async def auditar_zip(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
     
     finally:
-        # 4. LIMPIEZA ROBUSTA
+       
         logger.info(f"Limpiando archivos temporales de la auditoría {audit_id}...")
         try:
             if os.path.exists(work_dir): 

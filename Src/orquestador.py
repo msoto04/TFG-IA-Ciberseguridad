@@ -9,17 +9,16 @@ from langchain_community.chat_models import ChatOllama
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 
-# 1. CARGAR VARIABLES DE ENTORNO
+
 load_dotenv()
 DB_PATH = os.getenv("FAISS_PATH", "/app/faiss_index")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
 MODELO_ORQUESTADOR = os.getenv("MODELO_ORQUESTADOR", "llama3.2:3b")
 
-# 2. CONFIGURAR LOGGING
-# Como api.py ya configura el archivo físico, aquí solo nos 'enganchamos' a ese sistema
+
 logger = logging.getLogger("SecureAudit_LangGraph")
 
-# Inicializar LLM y Embeddings de forma dinámica
+
 llm = ChatOllama(
     model=MODELO_ORQUESTADOR, 
     temperature=0,
@@ -31,7 +30,7 @@ embeddings = OllamaEmbeddings(
     base_url=OLLAMA_URL 
 )
 
-# 3. ESTADO DEL GRAFO (Nuestra memoria compartida entre agentes)
+
 class AuditoriaState(TypedDict):
     hallazgos_tecnicos: List[dict]
     explicacion_tecnica: str
@@ -39,9 +38,7 @@ class AuditoriaState(TypedDict):
     veredicto_final: str
     tiempos: dict 
 
-# ==========================================
-# AGENTE 1: TÉCNICO
-# ==========================================
+
 def agente_tecnico(state: AuditoriaState):
     inicio = time.time()
     logger.info("--- [AGENTE TÉCNICO] Analizando fallo de código... ---")
@@ -66,16 +63,14 @@ def agente_tecnico(state: AuditoriaState):
     
     return {"explicacion_tecnica": explicacion, "tiempos": tiempos}
 
-# ==========================================
-# AGENTE 2: LEGAL / NORMATIVO (RAG)
-# ==========================================
+
 def agente_legal(state: AuditoriaState):
     inicio = time.time()
     logger.info("--- [AGENTE LEGAL] Consultando base de datos FAISS (ENS/OWASP)... ---")
     
     hallazgo = state['hallazgos_tecnicos'][0]
     
-    # Intentar recuperar contexto de FAISS
+   
     try:
         vector_db = FAISS.load_local(DB_PATH, embeddings, allow_dangerous_deserialization=True)
         busqueda = f"{hallazgo['vulnerabilidad']} seguridad ENS normativa"
@@ -120,20 +115,18 @@ def agente_legal(state: AuditoriaState):
     
     return {"veredicto_final": veredicto, "tiempos": tiempos}
 
-# ==========================================
-# COMPILACIÓN DEL GRAFO (WORKFLOW)
-# ==========================================
+
 logger.info("Inicializando Grafo LangGraph de Auditoría...")
 workflow = StateGraph(AuditoriaState)
 
-# Añadir Nodos
+
 workflow.add_node("agente_tecnico", agente_tecnico)
 workflow.add_node("agente_legal", agente_legal)
 
-# Definir Flujo
+
 workflow.set_entry_point("agente_tecnico")
 workflow.add_edge("agente_tecnico", "agente_legal")
 workflow.add_edge("agente_legal", END)
 
-# Compilar Aplicación
+
 app = workflow.compile()
