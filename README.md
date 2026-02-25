@@ -12,9 +12,9 @@ Todo el procesamiento de Inteligencia Artificial se realiza de forma local utili
 
 Para ejecutar este proyecto en tu máquina, necesitas tener instalados:
 
-1\. \*\*Docker Desktop\*\* (para levantar el backend y la base de datos vectorial de forma aislada).
+1\. Docker Desktop (para levantar el backend y la base de datos vectorial de forma aislada).
 
-2\. \*\*Ollama\*\* (para ejecutar los modelos de IA localmente).
+2\. Ollama (para ejecutar los modelos de IA localmente).
 
 
 
@@ -56,5 +56,5 @@ Abre una terminal en la raíz de este proyecto (donde está el archivo Dockerfil
 
 \### Paso 3: Acceso
 
-Abre tu navegador web y ve a la ruta donde tengas el archivo `index.html` (Capa\_Presentacion\_SPA/index.html) para ver la interfaz, o ve directamente a la API en `http://localhost:8000`.
+Abre tu navegador web y ve a la ruta donde esta el archivo `index.html` (Frontend/index.html) para ver la interfaz, o ve directamente a la API en `http://localhost:8000`.
 
