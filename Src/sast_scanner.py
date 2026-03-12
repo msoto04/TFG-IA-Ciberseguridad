@@ -18,8 +18,13 @@ def ejecutar_sast_profesional(directorio_codigo):
     archivo_salida = os.path.join(directorio_codigo, "semgrep_results.json")
     
     comando = [
+        
         "semgrep", "scan",
-        "--config", "p/default", 
+        "--config", "p/default",         # Reglas base generales
+        "--config", "p/security-audit",  # Auditoría de seguridad estricta
+        "--config", "p/secrets",         # Caza contraseñas, tokens y claves a fuego (Hardcoded)
+        "--config", "p/python",          # Reglas específicas de Python (Criptografía débil como MD5)
+        "--config", "p/owasp-top-ten",   # Top 10 vulnerabilidades web críticas
         "--json",             
         "--output", archivo_salida,
         "--quiet",            

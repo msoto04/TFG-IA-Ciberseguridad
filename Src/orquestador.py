@@ -9,15 +9,12 @@ from langchain_community.chat_models import ChatOllama
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 
-
 load_dotenv()
 DB_PATH = os.getenv("FAISS_PATH", "/app/faiss_index")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
 MODELO_ORQUESTADOR = os.getenv("MODELO_ORQUESTADOR", "llama3.2:3b")
 
-
 logger = logging.getLogger("SecureAudit_LangGraph")
-
 
 llm = ChatOllama(
     model=MODELO_ORQUESTADOR, 
@@ -30,14 +27,12 @@ embeddings = OllamaEmbeddings(
     base_url=OLLAMA_URL 
 )
 
-
 class AuditoriaState(TypedDict):
     hallazgos_tecnicos: List[dict]
     explicacion_tecnica: str
     articulos_legales: str
     veredicto_final: str
     tiempos: dict 
-
 
 def agente_tecnico(state: AuditoriaState):
     inicio = time.time()
@@ -52,12 +47,11 @@ def agente_tecnico(state: AuditoriaState):
         explicacion = respuesta.content
         logger.info(f"Análisis técnico generado para {hallazgo['vulnerabilidad']}")
     except Exception as e:
-        logger.error(f"Fallo críttico en Agente Técnico: {e}", exc_info=True)
+        logger.error(f"Fallo crítico en Agente Técnico: {e}", exc_info=True)
         explicacion = f"Error generando explicación técnica: {str(e)}"
 
     fin = time.time()
     
-    # Manejo seguro del diccionario de tiempos
     tiempos = state.get('tiempos', {})
     tiempos['tecnico'] = round(fin - inicio, 2)
     
@@ -70,7 +64,6 @@ def agente_legal(state: AuditoriaState):
     
     hallazgo = state['hallazgos_tecnicos'][0]
     
-   
     try:
         vector_db = FAISS.load_local(DB_PATH, embeddings, allow_dangerous_deserialization=True)
         busqueda = f"{hallazgo['vulnerabilidad']} seguridad ENS normativa"
@@ -81,23 +74,42 @@ def agente_legal(state: AuditoriaState):
         logger.error(f"No se pudo acceder a FAISS en Agente Legal: {e}", exc_info=True)
         contexto_ens = "La documentación normativa no está disponible por un error de base de datos."
 
-    prompt = f"""Eres un Auditor Experto en Ciberseguridad y Cumplimiento.
-    
-    FALLO TÉCNICO DETECTADO:
-    {state['explicacion_tecnica']}
-    
-    DOCUMENTACIÓN RECUPERADA (OWASP, ENS, RGPD):
-    {contexto_ens}
-    
-    TU TAREA:
-    Genera una respuesta en formato tabla Markdown exacta con estos campos.
-    
-    | Campo | Detalle |
-    | :--- | :--- |
-    | **Vulnerabilidad** | {hallazgo['vulnerabilidad']} |
-    | **Normativa / Incumplimiento** | (Extrae la norma aplicable de la DOCUMENTACIÓN RECUPERADA. NO inventes artículos. Si es de OWASP, cita OWASP) |
-    | **Nivel de Riesgo** | {hallazgo['severidad']} |
-    | **SOLUCIÓN TÉCNICA** | (Basado en la documentación recuperada, explica cómo solucionar esta vulnerabilidad en el código) |
+    # 1. EL MIDDLEWARE DE TRADUCCIÓN (Diccionario)
+    TRADUCTOR_VULNERABILIDADES = {
+        "sqlalchemy-execute-raw-query": "Inyección SQL Clásica (SQLi) - CWE-89. El código concatena strings en lugar de usar parámetros seguros.",
+        "insecure-hash-algorithm-md5": "Criptografía Débil (MD5) - CWE-327. Se está utilizando un algoritmo de hash obsoleto que es vulnerable a colisiones.",
+        "hardcoded-secret": "Credenciales a Fuego (Hardcoded Secret) - CWE-798. Hay una contraseña, token o clave secreta escrita directamente en el código.",
+        "hardcoded-password": "Credenciales a Fuego (Hardcoded Secret) - CWE-798. Contraseña escrita en texto plano en el código."
+    }
+
+    codigo_afectado = hallazgo.get('codigo_afectado', 'No disponible')
+    codigo_completo = hallazgo.get('codigo_completo', 'No disponible')
+
+    # 2. INTERCEPTAR Y TRADUCIR
+    etiqueta_semgrep = hallazgo.get('vulnerabilidad', '').lower()
+    vulnerabilidad_real = TRADUCTOR_VULNERABILIDADES.get(
+        etiqueta_semgrep, 
+        f"Vulnerabilidad técnica: {etiqueta_semgrep}"
+    )
+
+    prompt = f"""
+    Eres un Auditor de Código Senior hiper-estricto. 
+    REGLA DE ORO: NUNCA inventes frameworks, rutas web (Flask/Django) ni librerías que no existan en el archivo original.
+
+    ARCHIVO ORIGINAL COMPLETO A ANALIZAR:
+    {codigo_completo}
+
+    VULNERABILIDAD A CORREGIR:
+    - Tipo de fallo real: {vulnerabilidad_real}
+    - Fragmento con el fallo: {codigo_afectado}
+
+    INSTRUCCIONES DE RESPUESTA (Solo texto plano estructurado, sin Markdown):
+
+    NORMATIVA E IMPACTO:
+    Explica el impacto de este fallo ({vulnerabilidad_real}) basándote en el ARCHIVO ORIGINAL. Relaciónalo con el ENS (Esquema Nacional de Seguridad) o RGPD si es pertinente.
+
+    SOLUCIÓN TÉCNICA:
+    Muestra cómo reescribir el fragmento afectado para solucionar el problema. ESTÁS OBLIGADO a usar la misma base de datos y librerías importadas en el ARCHIVO ORIGINAL.
     """
     
     try:
@@ -119,14 +131,11 @@ def agente_legal(state: AuditoriaState):
 logger.info("Inicializando Grafo LangGraph de Auditoría...")
 workflow = StateGraph(AuditoriaState)
 
-
 workflow.add_node("agente_tecnico", agente_tecnico)
 workflow.add_node("agente_legal", agente_legal)
-
 
 workflow.set_entry_point("agente_tecnico")
 workflow.add_edge("agente_tecnico", "agente_legal")
 workflow.add_edge("agente_legal", END)
-
 
 app = workflow.compile()

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: secureaudit-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    environment:
+      - OLLAMA_URL=http://host.docker.internal:11434
+      - REDIS_URL=redis://redis:6379/0  
+      - MODELO_ORQUESTADOR=llama3.1:8b
+    extra_hosts:
+      - "host.docker.internal:host-gateway" 
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    container_name: secureaudit-redis
+    ports:
+      - "6379:6379"
+
+  worker:
+    build: .
+    container_name: secureaudit-worker
+ 
+    command: celery -A Src.celery_worker.celery_app worker --loglevel=info
+    volumes:
+      - ./:/app
+    environment:
+      - OLLAMA_URL=http://host.docker.internal:11434
+      - REDIS_URL=redis://redis:6379/0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+      - backend

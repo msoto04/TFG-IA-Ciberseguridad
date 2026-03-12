@@ -14,29 +14,71 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+
+    document.getElementById('upload-zone').style.display = 'none';
+    const progressContainer = document.getElementById('progress-container');
+    if(progressContainer) progressContainer.style.display = 'block';
+    if(document.getElementById('spinner')) document.getElementById('spinner').style.display = 'none';
     
-    document.getElementById('spinner').style.display = 'block';
-    
+    document.getElementById('progress-text').innerText = "Subiendo archivo...";
+    document.getElementById('progress-bar-fill').style.width = "5%";
+
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-        const res = await fetch('http://127.0.0.1:8000/auditar-zip', { method: 'POST', body: formData });
+   
+        const res = await fetch('/auditar-zip', { method: 'POST', body: formData });
         const data = await res.json();
         
-        currentAuditData = data;
-        processAuditResults(data);
-        saveToHistory(file.name, data.total_vulnerabilidades);
+        if (data.estado !== "Procesando") throw new Error("Error al iniciar");
+        
+        const auditId = data.audit_id;
 
-        // Cambiar vista y activar botón PDF
-        document.getElementById('upload-zone').style.display = 'none';
-        document.getElementById('audit-workspace').style.display = 'grid';
-        document.getElementById('btn-export-pdf').style.display = 'inline-block';
+
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/progreso/${auditId}`);
+      
+        ws.onopen = () => {
+            document.getElementById('progress-text').innerText = "Conexión en vivo establecida. Esperando a la IA...";
+        };
+
+      
+        ws.onmessage = async (event) => {
+            const msg = JSON.parse(event.data);
+            
+          
+            document.getElementById('progress-text').innerText = msg.mensaje;
+            document.getElementById('progress-bar-fill').style.width = msg.progreso + '%';
+
+         
+            if (msg.progreso === 100) {
+                ws.close(); 
+                
+                const resFinal = await fetch(`/auditoria/${auditId}`);
+                const dataFinal = await resFinal.json();
+                
+                currentAuditData = dataFinal;
+                processAuditResults(dataFinal);
+                saveToHistory(file.name, dataFinal.total_vulnerabilidades);
+
+                if(progressContainer) progressContainer.style.display = 'none';
+                document.getElementById('audit-workspace').style.display = 'grid';
+                document.getElementById('btn-export-pdf').style.display = 'inline-block';
+                
+            } else if (msg.progreso === -1) {
+            
+                ws.close();
+                alert("Error en la auditoría: " + msg.mensaje);
+                document.getElementById('upload-zone').style.display = 'block';
+                progressContainer.style.display = 'none';
+            }
+        };
 
     } catch (e) {
         alert("Error de conexión: " + e);
-    } finally {
-        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('upload-zone').style.display = 'block';
+        if(progressContainer) progressContainer.style.display = 'none';
     }
 });
 
@@ -106,7 +148,7 @@ function initCharts() {
             labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'],
             datasets: [{
                 label: 'Nivel de Cumplimiento',
-                data: [0,0,0,0,0],
+                data: [0,0,0,0,0], // Empezamos a 0, la IA lo actualizará luego
                 backgroundColor: 'rgba(59, 130, 246, 0.2)',
                 borderColor: '#3b82f6',
                 borderWidth: 2,
@@ -114,7 +156,20 @@ function initCharts() {
             }]
         },
         options: {
-            scales: { r: { angleLines: {color: '#334155'}, grid: {color: '#334155'}, suggestMin: 0, suggestMax: 100, ticks: { display: false } } },
+            scales: { 
+                r: { 
+                    angleLines: { color: '#334155' }, 
+                    grid: { color: '#334155' }, 
+                    suggestMin: 0, 
+                    suggestMax: 100, 
+                    ticks: { display: false },
+                  
+                    pointLabels: { 
+                        color: '#ffffff', 
+                        font: { size: 14, weight: 'bold' } 
+                    }
+                } 
+            },
             plugins: { legend: { display: false } }
         }
     });
@@ -242,27 +297,32 @@ async function generarPDF() {
 }
 
 
+// Ya no guardamos en localStorage, lo hace el backend automáticamente
 function saveToHistory(fileName, count) {
-    let history = JSON.parse(localStorage.getItem('auditHistory') || '[]');
-    history.unshift({ date: new Date().toLocaleTimeString(), file: fileName, count: count });
-    if (history.length > 5) history.pop();
-    localStorage.setItem('auditHistory', JSON.stringify(history));
-    loadHistory();
+    loadHistory(); // Solo recargamos la vista
 }
 
-function loadHistory() {
-    let history = JSON.parse(localStorage.getItem('auditHistory') || '[]');
-    const container = document.getElementById('history-list');
-    
-    if (history.length === 0) return;
-    
-    container.innerHTML = '';
-    history.forEach(h => {
-        const div = document.createElement('div');
-        div.style.padding = "10px";
-        div.style.borderBottom = "1px solid #333";
-        div.style.fontSize = "0.8em";
-        div.innerHTML = `<span style="color:var(--primary)">${h.file}</span><br>Fallos: ${h.count} <span style="float:right; color:#666">${h.date}</span>`;
-        container.appendChild(div);
-    });
+// Ahora leemos el historial desde nuestra nueva Base de Datos
+async function loadHistory() {
+    try {
+        const res = await fetch('/historial');
+        const history = await res.json();
+        
+        const container = document.getElementById('history-list');
+        if (history.length === 0) return;
+        
+        container.innerHTML = '';
+        history.forEach(h => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <div style="font-size: 0.8em; color: var(--text-muted);">${h.date}</div>
+                <div style="font-weight: 600;">${h.file}</div>
+                <div style="font-size: 0.8em; color: var(--danger);"><i class="fas fa-bug"></i> ${h.count} fallos</div>
+            `;
+            container.appendChild(div);
+        });
+    } catch (e) {
+        console.error("Error cargando historial de la BD:", e);
+    }
 }

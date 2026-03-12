@@ -1,0 +1,42 @@
+2026-03-11 10:18:46,423 - SecureAudit_API - INFO - Iniciando auditoría ID: aec0426b-374d-4b5a-9bab-58fc80c007fa para el archivo: prueba2.zip
+2026-03-11 10:18:46,462 - SecureAudit_API - INFO - Archivo descomprimido en /app/auditoria_temp/aec0426b-374d-4b5a-9bab-58fc80c007fa. Iniciando escáner SAST.
+2026-03-11 10:18:46,484 - SecureAudit_SAST - INFO - Iniciando escaneo SAST en: /app/auditoria_temp/aec0426b-374d-4b5a-9bab-58fc80c007fa
+2026-03-11 10:18:52,942 - SecureAudit_SAST - INFO - Escaneo SAST completado. Se encontraron 1 vulnerabilidades.
+2026-03-11 10:18:52,943 - SecureAudit_API - INFO - Se encontraron 1 vulnerabilidades. Iniciando análisis IA.
+2026-03-11 10:18:52,974 - SecureAudit_LangGraph - INFO - --- [AGENTE TÉCNICO] Analizando fallo de código... ---
+2026-03-11 10:20:00,849 - SecureAudit_LangGraph - INFO - Análisis técnico generado para sqlalchemy-execute-raw-query
+2026-03-11 10:20:00,854 - SecureAudit_LangGraph - INFO - --- [AGENTE LEGAL] Consultando base de datos FAISS (ENS/OWASP)... ---
+2026-03-11 10:20:00,863 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-11 10:20:00,896 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-11 10:20:04,941 - SecureAudit_LangGraph - INFO - Se recuperaron 3 fragmentos normativos.
+2026-03-11 10:21:47,038 - SecureAudit_LangGraph - INFO - Veredicto legal/técnico generado con éxito.
+2026-03-11 10:21:47,043 - SecureAudit_API - INFO - Auditoría aec0426b-374d-4b5a-9bab-58fc80c007fa finalizada correctamente.
+2026-03-11 10:21:47,043 - SecureAudit_API - INFO - Limpiando archivos temporales de la auditoría aec0426b-374d-4b5a-9bab-58fc80c007fa...
+2026-03-11 10:37:44,271 - SecureAudit_API - INFO - Iniciando auditoría ID: 7dc31856-c527-4742-a0c2-d7afbe856d8f para el archivo: prueba2.zip
+2026-03-11 10:37:44,310 - SecureAudit_API - INFO - Archivo descomprimido en /app/auditoria_temp/7dc31856-c527-4742-a0c2-d7afbe856d8f. Iniciando escáner SAST.
+2026-03-11 10:37:44,312 - SecureAudit_SAST - INFO - Iniciando escaneo SAST en: /app/auditoria_temp/7dc31856-c527-4742-a0c2-d7afbe856d8f
+2026-03-11 10:37:54,515 - SecureAudit_SAST - INFO - Escaneo SAST completado. Se encontraron 1 vulnerabilidades.
+2026-03-11 10:37:54,516 - SecureAudit_API - INFO - Se encontraron 1 vulnerabilidades. Iniciando análisis IA.
+2026-03-11 10:37:54,546 - SecureAudit_LangGraph - INFO - --- [AGENTE TÉCNICO] Analizando fallo de código... ---
+2026-03-11 10:39:00,265 - SecureAudit_LangGraph - INFO - Análisis técnico generado para sqlalchemy-execute-raw-query
+2026-03-11 10:39:00,269 - SecureAudit_LangGraph - INFO - --- [AGENTE LEGAL] Consultando base de datos FAISS (ENS/OWASP)... ---
+2026-03-11 10:39:00,325 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-11 10:39:00,603 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-11 10:39:04,427 - SecureAudit_LangGraph - INFO - Se recuperaron 3 fragmentos normativos.
+2026-03-11 10:40:27,214 - SecureAudit_LangGraph - INFO - Veredicto legal/técnico generado con éxito.
+2026-03-11 10:40:27,218 - SecureAudit_API - INFO - Auditoría 7dc31856-c527-4742-a0c2-d7afbe856d8f finalizada correctamente.
+2026-03-11 10:40:27,218 - SecureAudit_API - INFO - Limpiando archivos temporales de la auditoría 7dc31856-c527-4742-a0c2-d7afbe856d8f...
+2026-03-11 11:11:42,891 - SecureAudit_API - INFO - Iniciando auditoría ID: 4af7c0f6-75d7-4d45-a69d-b236945eda49 para el archivo: prueba2.zip
+2026-03-11 11:11:42,952 - SecureAudit_API - INFO - Archivo descomprimido en /app/auditoria_temp/4af7c0f6-75d7-4d45-a69d-b236945eda49. Iniciando escáner SAST.
+2026-03-11 11:11:43,077 - SecureAudit_SAST - INFO - Iniciando escaneo SAST en: /app/auditoria_temp/4af7c0f6-75d7-4d45-a69d-b236945eda49
+2026-03-11 11:11:56,045 - SecureAudit_SAST - INFO - Escaneo SAST completado. Se encontraron 1 vulnerabilidades.
+2026-03-11 11:11:56,045 - SecureAudit_API - INFO - Se encontraron 1 vulnerabilidades. Iniciando análisis IA.
+2026-03-11 11:11:56,080 - SecureAudit_LangGraph - INFO - --- [AGENTE TÉCNICO] Analizando fallo de código... ---
+2026-03-11 11:13:05,463 - SecureAudit_LangGraph - INFO - Análisis técnico generado para sqlalchemy-execute-raw-query
+2026-03-11 11:13:05,468 - SecureAudit_LangGraph - INFO - --- [AGENTE LEGAL] Consultando base de datos FAISS (ENS/OWASP)... ---
+2026-03-11 11:13:05,511 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-11 11:13:05,873 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-11 11:13:10,031 - SecureAudit_LangGraph - INFO - Se recuperaron 3 fragmentos normativos.
+2026-03-11 11:14:54,893 - SecureAudit_LangGraph - INFO - Veredicto legal/técnico generado con éxito.
+2026-03-11 11:14:55,048 - SecureAudit_API - INFO - Auditoría 4af7c0f6-75d7-4d45-a69d-b236945eda49 finalizada correctamente.
+2026-03-11 11:14:55,049 - SecureAudit_API - INFO - Limpiando archivos temporales de la auditoría 4af7c0f6-75d7-4d45-a69d-b236945eda49...

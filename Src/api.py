@@ -5,6 +5,9 @@ import zipfile
 import logging
 import aiofiles
 import asyncio
+import redis.asyncio as redis_async
+from fastapi import WebSocket, WebSocketDisconnect
+from Src.celery_worker import procesar_auditoria_task
 from dotenv import load_dotenv
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -20,6 +23,27 @@ from langchain.chains import create_retrieval_chain
 
 from Src.sast_scanner import ejecutar_sast_profesional
 from Src.orquestador import app as grafo_agentes
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from Src.database import engine, Base, SessionLocal
+from Src.models import Usuario, Auditoria, Vulnerabilidad
+
+
+Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 load_dotenv()
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "/app/uploads")
@@ -44,6 +68,16 @@ os.makedirs(EXTRACT_DIR, exist_ok=True)
 
 app = FastAPI(title="Sistema Auditoría IA (ENS) - RAG FAISS")
 
+@app.on_event("startup")
+def crear_usuario_demo():
+    db = SessionLocal()
+    # Si la base de datos está vacía, creamos un usuario de prueba
+    if not db.query(Usuario).first():
+        usuario_demo = Usuario(email="auditor@empresa.com", hashed_password="123")
+        db.add(usuario_demo)
+        db.commit()
+    db.close()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -51,6 +85,20 @@ app.add_middleware(
     allow_methods=["*"], 
     allow_headers=["*"], 
 )
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+
+
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+
+@app.get("/")
+async def servir_interfaz():
+    html_path = os.path.join(FRONTEND_DIR, "index.html")
+    if not os.path.exists(html_path):
+        return {"error": "No se encuentra el archivo index.html en la carpeta frontend"}
+    return FileResponse(html_path)
 
 
 class ChatRequest(BaseModel):
@@ -119,66 +167,91 @@ async def chat_rag(request: ChatRequest):
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 @app.post("/auditar-zip")
-async def auditar_zip(file: UploadFile = File(...)):
+async def auditar_zip(file: UploadFile = File(...), db: Session = Depends(get_db)):
     audit_id = str(uuid.uuid4())
     zip_path = os.path.join(UPLOAD_DIR, f"{audit_id}.zip")
     work_dir = os.path.join(EXTRACT_DIR, audit_id)
     
-    logger.info(f"Iniciando auditoría ID: {audit_id} para el archivo: {file.filename}")
+    # 1. Guardar archivo muy rápido
+    content = await file.read()
+    async with aiofiles.open(zip_path, 'wb') as out_file:
+        await out_file.write(content)
 
-    try:
-        content = await file.read()
-        async with aiofiles.open(zip_path, 'wb') as out_file:
-            await out_file.write(content)
-            
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(work_dir)
-            
-        logger.info(f"Archivo descomprimido en {work_dir}. Iniciando escáner SAST.")
-        
-        
-        hallazgos = await asyncio.to_thread(ejecutar_sast_profesional, work_dir)
-        
-        resultados_estructurados = []
-        if hallazgos:
-            logger.info(f"Se encontraron {len(hallazgos)} vulnerabilidades. Iniciando análisis IA.")
-            for h in hallazgos:
-                try:
-                  
-                    respuesta = await asyncio.to_thread(
-                        grafo_agentes.invoke, 
-                        {"hallazgos_tecnicos": [h], "tiempos": {}}
-                    )
-                    analisis = respuesta['veredicto_final']
-                except Exception as e:
-                    logger.error(f"Error en LangGraph analizando hallazgo: {e}", exc_info=True)
-                    analisis = f"Error analizando con IA: {str(e)}"
+    # 2. Registrar en Base de Datos en estado inicial
+    usuario_actual = db.query(Usuario).first()
+    nueva_auditoria = Auditoria(
+        id=audit_id,
+        nombre_archivo=file.filename,
+        usuario_id=usuario_actual.id,
+        puntuacion=0.0
+    )
+    db.add(nueva_auditoria)
+    db.commit()
 
-                item = {
-                    "vulnerabilidad": h['vulnerabilidad'],
-                    "archivo": h['archivo'],
-                    "severidad": h['severidad'],
-                    "analisis_legal": analisis
-                }
-                resultados_estructurados.append(item)
+    procesar_auditoria_task.apply_async(
+        args=[audit_id, zip_path, work_dir, file.filename, usuario_actual.id],
+        countdown=2
+    )
 
-        logger.info(f"Auditoría {audit_id} finalizada correctamente.")
-        return {
-            "estado": "Finalizado",
-            "total_vulnerabilidades": len(hallazgos),
-            "resultados": resultados_estructurados
-        }
+    # Respondemos al navegador inmediatamente
+    return {
+        "estado": "Procesando",
+        "audit_id": audit_id
+    }
 
-    except Exception as e:
-        logger.error(f"Error crítico en la auditoría {audit_id}: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+# --- CANAL EN TIEMPO REAL (WEBSOCKETS) ---
+@app.websocket("/ws/progreso/{audit_id}")
+async def websocket_progreso(websocket: WebSocket, audit_id: str):
+    await websocket.accept()
+    redis_client = redis_async.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"))
+    pubsub = redis_client.pubsub()
+    await pubsub.subscribe(f"progreso_{audit_id}")
     
+    try:
+        async for message in pubsub.listen():
+            if message["type"] == "message":
+                datos = message["data"].decode("utf-8")
+                await websocket.send_text(datos)
+                # Si llega a 100% o da error, cerramos conexión
+                if '"progreso": 100' in datos or '"progreso": -1' in datos:
+                    break
+    except WebSocketDisconnect:
+        pass
     finally:
-        logger.info(f"Limpiando archivos temporales de la auditoría {audit_id}...")
-        try:
-            if os.path.exists(work_dir): 
-                shutil.rmtree(work_dir)
-            if os.path.exists(zip_path): 
-                os.remove(zip_path)
-        except Exception as cleanup_error:
-            logger.error(f"Error al limpiar temporales: {cleanup_error}")
+        await pubsub.unsubscribe()
+        await websocket.close()
+
+# --- OBTENER RESULTADO FINAL ---
+@app.get("/auditoria/{audit_id}")
+def obtener_resultado_auditoria(audit_id: str, db: Session = Depends(get_db)):
+    auditoria = db.query(Auditoria).filter(Auditoria.id == audit_id).first()
+    if not auditoria:
+        raise HTTPException(status_code=404, detail="Auditoría no encontrada")
+    
+    resultados = []
+    for v in auditoria.vulnerabilidades:
+        resultados.append({
+            "vulnerabilidad": v.nombre,
+            "archivo": v.archivo_afectado,
+            "severidad": v.severidad,
+            "analisis_legal": v.analisis_legal
+        })
+        
+    return {
+        "estado": "Finalizado",
+        "total_vulnerabilidades": len(resultados),
+        "resultados": resultados
+    }
+
+@app.get("/historial")
+def obtener_historial(db: Session = Depends(get_db)):
+    auditorias = db.query(Auditoria).order_by(Auditoria.fecha.desc()).limit(5).all()
+    historial = []
+    for aud in auditorias:
+        historial.append({
+            "id": aud.id,
+            "date": aud.fecha.strftime("%H:%M:%S"),
+            "file": aud.nombre_archivo,
+            "count": len(aud.vulnerabilidades)
+        })
+    return historial

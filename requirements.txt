@@ -14,3 +14,7 @@ requests
 pypdf
 python-dotenv
 aiofiles
+sqlalchemy==2.0.23
+celery==5.3.6
+redis==5.0.1
+websockets==12.0
