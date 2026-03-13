@@ -12,7 +12,7 @@ Todo el procesamiento de Inteligencia Artificial se realiza de forma local utili
 
 Para ejecutar este proyecto en tu máquina, necesitas tener instalados:
 
-1\. Docker Desktop (para levantar el backend y la base de datos vectorial de forma aislada).
+1\. Docker Desktop (para levantar el backend, Redis, los workers y la base de datos vectorial de forma aislada).
 
 2\. Ollama (para ejecutar los modelos de IA localmente).
 
@@ -38,22 +38,17 @@ El contenedor de Docker se conectará al Ollama de tu máquina anfitriona.
 
 \### Paso 2: Levantar la Aplicación
 
-Abre una terminal en la raíz de este proyecto (donde está el archivo Dockerfile) y ejecuta estos dos comandos:
+Abre una terminal en la raíz de este proyecto (donde está el archivo docker-compose.yml) y ejecuta este único comando para construir y arrancar todos los servicios a la vez:
 
 
 
-1\. Construir la imagen:
-
-&nbsp;  `docker build -t secure-audit-ai .`
+&nbsp;  `docker-compose up --build`
 
 
 
-2\. Arrancar el contenedor:
+\### Paso 3: Acceso
 
-&nbsp;  `docker run -p 8000:8000 --env-file .env secure-audit-ai`
-
-
-
+Abre tu navegador web y ve a la ruta donde esta el archivo `index.html` (Frontend/index.html) para ver la interfaz, o ve directamente a la API en `http://localhost:8000`.
 \### Paso 3: Acceso
 
 Abre tu navegador web y ve a la ruta donde esta el archivo `index.html` (Frontend/index.html) para ver la interfaz, o ve directamente a la API en `http://localhost:8000`.
