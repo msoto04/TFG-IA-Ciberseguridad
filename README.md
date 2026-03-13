@@ -49,3 +49,4 @@ Abre una terminal en la raíz de este proyecto (donde está el archivo docker-co
 \### Paso 3: Acceso
 
 Abre tu navegador web y ve a la ruta donde esta el archivo `index.html` (Frontend/index.html) para ver la interfaz, o ve directamente a la API en `http://localhost:8000`.
+
