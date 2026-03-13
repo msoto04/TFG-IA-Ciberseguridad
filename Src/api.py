@@ -71,7 +71,7 @@ app = FastAPI(title="Sistema Auditoría IA (ENS) - RAG FAISS")
 @app.on_event("startup")
 def crear_usuario_demo():
     db = SessionLocal()
-    # Si la base de datos está vacía, creamos un usuario de prueba
+   
     if not db.query(Usuario).first():
         usuario_demo = Usuario(email="auditor@empresa.com", hashed_password="123")
         db.add(usuario_demo)
@@ -112,7 +112,7 @@ async def chat_rag(request: ChatRequest):
         logger.info(f"Petición Chat RAG recibida. Modelo: {request.modelo}, Temperatura: {request.temperature}") 
         
         embeddings = OllamaEmbeddings(
-            model="nomic-embed-text",
+            model="mxbai-embed-large",
             base_url=OLLAMA_URL  
         )
         
@@ -135,24 +135,23 @@ async def chat_rag(request: ChatRequest):
 
        
         prompt_template = ChatPromptTemplate.from_template("""
-            Eres un Auditor Técnico de Ciberseguridad.
-            Utiliza la información del siguiente <contexto> para construir tu respuesta.
-            
-            <contexto>
-            {context}
-            </contexto>
+            Eres un Auditor IA Jefe experto en Ciberseguridad y normativas legales.
 
-            Pregunta: {input}
-            
-            INSTRUCCIONES:
-            1. Lee atentamente el contexto. Si contiene información relacionada con la pregunta, úsala para dar una respuesta clara y profesional.
-            2. Si la documentación menciona OWASP, ENS o RGPD, cítalos en tu respuesta.
-            3. Si el contexto NO habla en absoluto del tema, responde: "La documentación normativa auditada no especifica este detalle."
-            4. NO inventes leyes, artículos ni acrónimos que no estén en el texto.
-        """)
+            CONTEXTO RECUPERADO DE LOS DOCUMENTOS:
+            {context}
+
+            REGLAS DE COMPORTAMIENTO:
+            1. Tu objetivo es responder la pregunta del usuario basándote ÚNICAMENTE en el contexto proporcionado arriba.
+            2. RESOLUCIÓN DE SIGLAS: Si el usuario usa siglas (como ENS, RGPD, OWASP, etc.), utiliza tu conocimiento técnico general para entender a qué se refiere, y busca ese concepto en el contexto.
+            3. Si la respuesta está en el contexto, explícala con claridad y profesionalidad.
+            4. Si el contexto NO contiene la respuesta, di explícitamente: "No encuentro esta información en la documentación normativa auditada."
+
+            PREGUNTA DEL USUARIO:
+            {input}
+            """)
         
         document_chain = create_stuff_documents_chain(llm_dinamico, prompt_template)
-        retriever = vector_db.as_retriever(search_kwargs={"k": 5})
+        retriever = vector_db.as_retriever(search_kwargs={"k": 10})
         rag_chain = create_retrieval_chain(retriever, document_chain)
 
         
@@ -172,12 +171,12 @@ async def auditar_zip(file: UploadFile = File(...), db: Session = Depends(get_db
     zip_path = os.path.join(UPLOAD_DIR, f"{audit_id}.zip")
     work_dir = os.path.join(EXTRACT_DIR, audit_id)
     
-    # 1. Guardar archivo muy rápido
+    
     content = await file.read()
     async with aiofiles.open(zip_path, 'wb') as out_file:
         await out_file.write(content)
 
-    # 2. Registrar en Base de Datos en estado inicial
+   
     usuario_actual = db.query(Usuario).first()
     nueva_auditoria = Auditoria(
         id=audit_id,
@@ -193,13 +192,13 @@ async def auditar_zip(file: UploadFile = File(...), db: Session = Depends(get_db
         countdown=2
     )
 
-    # Respondemos al navegador inmediatamente
+  
     return {
         "estado": "Procesando",
         "audit_id": audit_id
     }
 
-# --- CANAL EN TIEMPO REAL (WEBSOCKETS) ---
+
 @app.websocket("/ws/progreso/{audit_id}")
 async def websocket_progreso(websocket: WebSocket, audit_id: str):
     await websocket.accept()

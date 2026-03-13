@@ -37,21 +37,21 @@ def procesar_auditoria_task(audit_id, zip_path, work_dir, file_name, usuario_id)
         emitir_progreso(audit_id, f"Se encontraron {len(hallazgos)} vulnerabilidades. Iniciando IA...", 40)
         
         for i, h in enumerate(hallazgos):
-            # Calculamos el progreso proporcional
+          
             progreso_actual = 40 + int(((i + 1) / len(hallazgos)) * 55) 
             emitir_progreso(audit_id, f"Agente IA analizando vulnerabilidad {i+1} de {len(hallazgos)}...", progreso_actual)
             
-            # --- NUEVO: LEER EL ARCHIVO COMPLETO PARA LA IA ---
+           
             try:
                 ruta_archivo = os.path.join(work_dir, h['archivo'])
                 with open(ruta_archivo, 'r', encoding='utf-8') as f:
                     h['codigo_completo'] = f.read()
             except Exception:
                 h['codigo_completo'] = "Contenido no disponible"
-            # --------------------------------------------------
+         
 
             try:
-                # LLAMADA A LA IA
+             
                 respuesta = grafo_agentes.invoke({"hallazgos_tecnicos": [h], "tiempos": {}})
                 analisis = respuesta['veredicto_final']
             except Exception as e:

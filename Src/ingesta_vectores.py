@@ -1,7 +1,8 @@
 import os
 import sys
 from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
+
+from langchain_community.document_loaders import PyMuPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
@@ -30,7 +31,7 @@ def crear_base_datos():
         if archivo.endswith(".pdf"):
             print(f" leer PDF: {archivo}...")
             try:
-                loader = PyPDFLoader(ruta)
+                loader = PyMuPDFLoader(ruta)
                 docs = loader.load()
                 caracteres = sum(len(d.page_content) for d in docs)
                 print(f"EXITO: Leídas {len(docs)} páginas, {caracteres} caracteres extraídos.")
@@ -68,15 +69,16 @@ def crear_base_datos():
         sys.exit(1)
 
     print("\nCortando texto en fragmentos...")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     trozos = text_splitter.split_documents(documentos_totales)
     print(f"Generados {len(trozos)} fragmentos en total.")
 
     print("\nGenerando Embeddings (Conectando a host.docker.internal)...")
-    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     
-  
-    embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url=ollama_url)
+   
+    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
+    
+    embeddings = OllamaEmbeddings(model="mxbai-embed-large", base_url=ollama_url)
     
     vector_db = FAISS.from_documents(trozos, embeddings)
     

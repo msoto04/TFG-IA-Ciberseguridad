@@ -23,7 +23,7 @@ llm = ChatOllama(
 )
 
 embeddings = OllamaEmbeddings(
-    model="nomic-embed-text",
+    model="mxbai-embed-large",
     base_url=OLLAMA_URL 
 )
 
@@ -74,7 +74,7 @@ def agente_legal(state: AuditoriaState):
         logger.error(f"No se pudo acceder a FAISS en Agente Legal: {e}", exc_info=True)
         contexto_ens = "La documentación normativa no está disponible por un error de base de datos."
 
-    # 1. EL MIDDLEWARE DE TRADUCCIÓN (Diccionario)
+ 
     TRADUCTOR_VULNERABILIDADES = {
         "sqlalchemy-execute-raw-query": "Inyección SQL Clásica (SQLi) - CWE-89. El código concatena strings en lugar de usar parámetros seguros.",
         "insecure-hash-algorithm-md5": "Criptografía Débil (MD5) - CWE-327. Se está utilizando un algoritmo de hash obsoleto que es vulnerable a colisiones.",
@@ -85,7 +85,7 @@ def agente_legal(state: AuditoriaState):
     codigo_afectado = hallazgo.get('codigo_afectado', 'No disponible')
     codigo_completo = hallazgo.get('codigo_completo', 'No disponible')
 
-    # 2. INTERCEPTAR Y TRADUCIR
+
     etiqueta_semgrep = hallazgo.get('vulnerabilidad', '').lower()
     vulnerabilidad_real = TRADUCTOR_VULNERABILIDADES.get(
         etiqueta_semgrep, 

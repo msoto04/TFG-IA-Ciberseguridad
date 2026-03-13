@@ -1,4 +1,5 @@
-from langchain_community.document_loaders import PyPDFLoader
+
+from langchain_community.document_loaders import PyMuPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 
@@ -11,7 +12,7 @@ def procesar_documentos():
     for archivo in os.listdir(docs_path):
         if archivo.endswith(".pdf"):
             print(f"Leyendo {archivo}...")
-            loader = PyPDFLoader(os.path.join(docs_path, archivo))
+            loader = PyMuPDFLoader(os.path.join(docs_path, archivo))
             documentos_totales.extend(loader.load())
 
 

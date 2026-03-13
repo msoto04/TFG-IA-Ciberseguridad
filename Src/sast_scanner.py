@@ -20,11 +20,11 @@ def ejecutar_sast_profesional(directorio_codigo):
     comando = [
         
         "semgrep", "scan",
-        "--config", "p/default",         # Reglas base generales
-        "--config", "p/security-audit",  # Auditoría de seguridad estricta
-        "--config", "p/secrets",         # Caza contraseñas, tokens y claves a fuego (Hardcoded)
-        "--config", "p/python",          # Reglas específicas de Python (Criptografía débil como MD5)
-        "--config", "p/owasp-top-ten",   # Top 10 vulnerabilidades web críticas
+        "--config", "p/default",        
+        "--config", "p/security-audit",  
+        "--config", "p/secrets",       
+        "--config", "p/python",         
+        "--config", "p/owasp-top-ten",   
         "--json",             
         "--output", archivo_salida,
         "--quiet",            

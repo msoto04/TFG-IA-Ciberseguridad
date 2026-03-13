@@ -148,7 +148,7 @@ function initCharts() {
             labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'],
             datasets: [{
                 label: 'Nivel de Cumplimiento',
-                data: [0,0,0,0,0], // Empezamos a 0, la IA lo actualizará luego
+                data: [0,0,0,0,0], 
                 backgroundColor: 'rgba(59, 130, 246, 0.2)',
                 borderColor: '#3b82f6',
                 borderWidth: 2,
@@ -222,13 +222,13 @@ async function generarPDF() {
     doc.setFontSize(12);
     doc.text("Cumplimiento Esquema Nacional de Seguridad (ENS)", 105, 30, { align: "center" });
     
-    // Datos Generales
+   
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(10);
     doc.text(`ID Auditoría: ${currentAuditData.id_auditoria || 'N/A'}`, 14, 50);
     doc.text(`Fecha de Emisión: ${new Date().toLocaleString()}`, 14, 55);
     
-    // Resumen Ejecutivo (Tabla Simple)
+    
     const score = Math.max(0, 100 - (currentAuditData.total_vulnerabilidades * 5));
     doc.autoTable({
         startY: 65,
@@ -252,7 +252,7 @@ async function generarPDF() {
     let yPos = doc.lastAutoTable.finalY + 20;
 
     currentAuditData.resultados.forEach((item, index) => {
-        // Título del Hallazgo
+       
         doc.setFontSize(12);
         doc.setTextColor(...colorDanger);
         doc.setFont("helvetica", "bold");
@@ -297,12 +297,12 @@ async function generarPDF() {
 }
 
 
-// Ya no guardamos en localStorage, lo hace el backend automáticamente
+
 function saveToHistory(fileName, count) {
-    loadHistory(); // Solo recargamos la vista
+    loadHistory(); 
 }
 
-// Ahora leemos el historial desde nuestra nueva Base de Datos
+
 async function loadHistory() {
     try {
         const res = await fetch('/historial');

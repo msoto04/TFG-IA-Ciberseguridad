@@ -8,23 +8,23 @@ class Usuario(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
-    hashed_password = Column(String) # Nunca guardaremos contraseñas en texto plano
+    hashed_password = Column(String) 
     
-    # Relación: Un usuario puede tener muchas auditorías
+   
     auditorias = relationship("Auditoria", back_populates="propietario")
 
 class Auditoria(Base):
     __tablename__ = "auditorias"
     
-    id = Column(String, primary_key=True, index=True) # Usaremos tu uuid.uuid4()
+    id = Column(String, primary_key=True, index=True) 
     fecha = Column(DateTime, default=datetime.utcnow)
     nombre_archivo = Column(String)
     puntuacion = Column(Float)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     
-    # Relaciones
+  
     propietario = relationship("Usuario", back_populates="auditorias")
-    # Si borro una auditoría, se borran sus vulnerabilidades (cascade)
+
     vulnerabilidades = relationship("Vulnerabilidad", back_populates="auditoria", cascade="all, delete-orphan")
 
 class Vulnerabilidad(Base):
@@ -35,7 +35,7 @@ class Vulnerabilidad(Base):
     nombre = Column(String)
     severidad = Column(String)
     archivo_afectado = Column(String)
-    analisis_legal = Column(String) # Aquí guardaremos la respuesta de la IA
+    analisis_legal = Column(String) 
 
-    # Relación
+ 
     auditoria = relationship("Auditoria", back_populates="vulnerabilidades")

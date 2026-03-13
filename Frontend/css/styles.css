@@ -76,9 +76,6 @@ h1, h2, h3 { font-family: 'JetBrains Mono', monospace; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* =========================================
-   ESTILOS DEL DASHBOARD SAAS (AUDITORÍA)
-   ========================================= */
 
 .dashboard-header {
     display: flex;
@@ -129,7 +126,6 @@ h1, h2, h3 { font-family: 'JetBrains Mono', monospace; }
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
-    /* ESTA ES LA MAGIA QUE FRENA A CHART.JS */
     position: relative;
     height: 320px; 
     display: flex;

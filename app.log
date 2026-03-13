@@ -40,3 +40,49 @@
 2026-03-11 11:14:54,893 - SecureAudit_LangGraph - INFO - Veredicto legal/técnico generado con éxito.
 2026-03-11 11:14:55,048 - SecureAudit_API - INFO - Auditoría 4af7c0f6-75d7-4d45-a69d-b236945eda49 finalizada correctamente.
 2026-03-11 11:14:55,049 - SecureAudit_API - INFO - Limpiando archivos temporales de la auditoría 4af7c0f6-75d7-4d45-a69d-b236945eda49...
+2026-03-12 15:01:45,802 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-12 15:01:45,863 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-12 15:01:46,146 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-12 15:03:44,993 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-12 15:05:15,614 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-12 15:06:03,252 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-12 15:17:57,662 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-12 15:17:57,707 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-12 15:17:58,025 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-12 15:20:06,324 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-12 15:25:00,155 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-12 15:25:00,239 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-12 15:25:00,640 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-12 15:28:59,668 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-12 16:03:01,289 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-12 16:03:01,306 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-12 16:03:01,334 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-12 16:06:05,062 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 11:11:01,335 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 11:11:01,423 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-13 11:11:01,723 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-13 11:13:47,622 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:07:38,480 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:07:38,482 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-13 12:07:38,502 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-13 12:09:44,290 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:10:48,968 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:12:52,501 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:16:46,068 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:18:38,401 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:19:02,800 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:20:44,583 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:24:02,464 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:27:07,671 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:28:12,619 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:30:12,833 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:30:30,270 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:32:17,442 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:32:50,756 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:35:15,464 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:36:02,570 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:38:15,856 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:38:54,276 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:40:22,911 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 12:41:04,178 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 12:42:51,361 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
