@@ -22,3 +22,4 @@ PyJWT==2.8.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.9
 pymupdf==1.23.26
+bcrypt==3.2.2

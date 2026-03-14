@@ -18,6 +18,30 @@
 </head>
 <body>
 
+    <div id="login-overlay" class="login-overlay">
+        
+        <div class="login-box" id="box-login">
+            <h2><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h2>
+            <p>Accede a tu bóveda de auditorías</p>
+            <input type="email" id="login-email" placeholder="Correo electrónico" required>
+            <input type="password" id="login-password" placeholder="Contraseña" required>
+            <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="iniciarSesion()">Entrar</button>
+            <p style="font-size: 0.85em; margin-top: 15px; cursor: pointer; color: var(--primary);" onclick="toggleAuth()">¿No tienes cuenta? <b>Regístrate aquí</b></p>
+            <div id="login-msg" class="auth-msg"></div>
+        </div>
+
+        <div class="login-box" id="box-registro" style="display: none;">
+            <h2><i class="fas fa-user-plus"></i> Crear Cuenta</h2>
+            <p>Regístrate para auditar con IA</p>
+            <input type="email" id="reg-email" placeholder="Correo electrónico" required>
+            <input type="password" id="reg-password" placeholder="Contraseña" required>
+            <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="registrarUsuario()">Registrarse</button>
+            <p style="font-size: 0.85em; margin-top: 15px; cursor: pointer; color: var(--primary);" onclick="toggleAuth()">¿Ya tienes cuenta? <b>Inicia sesión</b></p>
+            <div id="reg-msg" class="auth-msg"></div>
+        </div>
+
+    </div>
+
     <div class="sidebar">
         <div class="brand">
             <i class="fas fa-shield-virus"></i> SECURE<span style="color:var(--primary)">AUDIT</span>
@@ -27,16 +51,23 @@
         <div class="nav-item active" onclick="navigate('home')"><i class="fas fa-grid-2"></i> Dashboard</div>
         <div class="nav-item" onclick="navigate('audit')"><i class="fas fa-search-code"></i> Auditoría SAST</div>
         <div class="nav-item" onclick="navigate('chat')"><i class="fas fa-brain"></i> Agente Legal</div>
+
         
         <div class="menu-label" style="margin-top: 20px;">HISTORIAL RECIENTE</div>
         <div id="history-list" class="history-list">
             <div class="history-placeholder">Sin auditorías previas</div>
         </div>
-
+        <div style="flex-grow: 1;"></div>
+        
+        <div class="nav-item" onclick="cerrarSesion()" style="color: var(--danger); border-top: 1px solid var(--border); padding-top: 15px; margin-top: 20px;">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </div>
         <div class="sys-status">
             <div class="status-dot"></div> Sistema: <strong>ONLINE</strong><br>
             <small>RAM: Optimizada (Quantized)</small>
         </div>
+
+
     </div>
 
     <div class="main-content">

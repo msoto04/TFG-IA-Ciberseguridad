@@ -86,3 +86,31 @@
 2026-03-13 12:40:22,911 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
 2026-03-13 12:41:04,178 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
 2026-03-13 12:42:51,361 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 13:54:41,262 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-13 13:54:41,297 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-13 13:54:41,615 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-13 13:58:38,139 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.
+2026-03-13 14:18:35,619 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-03-13 14:18:46,152 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-03-13 14:18:46,929 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-03-13 14:19:33,339 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-03-14 15:10:02,441 - SecureAudit_API - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-03-14 15:10:02,491 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-03-14 15:10:02,612 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-03-14 15:12:05,165 - SecureAudit_API - INFO - Respuesta del chat generada con éxito.

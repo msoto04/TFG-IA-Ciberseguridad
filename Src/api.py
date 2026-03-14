@@ -32,6 +32,20 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 from Src.database import engine, Base, SessionLocal
 from Src.models import Usuario, Auditoria, Vulnerabilidad
+from Src.auth import get_password_hash, verificar_password, crear_token_acceso
+
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import jwt
+from Src.auth import SECRET_KEY, ALGORITHM
+
+class UsuarioRegistro(BaseModel):
+    email: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
 
 Base.metadata.create_all(bind=engine)
@@ -165,38 +179,98 @@ async def chat_rag(request: ChatRequest):
         logger.error(f"Error inesperado en Chat: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
+
+security = HTTPBearer()
+
+def obtener_usuario_actual(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Token inválido")
+            
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="El token ha caducado, haz login de nuevo")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Token falso o modificado")
+    
+    user = db.query(Usuario).filter(Usuario.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=401, detail="El usuario ya no existe")
+        
+    return user
+
+
 @app.post("/auditar-zip")
-async def auditar_zip(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def auditar_zip(
+    file: UploadFile = File(...), 
+    current_user: Usuario = Depends(obtener_usuario_actual),
+    db: Session = Depends(get_db)  
+):
     audit_id = str(uuid.uuid4())
     zip_path = os.path.join(UPLOAD_DIR, f"{audit_id}.zip")
     work_dir = os.path.join(EXTRACT_DIR, audit_id)
-    
     
     content = await file.read()
     async with aiofiles.open(zip_path, 'wb') as out_file:
         await out_file.write(content)
 
-   
-    usuario_actual = db.query(Usuario).first()
+ 
     nueva_auditoria = Auditoria(
         id=audit_id,
         nombre_archivo=file.filename,
-        usuario_id=usuario_actual.id,
+        usuario_id=current_user.id,  
         puntuacion=0.0
     )
     db.add(nueva_auditoria)
     db.commit()
 
     procesar_auditoria_task.apply_async(
-        args=[audit_id, zip_path, work_dir, file.filename, usuario_actual.id],
+        args=[audit_id, zip_path, work_dir, file.filename, current_user.id],
         countdown=2
     )
-
   
     return {
         "estado": "Procesando",
         "audit_id": audit_id
     }
+
+
+@app.post("/registro")
+def registrar_usuario(user: UsuarioRegistro, db: Session = Depends(get_db)):
+   
+    db_user = db.query(Usuario).filter(Usuario.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    
+
+    hashed_password = get_password_hash(user.password)
+    
+ 
+    nuevo_usuario = Usuario(email=user.email, hashed_password=hashed_password)
+    db.add(nuevo_usuario)
+    db.commit()
+    db.refresh(nuevo_usuario)
+    
+    return {"mensaje": "Usuario creado exitosamente. ¡Ya puedes iniciar sesión!"}
+
+@app.post("/login", response_model=Token)
+def login(user: UsuarioRegistro, db: Session = Depends(get_db)):
+   
+    db_user = db.query(Usuario).filter(Usuario.email == user.email).first()
+    
+ 
+    if not db_user or not verificar_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Credenciales incorrectas")
+    
+
+    access_token = crear_token_acceso(data={"sub": str(db_user.id)})
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
 
 
 @app.websocket("/ws/progreso/{audit_id}")
@@ -211,7 +285,7 @@ async def websocket_progreso(websocket: WebSocket, audit_id: str):
             if message["type"] == "message":
                 datos = message["data"].decode("utf-8")
                 await websocket.send_text(datos)
-                # Si llega a 100% o da error, cerramos conexión
+            
                 if '"progreso": 100' in datos or '"progreso": -1' in datos:
                     break
     except WebSocketDisconnect:
@@ -220,7 +294,7 @@ async def websocket_progreso(websocket: WebSocket, audit_id: str):
         await pubsub.unsubscribe()
         await websocket.close()
 
-# --- OBTENER RESULTADO FINAL ---
+
 @app.get("/auditoria/{audit_id}")
 def obtener_resultado_auditoria(audit_id: str, db: Session = Depends(get_db)):
     auditoria = db.query(Auditoria).filter(Auditoria.id == audit_id).first()
@@ -243,14 +317,21 @@ def obtener_resultado_auditoria(audit_id: str, db: Session = Depends(get_db)):
     }
 
 @app.get("/historial")
-def obtener_historial(db: Session = Depends(get_db)):
-    auditorias = db.query(Auditoria).order_by(Auditoria.fecha.desc()).limit(5).all()
-    historial = []
-    for aud in auditorias:
-        historial.append({
-            "id": aud.id,
-            "date": aud.fecha.strftime("%H:%M:%S"),
-            "file": aud.nombre_archivo,
-            "count": len(aud.vulnerabilidades)
+def obtener_historial(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(obtener_usuario_actual)  
+):
+
+    auditorias = db.query(Auditoria)\
+        .filter(Auditoria.usuario_id == current_user.id)\
+        .order_by(Auditoria.fecha.desc())\
+        .limit(5).all()
+    
+    resultados = []
+    for a in auditorias:
+        resultados.append({
+            "id": a.id,
+            "nombre_archivo": a.nombre_archivo,
+            "fecha": a.fecha.strftime("%Y-%m-%d %H:%M:%S")
         })
-    return historial
+    return resultados

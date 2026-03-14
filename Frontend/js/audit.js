@@ -14,8 +14,16 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+   
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+        alert("Formato incorrecto. Por favor, sube únicamente un archivo .zip");
+        e.target.value = ''; 
+        return; 
+    }
+
 
     document.getElementById('upload-zone').style.display = 'none';
+  
     const progressContainer = document.getElementById('progress-container');
     if(progressContainer) progressContainer.style.display = 'block';
     if(document.getElementById('spinner')) document.getElementById('spinner').style.display = 'none';
@@ -28,7 +36,18 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 
     try {
    
-        const res = await fetch('/auditar-zip', { method: 'POST', body: formData });
+       
+        const token = localStorage.getItem('jwt_token');
+
+      
+        const res = await fetch('/auditar-zip', { 
+            method: 'POST', 
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData 
+        });
+
+      
+        if (res.status === 401) { cerrarSesion(); throw new Error("Sesión caducada"); }
         const data = await res.json();
         
         if (data.estado !== "Procesando") throw new Error("Error al iniciar");
@@ -127,8 +146,8 @@ function showDetail(item, element) {
     let content = item.analisis_legal
         .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--primary)">$1</strong>')
         .replace(/\|/g, '')
-        .replace(/SOLUCIÓN TÉCNICA/g, '<h4 style="color:var(--success); margin-top:20px">💡 Solución Técnica</h4>')
-        .replace(/Incumplimiento ENS/g, '<h4 style="color:var(--danger)">⚖️ Incumplimiento ENS</h4>');
+        .replace(/SOLUCIÓN TÉCNICA/g, '<h4 style="color:var(--success); margin-top:20px">Solución Técnica</h4>')
+        .replace(/Incumplimiento ENS/g, '<h4 style="color:var(--danger)">Incumplimiento ENS</h4>');
 
     document.getElementById('finding-detail').innerHTML = `
         <h2 style="color:var(--accent); border-bottom:1px solid #333; padding-bottom:10px;">${item.vulnerabilidad}</h2>
@@ -214,7 +233,7 @@ async function generarPDF() {
     doc.setFillColor(...colorDark);
     doc.rect(0, 0, 210, 40, 'F');
     
-    // Título
+ 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.setTextColor(255, 255, 255);
@@ -305,24 +324,233 @@ function saveToHistory(fileName, count) {
 
 async function loadHistory() {
     try {
-        const res = await fetch('/historial');
+    
+        const token = localStorage.getItem('jwt_token');
+        
+      
+        const res = await fetch('/historial', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+     
+        if (res.status === 401) {
+            return;
+        }
+
         const history = await res.json();
         
         const container = document.getElementById('history-list');
-        if (history.length === 0) return;
+        
+     
+        if (!history || history.length === 0) {
+            container.innerHTML = '<div style="font-size: 0.85em; color: var(--text-muted); text-align: center; margin-top: 10px;">Tu historial está vacío.</div>';
+            return;
+        }
         
         container.innerHTML = '';
         history.forEach(h => {
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.innerHTML = `
-                <div style="font-size: 0.8em; color: var(--text-muted);">${h.date}</div>
-                <div style="font-weight: 600;">${h.file}</div>
-                <div style="font-size: 0.8em; color: var(--danger);"><i class="fas fa-bug"></i> ${h.count} fallos</div>
-            `;
-            container.appendChild(div);
+
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.style.cursor = 'pointer'; 
+        
+    
+        div.onclick = () => cargarAuditoriaPasada(h.id); 
+        
+        div.innerHTML = `
+            <div style="font-size: 0.8em; color: var(--text-muted);">${h.fecha}</div>
+            <div style="font-weight: 600;">${h.nombre_archivo}</div>
+            <div style="font-size: 0.8em; color: var(--primary);"><i class="fas fa-eye"></i> Ver Resultados</div>
+        `;
+        container.appendChild(div);
         });
     } catch (e) {
         console.error("Error cargando historial de la BD:", e);
+    }
+}
+
+
+function resetAuditoria() {
+    const progressContainer = document.getElementById('progress-container');
+    if(progressContainer) progressContainer.style.display = 'none';
+    
+ 
+    const resultsContainer = document.getElementById('results-container');
+    const findingsSection = document.querySelector('.findings-section');
+    const chartsGrid = document.querySelector('.charts-grid');
+    
+    if(resultsContainer) resultsContainer.style.display = 'none';
+    if(findingsSection) findingsSection.style.display = 'none';
+    if(chartsGrid) chartsGrid.style.display = 'none';
+    
+    const uploadZone = document.getElementById('upload-zone');
+    if (uploadZone) uploadZone.style.display = 'flex';
+    
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) fileInput.value = '';
+    
+    const progressBar = document.getElementById('progress-bar-fill');
+    if (progressBar) progressBar.style.width = '0%';
+    
+    const progressText = document.getElementById('progress-text');
+    if (progressText) progressText.innerText = 'Preparando...';
+}
+
+
+async function cargarAuditoriaPasada(auditId) {
+    try {
+        const token = localStorage.getItem('jwt_token');
+        
+        if (typeof navigate === 'function') navigate('audit');
+        
+        const uploadZone = document.getElementById('upload-zone');
+        if (uploadZone) uploadZone.style.display = 'none';
+        
+        const progressContainer = document.getElementById('progress-container');
+        if(progressContainer) progressContainer.style.display = 'block';
+        
+        const progressText = document.getElementById('progress-text');
+        if (progressText) progressText.innerText = "Recuperando auditoría de la bóveda...";
+        
+        const progressBar = document.getElementById('progress-bar-fill');
+        if (progressBar) progressBar.style.width = "100%";
+        
+        const res = await fetch(`/auditoria/${auditId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.status === 401) { cerrarSesion(); return; }
+        if (!res.ok) throw new Error("No se pudo cargar la auditoría");
+        
+        const data = await res.json();
+        currentAuditData = data; 
+        
+        if(progressContainer) progressContainer.style.display = 'none';
+        
+       
+        const workspace = document.getElementById('audit-workspace');
+        if (workspace) workspace.style.display = 'block';
+
+     
+        const findingsList = document.getElementById('findings-list');
+        const findingDetail = document.getElementById('finding-detail');
+
+        if (findingsList && findingDetail) {
+            findingsList.innerHTML = '';
+            
+           
+            findingDetail.innerHTML = `
+                <p style="color: var(--text-muted); text-align: center; margin-top: 80px;">
+                    <i class="fas fa-hand-pointer" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    Selecciona una vulnerabilidad de la lista izquierda para ver el diagnóstico legal y la solución técnica.
+                </p>
+            `;
+            
+            let criticas = 0, medias = 0, bajas = 0;
+
+            data.resultados.forEach((v) => {
+
+                const sev = (v.severidad || "").toString().toUpperCase().trim();
+
+                let colorBase = 'var(--success)'; 
+                let icono = 'fa-check-circle';
+
+              
+                if (sev.includes('ERROR') || sev.includes('ALTA') || sev.includes('ALTO') || sev.includes('HIGH') || sev.includes('CRITIC')) {
+                    criticas++;
+                    colorBase = 'var(--danger)'; 
+                    icono = 'fa-exclamation-triangle';
+                } 
+                else if (sev.includes('WARNING') || sev.includes('MEDIA') || sev.includes('MEDIO') || sev.includes('MEDIUM') || sev.includes('MODERAD')) {
+                    medias++;
+                    colorBase = 'var(--warning)'; 
+                    icono = 'fa-exclamation-circle';
+                } 
+                else {
+                    bajas++;
+                
+                }
+
+
+      
+                const item = document.createElement('div');
+                item.style.padding = '12px';
+                item.style.marginBottom = '10px';
+                item.style.background = 'var(--bg-panel)';
+                item.style.border = '1px solid var(--border)';
+                item.style.borderLeft = `4px solid ${colorBase}`;
+                item.style.borderRadius = '6px';
+                item.style.cursor = 'pointer';
+                item.style.transition = 'all 0.2s ease';
+                
+                item.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 5px; font-size: 0.95em;">${v.vulnerabilidad}</div>
+                    <div style="font-size: 0.8em; color: var(--text-muted);"><i class="fas ${icono}" style="color: ${colorBase}"></i> ${v.severidad.toUpperCase()}</div>
+                `;
+
+              
+                item.onclick = () => {
+                   
+                    Array.from(findingsList.children).forEach(c => c.style.background = 'var(--bg-panel)');
+                    item.style.background = 'rgba(255, 255, 255, 0.05)'; 
+
+                   
+                    findingDetail.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                            <span style="background: ${colorBase}; color: white; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85em;">
+                                ${v.severidad.toUpperCase()}
+                            </span>
+                            <h3 style="margin: 0; color: var(--text-main); font-size: 1.1em;">${v.vulnerabilidad}</h3>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.85em;">ARCHIVO AFECTADO:</h4>
+                            <code style="background: var(--bg-card); padding: 8px 12px; border-radius: 6px; display: block; color: var(--primary); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace;">
+                                ${v.archivo}
+                            </code>
+                        </div>
+
+                        <div>
+                            <h4 style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.85em;">ANÁLISIS LEGAL / TÉCNICO:</h4>
+                            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; line-height: 1.6; font-size: 0.95em; border-left: 2px solid var(--border);">
+                                ${v.analisis_legal}
+                            </div>
+                        </div>
+                    `;
+                };
+
+                findingsList.appendChild(item);
+            });
+
+           
+            const statVuln = document.getElementById('stat-vuln');
+            if(statVuln) statVuln.innerText = `${data.total_vulnerabilidades} Detectadas`;
+            
+            const statStatus = document.getElementById('stat-status');
+            if(statStatus) statStatus.innerText = "Historial Recuperado";
+
+            if (typeof chartDoughnut !== 'undefined' && chartDoughnut !== null) {
+                chartDoughnut.data.datasets[0].data = [criticas, medias, bajas];
+                chartDoughnut.update();
+            }
+            if (typeof chartRadar !== 'undefined' && chartRadar !== null) {
+                chartRadar.data.datasets[0].data = [
+                    criticas > 0 ? criticas * 10 : 10, 
+                    medias > 0 ? medias * 15 : 20, 
+                    bajas > 0 ? bajas * 20 : 30, 
+                    criticas + medias, 
+                    (criticas + medias + bajas) * 5
+                ];
+                chartRadar.update();
+            }
+
+            
+            const btnPdf = document.getElementById('btn-export-pdf');
+            if (btnPdf) btnPdf.style.display = 'inline-block';
+        }
+        
+    } catch (e) {
+        console.error(e);
+        alert("Error al cargar el historial: " + e.message);
     }
 }
