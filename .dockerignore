@@ -1,22 +1,31 @@
-# Ignorar el entorno virtual (¡Esto es lo que te está matando!)
+
 venv/
 env/
 .venv/
 
-# Ignorar git (no hace falta el historial dentro del contenedor)
+
 .git/
 .gitignore
 
-# Ignorar archivos temporales de Python
+
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Ignorar archivos de sistema o IDE
+
 .vscode/
 .idea/
 .DS_Store
 
-# Opcional: Si tienes carpetas de pruebas muy grandes, ignóralas también
+# carpetas de pruebas muy grandes, ignóralas también
 # codigo_prueba/
+
+# --- AÑADIDO PARA EL TFG (Seguridad y Limpieza) ---
+.env
+faiss_index/
+uploads/
+auditoria_temp/
+resultados/
+*.zip
+*.db

@@ -1,14 +1,18 @@
+import os
 from datetime import datetime, timedelta
 import jwt
 from passlib.context import CryptContext
+from dotenv import load_dotenv
 
 
-SECRET_KEY = "mi_clave_secreta_super_segura_para_el_tfg_123"
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY", "clave_por_defecto_insegura")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 120 
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 def verificar_password(plain_password, hashed_password):
     """Comprueba si la contraseña plana coincide con el hash de la BD"""
