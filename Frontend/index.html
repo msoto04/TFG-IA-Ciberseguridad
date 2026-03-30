@@ -142,31 +142,35 @@
         <button id="btn-export-pdf" class="btn-primary" onclick="generarPDF()" style="display:none;">
             <i class="fas fa-file-pdf"></i> Exportar Informe ENS
         </button>
+
+        <button id="btn-new-audit" class="btn-primary" style="display: none; margin-left: 10px;" onclick="location.reload()">
+            <i class="fas fa-plus"></i> Nueva Auditoría
+        </button>
     </div>
 
     <div class="summary-cards">
         <div class="stat-card">
             <h4><i class="fas fa-bug"></i> Vulnerabilidades</h4>
-            <div id="stat-vuln" class="stat-value">0 Detectadas</div>
+            <div id="audit-stat-vuln" class="stat-value">0 Detectadas</div> 
         </div>
         <div class="stat-card">
             <h4><i class="fas fa-shield-alt"></i> Puntuación ENS</h4>
-            <div id="stat-score" class="stat-value">0 / 100</div>
+            <div id="audit-stat-score" class="stat-value">0 / 100</div>
         </div>
         <div class="stat-card">
             <h4><i class="fas fa-info-circle"></i> Estado</h4>
-            <div id="stat-status" class="stat-value">-</div>
+            <div id="audit-stat-status" class="stat-value">-</div>
         </div>
     </div>
 
     <div class="charts-grid">
         <div class="chart-container">
             <h3>Nivel de Cumplimiento (Radar ENS)</h3>
-            <canvas id="radarChart"></canvas>
+            <canvas id="auditRadarChart"></canvas>
         </div>
         <div class="chart-container">
             <h3>Distribución de Severidad</h3>
-            <canvas id="doughnutChart"></canvas>
+            <canvas id="auditDoughnutChart"></canvas>
         </div>
     </div>
 

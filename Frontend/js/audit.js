@@ -1,6 +1,8 @@
 let currentAuditData = null;
-let chartRadar = null;
-let chartDoughnut = null;
+let chartRadar = null; // Para el Dashboard
+let chartDoughnut = null; // Para el Dashboard
+let auditChartRadar = null; // Para la vista de Auditoría
+let auditChartDoughnut = null; // Para la vista de Auditoría
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,7 +58,8 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/progreso/${auditId}`);
+        
+        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/progreso/${auditId}?token=${token}`);
       
         ws.onopen = () => {
             document.getElementById('progress-text').innerText = "Conexión en vivo establecida. Esperando a la IA...";
@@ -74,8 +77,17 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
             if (msg.progreso === 100) {
                 ws.close(); 
                 
-                const resFinal = await fetch(`/auditoria/${auditId}`);
+              
+                const token = localStorage.getItem('jwt_token'); 
+                const resFinal = await fetch(`/auditoria/${auditId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`, 
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const dataFinal = await resFinal.json();
+            
                 
                 currentAuditData = dataFinal;
                 processAuditResults(dataFinal);
@@ -102,33 +114,65 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 });
 
 function processAuditResults(data) {
+
+    if (!data || !data.resultados) return;
+
+    // --- NUEVO: Ocultamos el drag&drop y mostramos el botón de Nueva Auditoría ---
+    const uploadZone = document.getElementById('upload-zone');
+    if (uploadZone) uploadZone.style.display = 'none';
+
+    const btnNew = document.getElementById('btn-new-audit');
+    if (btnNew) btnNew.style.display = 'inline-block';
    
-    document.getElementById('stat-vuln').innerText = `${data.total_vulnerabilidades} Detectadas`;
+    document.getElementById('audit-stat-vuln').innerText = `${data.total_vulnerabilidades} Detectadas`;
     const score = Math.max(0, 100 - (data.total_vulnerabilidades * 5));
-    document.getElementById('stat-score').innerText = `${score} / 100`;
-    document.getElementById('stat-status').innerText = "Finalizado";
-    document.getElementById('stat-status').style.color = "#10b981";
+    document.getElementById('audit-stat-score').innerText = `${score} / 100`;
+    document.getElementById('audit-stat-status').innerText = "Finalizado";
+    document.getElementById('audit-stat-status').style.color = "#10b981";
+    
+    
 
     
     const list = document.getElementById('findings-list');
     list.innerHTML = '';
+
+    let criticas = 0, medias = 0, bajas = 0;
     
     let severities = { ERROR: 0, WARNING: 0, INFO: 0 };
 
     data.resultados.forEach((item, idx) => {
+
+        const sev = (item.severidad || '').toUpperCase();
+        if (sev.includes('CRIT') || sev.includes('HIGH') || sev.includes('ALTA')) {
+            criticas++;
+        } else if (sev.includes('MED')) {
+            medias++;
+        } else {
+            bajas++;
+        }
+        
         severities[item.severidad] = (severities[item.severidad] || 0) + 1;
 
         const div = document.createElement('div');
-        div.className = `finding-item ${item.severidad}`;
+        div.className = `finding-item ${item.severidad.toLowerCase()}`;
+        div.style.cursor = 'pointer';
+        div.style.padding = '10px';
+        div.style.borderBottom = '1px solid var(--border)';
+        
+       
+        const lineaIndicador = item.linea ? `<span style="color:#ff4757; margin-left:5px;">(Línea ${item.linea})</span>` : '';
+
         div.innerHTML = `
             <div style="display:flex; justify-content:space-between">
                 <strong>${item.vulnerabilidad}</strong>
-                <span style="font-size:0.8em; font-weight:bold">${item.severidad}</span>
+                <span style="font-size:0.8em; font-weight:bold" class="severity-badge sev-${item.severidad.toLowerCase()}">${item.severidad}</span>
             </div>
             <div style="font-size:0.8em; color:#94a3b8; margin-top:5px">
-                <i class="far fa-file-code"></i> ${item.archivo.split('/').pop()}
+                <i class="far fa-file-code"></i> ${item.archivo.split('/').pop()} ${lineaIndicador}
             </div>
         `;
+        
+      
         div.onclick = () => showDetail(item, div);
         list.appendChild(div);
     });
@@ -137,96 +181,108 @@ function processAuditResults(data) {
     updateCharts(score, severities);
 }
 
-function showDetail(item, element) {
-   
-    document.querySelectorAll('.finding-item').forEach(e => e.classList.remove('active'));
-    element.classList.add('active');
+function showDetail(item, divElement) {
+    
+    document.querySelectorAll('.finding-item').forEach(el => el.style.background = 'transparent');
+    if (divElement) divElement.style.background = 'rgba(0, 242, 254, 0.1)';
+
+    
+    const detailContainer = document.getElementById('finding-detail');
+
+  
+    const codigoHtml = item.codigo_afectado ? `
+        <div style="margin-top: 15px; background: #1e1e1e; padding: 15px; border-radius: 6px; border: 1px solid #333;">
+            <span style="font-size: 0.8em; color: #888; text-transform: uppercase;">Fragmento Vulnerable</span>
+            <pre style="margin: 5px 0 0 0; color: #d4d4d4; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.9em;"><code>${item.codigo_afectado}</code></pre>
+        </div>` : '';
+    
+    const referenciasHtml = item.referencias_legales ? `
+        <div style="margin-top: 20px; padding: 15px; background-color: rgba(0, 242, 254, 0.05); border-left: 4px solid #00f2fe; border-radius: 4px;">
+            <strong style="color: #00f2fe;"><i class="fas fa-book-open"></i> Fuentes Normativas Consultadas (FAISS)</strong><br>
+            <div style="color: #ccc; line-height: 1.5; margin-top: 8px; font-size: 0.9em;">
+                ${item.referencias_legales.replace(/\n/g, '<br>')}
+            </div>
+        </div>` : '';
 
    
-    let content = item.analisis_legal
-        .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--primary)">$1</strong>')
-        .replace(/\|/g, '')
-        .replace(/SOLUCIÓN TÉCNICA/g, '<h4 style="color:var(--success); margin-top:20px">Solución Técnica</h4>')
-        .replace(/Incumplimiento ENS/g, '<h4 style="color:var(--danger)">Incumplimiento ENS</h4>');
-
-    document.getElementById('finding-detail').innerHTML = `
-        <h2 style="color:var(--accent); border-bottom:1px solid #333; padding-bottom:10px;">${item.vulnerabilidad}</h2>
-        <div style="font-family:monospace; background:#0f172a; padding:10px; border-radius:5px; margin:10px 0;">
-            ${item.archivo}
+    detailContainer.innerHTML = `
+        <h3 style="margin-top: 0; color: #fff;">${item.vulnerabilidad}</h3>
+        <div style="color: var(--text-muted); margin-bottom: 15px;">
+            <i class="fas fa-file-alt"></i> ${item.archivo} 
+            ${item.linea ? `<span style="color:#ff4757; font-weight:bold; margin-left:10px;">(Línea ${item.linea})</span>` : ''}
         </div>
-        <div>${content}</div>
+
+        ${codigoHtml}
+
+        <div style="margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 6px; border: 1px solid var(--border);">
+            <strong style="color: #fff;"><i class="fas fa-brain"></i> Análisis y Solución (IA):</strong><br>
+            <div style="margin-top: 10px; line-height: 1.6; color: #ddd;">
+                ${(item.analisis_legal || 'Sin análisis detallado').replace(/\n/g, '<br>')}
+            </div>
+        </div>
+
+        ${referenciasHtml}
     `;
 }
 
-
 function initCharts() {
-    const ctxRadar = document.getElementById('radarChart').getContext('2d');
-    chartRadar = new Chart(ctxRadar, {
+    const radarOptions = {
+        scales: { r: { angleLines: { color: '#334155' }, grid: { color: '#334155' }, suggestMin: 0, suggestMax: 100, ticks: { display: false }, pointLabels: { color: '#ffffff', font: { size: 14, weight: 'bold' } } } },
+        plugins: { legend: { display: false } }
+    };
+    const doughnutOptions = { cutout: '70%', plugins: { legend: { position: 'right', labels: { color: '#fff' } } } };
+
+   
+    chartRadar = new Chart(document.getElementById('radarChart').getContext('2d'), {
         type: 'radar',
-        data: {
-            labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'],
-            datasets: [{
-                label: 'Nivel de Cumplimiento',
-                data: [0,0,0,0,0], 
-                backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                borderColor: '#3b82f6',
-                borderWidth: 2,
-                pointBackgroundColor: '#fff'
-            }]
-        },
-        options: {
-            scales: { 
-                r: { 
-                    angleLines: { color: '#334155' }, 
-                    grid: { color: '#334155' }, 
-                    suggestMin: 0, 
-                    suggestMax: 100, 
-                    ticks: { display: false },
-                  
-                    pointLabels: { 
-                        color: '#ffffff', 
-                        font: { size: 14, weight: 'bold' } 
-                    }
-                } 
-            },
-            plugins: { legend: { display: false } }
-        }
+        data: { labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'], datasets: [{ label: 'Nivel', data: [0,0,0,0,0], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3b82f6', borderWidth: 2, pointBackgroundColor: '#fff' }] },
+        options: radarOptions
     });
 
-    const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
-    chartDoughnut = new Chart(ctxDoughnut, {
+    chartDoughnut = new Chart(document.getElementById('doughnutChart').getContext('2d'), {
         type: 'doughnut',
-        data: {
-            labels: ['Crítico (High)', 'Medio (Med)', 'Bajo (Low)'],
-            datasets: [{
-                data: [0, 0, 0],
-                backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'],
-                borderWidth: 0
-            }]
-        },
-        options: { cutout: '70%', plugins: { legend: { position: 'right', labels: { color: '#fff' } } } }
+        data: { labels: ['Crítico', 'Medio', 'Bajo'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'], borderWidth: 0 }] },
+        options: doughnutOptions
+    });
+
+   
+    auditChartRadar = new Chart(document.getElementById('auditRadarChart').getContext('2d'), {
+        type: 'radar',
+        data: { labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'], datasets: [{ label: 'Nivel', data: [0,0,0,0,0], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3b82f6', borderWidth: 2, pointBackgroundColor: '#fff' }] },
+        options: radarOptions
+    });
+
+    auditChartDoughnut = new Chart(document.getElementById('auditDoughnutChart').getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: ['Crítico', 'Medio', 'Bajo'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'], borderWidth: 0 }] },
+        options: doughnutOptions
     });
 }
 
 function updateCharts(score, severities) {
-   
-    chartRadar.data.datasets[0].data = [score, score-10, score+5, score-5, score];
-    chartRadar.update();
-
-    chartDoughnut.data.datasets[0].data = [severities.ERROR || 0, severities.WARNING || 0, severities.INFO || 0];
-    chartDoughnut.update();
+    // SOLO actualizamos gráficas de la auditoría individual
+    if (auditChartRadar) {
+        auditChartRadar.data.datasets[0].data = [score, Math.max(0, score-10), Math.min(100, score+5), Math.max(0, score-5), score];
+        auditChartRadar.update();
+    }
+    
+    if (auditChartDoughnut) {
+        auditChartDoughnut.data.datasets[0].data = [severities.ERROR || 0, severities.WARNING || 0, severities.INFO || 0];
+        auditChartDoughnut.update();
+    }
+    
+    // NOTA: Hemos eliminado las líneas que actualizaban chartRadar y chartDoughnut 
+    // para no pisar los datos globales de la empresa.
 }
-
-
 
 async function generarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
    
-    const colorPrimary = [59, 130, 246]; // Azul
-    const colorDanger = [239, 68, 68];  // Rojo
-    const colorDark = [15, 23, 42];     // Azul oscuro
+    const colorPrimary = [59, 130, 246]; 
+    const colorDanger = [239, 68, 68];  
+    const colorDark = [15, 23, 42];    
     
  
   
@@ -324,51 +380,122 @@ function saveToHistory(fileName, count) {
 
 async function loadHistory() {
     try {
-    
         const token = localStorage.getItem('jwt_token');
-        
-      
+        if (!token) return;
+
         const res = await fetch('/historial', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
-     
-        if (res.status === 401) {
-            return;
-        }
+        if (!res.ok) return;
 
         const history = await res.json();
-        
         const container = document.getElementById('history-list');
-        
-     
+        if (!container) return;
+
         if (!history || history.length === 0) {
             container.innerHTML = '<div style="font-size: 0.85em; color: var(--text-muted); text-align: center; margin-top: 10px;">Tu historial está vacío.</div>';
             return;
         }
-        
-        container.innerHTML = '';
-        history.forEach(h => {
 
-        const div = document.createElement('div');
-        div.className = 'history-item';
-        div.style.cursor = 'pointer'; 
-        
-    
-        div.onclick = () => cargarAuditoriaPasada(h.id); 
-        
-        div.innerHTML = `
-            <div style="font-size: 0.8em; color: var(--text-muted);">${h.fecha}</div>
-            <div style="font-weight: 600;">${h.nombre_archivo}</div>
-            <div style="font-size: 0.8em; color: var(--primary);"><i class="fas fa-eye"></i> Ver Resultados</div>
-        `;
-        container.appendChild(div);
+        // --- 1. CÁLCULOS DEL DASHBOARD GLOBAL ---
+        let globalCriticas = 0;
+        let globalMedias = 0;
+        let globalBajas = 0;
+        let globalTotal = 0;
+
+        history.forEach(h => {
+            globalCriticas += (h.criticas || 0);
+            globalMedias += (h.medias || 0);
+            globalBajas += (h.bajas || 0);
+            globalTotal += (h.total_vulnerabilidades || 0);
         });
-    } catch (e) {
-        console.error("Error cargando historial de la BD:", e);
+
+        if (typeof trendChart !== 'undefined' && trendChart !== null) {
+            const historialOrdenado = [...history].reverse(); 
+            trendChart.data.labels = historialOrdenado.map(h => h.fecha || 'Auditoría');
+            trendChart.data.datasets[0].data = historialOrdenado.map(h => h.total_vulnerabilidades || 0);
+            trendChart.update();
+        }
+
+        if (typeof chartDoughnut !== 'undefined' && chartDoughnut !== null) {
+            chartDoughnut.data.datasets[0].data = [globalCriticas, globalMedias, globalBajas];
+            chartDoughnut.update();
+        }
+
+        const dashVuln = document.getElementById('stat-vuln');
+        if (dashVuln) dashVuln.innerText = `${globalTotal} Totales`;
+        
+        const dashScore = document.getElementById('stat-score');
+        let scoreGlobal = 100;
+        if (dashScore) {
+            let penalizacion = (globalCriticas * 5) + (globalMedias * 2) + (globalBajas * 1);
+            scoreGlobal = Math.max(0, 100 - penalizacion);
+            dashScore.innerText = `${scoreGlobal} / 100 (Media)`;
+        }
+
+        if (typeof chartRadar !== 'undefined' && chartRadar !== null) {
+            chartRadar.data.datasets[0].data = [
+                scoreGlobal, 
+                Math.max(0, scoreGlobal - 10), 
+                Math.min(100, scoreGlobal + 5), 
+                Math.max(0, scoreGlobal - 5), 
+                scoreGlobal
+            ];
+            chartRadar.update();
+        }
+
+        // --- 2. PINTAR LA LISTA LATERAL (¡Esto es lo que faltaba!) ---
+        container.innerHTML = ''; // Limpiamos el texto de "Cargando..."
+
+        history.forEach(h => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.style.cursor = 'pointer';
+            div.style.padding = '10px';
+            div.style.borderBottom = '1px solid var(--border)';
+            div.innerHTML = `
+                <div style="font-weight: bold; font-size: 0.9em;">${h.nombre_archivo || 'Auditoría'}</div>
+                <div style="font-size: 0.8em; color: var(--text-muted);">${h.fecha}</div>
+                <div style="font-size: 0.8em; margin-top: 5px;">
+                    <span style="color: #ef4444; margin-right: 5px;"><i class="fas fa-bug"></i> ${h.total_vulnerabilidades || 0}</span>
+                </div>
+            `;
+            
+            // Al hacer clic en un item del historial, abrimos esa auditoría
+// Al hacer clic en un item del historial, abrimos esa auditoría
+            div.onclick = async () => {
+                try {
+                    // 1. Usamos TU función para cambiar de pantalla correctamente (sin romper el menú)
+                    if (typeof navigate === 'function') {
+                        navigate('audit');
+                    }
+                    
+                    // 2. Nos aseguramos de que el panel de resultados se muestre
+                    const workspace = document.getElementById('audit-workspace');
+                    if (workspace) workspace.style.display = 'block';
+
+                    // 3. Pedimos los datos al backend
+                    const r = await fetch(`/auditoria/${h.id}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (r.ok) {
+                        const data = await r.json();
+                        // 4. Pintamos todo en la pantalla
+                        processAuditResults(data);
+                    }
+                } catch(err) {
+                    console.error("Error al abrir auditoría:", err);
+                }
+            };
+            
+            container.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error('Error cargando historial:', error);
     }
 }
-
 
 function resetAuditoria() {
     const progressContainer = document.getElementById('progress-container');

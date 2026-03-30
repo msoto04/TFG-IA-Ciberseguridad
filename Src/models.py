@@ -35,7 +35,12 @@ class Vulnerabilidad(Base):
     nombre = Column(String)
     severidad = Column(String)
     archivo_afectado = Column(String)
-    analisis_legal = Column(String) 
+    
+    linea = Column(Integer, nullable=True)             # Línea exacta del fallo
+    codigo_afectado = Column(String, nullable=True)    # Fragmento de código vulnerable
+    referencias_legales = Column(String, nullable=True) # Fuentes normativas (FAISS) usadas por la IA
 
- 
+    
+    analisis_legal = Column(String)
+    
     auditoria = relationship("Auditoria", back_populates="vulnerabilidades")

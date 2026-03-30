@@ -32,7 +32,8 @@ class AuditoriaState(TypedDict):
     explicacion_tecnica: str
     articulos_legales: str
     veredicto_final: str
-    tiempos: dict 
+    referencias_legales: str  
+    tiempos: dict
 
 def agente_tecnico(state: AuditoriaState):
     inicio = time.time()
@@ -60,72 +61,98 @@ def agente_tecnico(state: AuditoriaState):
 
 def agente_legal(state: AuditoriaState):
     inicio = time.time()
-    logger.info("--- [AGENTE LEGAL] Consultando base de datos FAISS (ENS/OWASP)... ---")
+    logger.info("--- [AGENTE LEGAL / RAG] ---")
     
-    hallazgo = state['hallazgos_tecnicos'][0]
+    # Extraemos los datos que nos manda el Celery Worker
+    h = state['hallazgos_tecnicos'][0]
+    vulnerabilidad_real = h.get('vulnerabilidad', 'Desconocida')
+    codigo_afectado = h.get('codigo_afectado', 'No disponible')
+    linea = h.get('linea', 'Desconocida')
+    archivo = h.get('archivo', 'Desconocido')
+    
+    # 1. RECUPERAR CONTEXTO Y METADATOS (FAISS)
+    contexto_texto = "No se encontraron referencias normativas."
+    referencias_encontradas = []
     
     try:
-        vector_db = FAISS.load_local(DB_PATH, embeddings, allow_dangerous_deserialization=True)
-        busqueda = f"{hallazgo['vulnerabilidad']} seguridad ENS normativa"
-        documentos = vector_db.similarity_search(busqueda, k=3)
-        contexto_ens = "\n\n".join([doc.page_content for doc in documentos])
-        logger.info(f"Se recuperaron {len(documentos)} fragmentos normativos.")
+        vectorstore = FAISS.load_local(DB_PATH, embeddings, allow_dangerous_deserialization=True)
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+        docs = retriever.invoke(vulnerabilidad_real)
+        
+        if docs:
+            contexto_fragmentos = []
+            for i, doc in enumerate(docs):
+                # Extraemos los metadatos de la fuente
+                fuente = doc.metadata.get("source", "Documento desconocido")
+                fuente_corta = os.path.basename(fuente)
+                pagina = doc.metadata.get("page", "N/A")
+                
+                ref_str = f"Documento: {fuente_corta} (Pág {pagina})"
+                referencias_encontradas.append(ref_str)
+                
+                # Delimitamos el contexto
+                contexto_fragmentos.append(f"--- REFERENCIA {i+1} ({ref_str}) ---\n{doc.page_content}")
+            
+            contexto_texto = "\n\n".join(contexto_fragmentos)
+            referencias_encontradas = list(set(referencias_encontradas)) # Quitar duplicados
     except Exception as e:
-        logger.error(f"No se pudo acceder a FAISS en Agente Legal: {e}", exc_info=True)
-        contexto_ens = "La documentación normativa no está disponible por un error de base de datos."
+        logger.error(f"Fallo al consultar FAISS: {e}")
 
- 
-    TRADUCTOR_VULNERABILIDADES = {
-        "sqlalchemy-execute-raw-query": "Inyección SQL Clásica (SQLi) - CWE-89. El código concatena strings en lugar de usar parámetros seguros.",
-        "insecure-hash-algorithm-md5": "Criptografía Débil (MD5) - CWE-327. Se está utilizando un algoritmo de hash obsoleto que es vulnerable a colisiones.",
-        "hardcoded-secret": "Credenciales a Fuego (Hardcoded Secret) - CWE-798. Hay una contraseña, token o clave secreta escrita directamente en el código.",
-        "hardcoded-password": "Credenciales a Fuego (Hardcoded Secret) - CWE-798. Contraseña escrita en texto plano en el código."
-    }
-
-    codigo_afectado = hallazgo.get('codigo_afectado', 'No disponible')
-    codigo_completo = hallazgo.get('codigo_completo', 'No disponible')
-
-
-    etiqueta_semgrep = hallazgo.get('vulnerabilidad', '').lower()
-    vulnerabilidad_real = TRADUCTOR_VULNERABILIDADES.get(
-        etiqueta_semgrep, 
-        f"Vulnerabilidad técnica: {etiqueta_semgrep}"
-    )
-
-    prompt = f"""
-    Eres un Auditor de Código Senior hiper-estricto. 
-    REGLA DE ORO: NUNCA inventes frameworks, rutas web (Flask/Django) ni librerías que no existan en el archivo original.
-
-    ARCHIVO ORIGINAL COMPLETO A ANALIZAR:
-    {codigo_completo}
-
-    VULNERABILIDAD A CORREGIR:
-    - Tipo de fallo real: {vulnerabilidad_real}
-    - Fragmento con el fallo: {codigo_afectado}
-
-    INSTRUCCIONES DE RESPUESTA (Solo texto plano estructurado, sin Markdown):
-
-    NORMATIVA E IMPACTO:
-    Explica el impacto de este fallo ({vulnerabilidad_real}) basándote en el ARCHIVO ORIGINAL. Relaciónalo con el ENS (Esquema Nacional de Seguridad) o RGPD si es pertinente.
-
-    SOLUCIÓN TÉCNICA:
-    Muestra cómo reescribir el fragmento afectado para solucionar el problema. ESTÁS OBLIGADO a usar la misma base de datos y librerías importadas en el ARCHIVO ORIGINAL.
-    """
+    # 2. PROMPT ESTRUCTURADO Y DELIMITADO (Checklist del Revisor)
+    prompt = f"""Eres un auditor experto en ciberseguridad y normativas legales (ENS, RGPD).
     
+[CONTEXTO NORMATIVO RECUPERADO]
+{contexto_texto}
+
+[CÓDIGO VULNERABLE REPORTADO]
+Archivo: {archivo} (Línea: {linea})
+Código:
+{codigo_afectado}
+
+[INSTRUCCIONES]
+Analiza el fallo '{vulnerabilidad_real}' basándote ÚNICAMENTE en el contexto normativo recuperado y en el código.
+Devuelve tu respuesta ESTRICTAMENTE en formato JSON válido con las siguientes claves, sin bloques markdown de código (no uses ```json):
+{{
+    "analisis_legal": "Explica el impacto relacionando el código con la normativa citada.",
+    "solucion": "Ejemplo corto de cómo arreglar el código.",
+    "citas": "Cita explícita de los documentos del contexto que has utilizado para esta respuesta."
+}}
+"""
+    
+    # 3. INVOCACIÓN AL LLM Y PARSEO DE RESPUESTA
     try:
         respuesta = llm.invoke(prompt)
-        veredicto = respuesta.content
-        logger.info("Veredicto legal/técnico generado con éxito.")
+        contenido = respuesta.content.strip()
+        
+        # Limpiar posible markdown residual del LLM para extraer el JSON
+        if contenido.startswith("```json"):
+            contenido = contenido.replace("```json", "").replace("```", "").strip()
+        elif contenido.startswith("```"):
+            contenido = contenido.replace("```", "").strip()
+            
+        import json
+        resultado_json = json.loads(contenido)
+        
+        veredicto = f"**Análisis:** {resultado_json.get('analisis_legal', '')}\n\n**Solución:** {resultado_json.get('solucion', '')}"
+        
+        texto_citas = resultado_json.get('citas', '')
+        citas_finales = "Fuentes oficiales recuperadas:\n- " + "\n- ".join(referencias_encontradas) + f"\n\n*Extracto:* {texto_citas}"
+        
     except Exception as e:
-        logger.error(f"Fallo crítico en Agente Legal al invocar LLM: {e}", exc_info=True)
-        veredicto = f"Error generando informe legal: {str(e)}"
+        logger.error(f"Fallo parseando JSON del LLM: {e}")
+        veredicto = f"Análisis técnico: La vulnerabilidad {vulnerabilidad_real} requiere revisión."
+        citas_finales = ", ".join(referencias_encontradas) if referencias_encontradas else "Sin referencias claras"
 
     fin = time.time()
-    
     tiempos = state.get('tiempos', {})
     tiempos['legal'] = round(fin - inicio, 2)
     
-    return {"veredicto_final": veredicto, "tiempos": tiempos}
+    # Devolvemos el veredicto y, de forma separada, las referencias exactas para guardarlas
+    return {
+        "veredicto_final": veredicto, 
+        "referencias_legales": citas_finales,
+        "tiempos": tiempos
+    }
 
 
 logger.info("Inicializando Grafo LangGraph de Auditoría...")

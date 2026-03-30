@@ -82,15 +82,6 @@ os.makedirs(EXTRACT_DIR, exist_ok=True)
 
 app = FastAPI(title="Sistema Auditoría IA (ENS) - RAG FAISS")
 
-@app.on_event("startup")
-def crear_usuario_demo():
-    db = SessionLocal()
-   
-    if not db.query(Usuario).first():
-        usuario_demo = Usuario(email="auditor@empresa.com", hashed_password="123")
-        db.add(usuario_demo)
-        db.commit()
-    db.close()
 
 app.add_middleware(
     CORSMiddleware,
@@ -203,21 +194,58 @@ def obtener_usuario_actual(credentials: HTTPAuthorizationCredentials = Depends(s
     return user
 
 
+
+MAX_ZIP_SIZE = 100 * 1024 * 1024  
+
 @app.post("/auditar-zip")
 async def auditar_zip(
     file: UploadFile = File(...), 
     current_user: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db)  
 ):
+
+    if not file.filename.lower().endswith('.zip'):
+        raise HTTPException(status_code=400, detail="Rechazado: El archivo debe tener extensión .zip")
+    
+    if file.content_type not in ["application/zip", "application/x-zip-compressed", "multipart/x-zip"]:
+        raise HTTPException(status_code=400, detail="Rechazado: El contenido real del archivo no es un ZIP válido")
+
     audit_id = str(uuid.uuid4())
     zip_path = os.path.join(UPLOAD_DIR, f"{audit_id}.zip")
     work_dir = os.path.join(EXTRACT_DIR, audit_id)
     
-    content = await file.read()
-    async with aiofiles.open(zip_path, 'wb') as out_file:
-        await out_file.write(content)
-
  
+    tamanio_descargado = 0
+    CHUNK_SIZE = 1024 * 1024 
+    
+    try:
+        async with aiofiles.open(zip_path, 'wb') as out_file:
+            while True:
+                chunk = await file.read(CHUNK_SIZE)
+                if not chunk:
+                    break 
+                
+                tamanio_descargado += len(chunk)
+                
+              
+                if tamanio_descargado > MAX_ZIP_SIZE:
+                    os.remove(zip_path)
+                    raise HTTPException(
+                        status_code=413, 
+                        detail=f"Rechazado: El archivo supera el límite de {MAX_ZIP_SIZE // (1024*1024)}MB permitidos."
+                    )
+                
+                await out_file.write(chunk)
+    except HTTPException:
+        raise
+    except Exception as e:
+       
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
+        logger.error(f"Error procesando la subida del ZIP: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error interno al procesar el archivo.")
+
+  
     nueva_auditoria = Auditoria(
         id=audit_id,
         nombre_archivo=file.filename,
@@ -227,6 +255,7 @@ async def auditar_zip(
     db.add(nueva_auditoria)
     db.commit()
 
+  
     procesar_auditoria_task.apply_async(
         args=[audit_id, zip_path, work_dir, file.filename, current_user.id],
         countdown=2
@@ -236,7 +265,6 @@ async def auditar_zip(
         "estado": "Procesando",
         "audit_id": audit_id
     }
-
 
 @app.post("/registro")
 def registrar_usuario(user: UsuarioRegistro, db: Session = Depends(get_db)):
@@ -274,32 +302,68 @@ def login(user: UsuarioRegistro, db: Session = Depends(get_db)):
 
 
 @app.websocket("/ws/progreso/{audit_id}")
-async def websocket_progreso(websocket: WebSocket, audit_id: str):
-    await websocket.accept()
-    redis_client = redis_async.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"))
-    pubsub = redis_client.pubsub()
-    await pubsub.subscribe(f"progreso_{audit_id}")
-    
+async def websocket_endpoint(websocket: WebSocket, audit_id: str, token: str = None):
+
+    if not token:
+        await websocket.close(code=1008) 
+        return
+        
     try:
-        async for message in pubsub.listen():
-            if message["type"] == "message":
-                datos = message["data"].decode("utf-8")
-                await websocket.send_text(datos)
+     
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            await websocket.close(code=1008)
+            return
             
+   
+        db = SessionLocal()
+        auditoria = db.query(Auditoria).filter(Auditoria.id == audit_id).first()
+        db.close()
+
+        if auditoria and str(auditoria.usuario_id) != str(user_id):
+            await websocket.close(code=1008)
+            return
+
+    except jwt.PyJWTError:
+        await websocket.close(code=1008)
+        return
+
+    await websocket.accept()
+    
+    REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+    pubsub = redis_async.Redis.from_url(REDIS_URL).pubsub()
+    await pubsub.subscribe(f"progreso_{audit_id}")
+
+    try:
+        async for mensaje in pubsub.listen():
+            if mensaje["type"] == "message":
+                datos = mensaje["data"].decode("utf-8")
+                await websocket.send_text(datos)
                 if '"progreso": 100' in datos or '"progreso": -1' in datos:
                     break
     except WebSocketDisconnect:
         pass
     finally:
         await pubsub.unsubscribe()
-        await websocket.close()
+        try:
+            await websocket.close()
+        except:
+            pass
 
 
 @app.get("/auditoria/{audit_id}")
-def obtener_resultado_auditoria(audit_id: str, db: Session = Depends(get_db)):
+def obtener_resultado_auditoria(
+    audit_id: str, 
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(obtener_usuario_actual)  
+):
     auditoria = db.query(Auditoria).filter(Auditoria.id == audit_id).first()
     if not auditoria:
         raise HTTPException(status_code=404, detail="Auditoría no encontrada")
+    
+    if auditoria.usuario_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Acceso denegado: No tienes permiso para ver esta auditoría")
     
     resultados = []
     for v in auditoria.vulnerabilidades:
@@ -307,7 +371,10 @@ def obtener_resultado_auditoria(audit_id: str, db: Session = Depends(get_db)):
             "vulnerabilidad": v.nombre,
             "archivo": v.archivo_afectado,
             "severidad": v.severidad,
-            "analisis_legal": v.analisis_legal
+            "analisis_legal": v.analisis_legal,
+            "linea": v.linea,
+            "codigo_afectado": v.codigo_afectado,
+            "referencias_legales": v.referencias_legales
         })
         
     return {
@@ -321,17 +388,35 @@ def obtener_historial(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(obtener_usuario_actual)  
 ):
-
+  
     auditorias = db.query(Auditoria)\
         .filter(Auditoria.usuario_id == current_user.id)\
         .order_by(Auditoria.fecha.desc())\
-        .limit(5).all()
+        .all()
     
     resultados = []
     for a in auditorias:
+       
+        criticas = 0
+        medias = 0
+        bajas = 0
+        
+        for v in a.vulnerabilidades:
+            sev = str(v.severidad).upper()
+            if 'CRIT' in sev or 'HIGH' in sev or 'ALTA' in sev or 'ERROR' in sev:
+                criticas += 1
+            elif 'MED' in sev or 'WARN' in sev:
+                medias += 1
+            else:
+                bajas += 1
+
         resultados.append({
             "id": a.id,
             "nombre_archivo": a.nombre_archivo,
-            "fecha": a.fecha.strftime("%Y-%m-%d %H:%M:%S")
+            "fecha": a.fecha.strftime("%Y-%m-%d %H:%M:%S"),
+            "total_vulnerabilidades": criticas + medias + bajas,
+            "criticas": criticas,
+            "medias": medias,
+            "bajas": bajas
         })
     return resultados
