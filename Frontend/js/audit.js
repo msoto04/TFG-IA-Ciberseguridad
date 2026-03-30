@@ -1,8 +1,8 @@
 let currentAuditData = null;
-let chartRadar = null; // Para el Dashboard
-let chartDoughnut = null; // Para el Dashboard
-let auditChartRadar = null; // Para la vista de Auditoría
-let auditChartDoughnut = null; // Para la vista de Auditoría
+let chartRadar = null; 
+let chartDoughnut = null; 
+let auditChartRadar = null; 
+let auditChartDoughnut = null; 
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -117,7 +117,6 @@ function processAuditResults(data) {
 
     if (!data || !data.resultados) return;
 
-    // --- NUEVO: Ocultamos el drag&drop y mostramos el botón de Nueva Auditoría ---
     const uploadZone = document.getElementById('upload-zone');
     if (uploadZone) uploadZone.style.display = 'none';
 
@@ -260,7 +259,7 @@ function initCharts() {
 }
 
 function updateCharts(score, severities) {
-    // SOLO actualizamos gráficas de la auditoría individual
+ 
     if (auditChartRadar) {
         auditChartRadar.data.datasets[0].data = [score, Math.max(0, score-10), Math.min(100, score+5), Math.max(0, score-5), score];
         auditChartRadar.update();
@@ -271,8 +270,6 @@ function updateCharts(score, severities) {
         auditChartDoughnut.update();
     }
     
-    // NOTA: Hemos eliminado las líneas que actualizaban chartRadar y chartDoughnut 
-    // para no pisar los datos globales de la empresa.
 }
 
 async function generarPDF() {
@@ -444,8 +441,8 @@ async function loadHistory() {
             chartRadar.update();
         }
 
-        // --- 2. PINTAR LA LISTA LATERAL (¡Esto es lo que faltaba!) ---
-        container.innerHTML = ''; // Limpiamos el texto de "Cargando..."
+   
+        container.innerHTML = ''; 
 
         history.forEach(h => {
             const div = document.createElement('div');
@@ -461,27 +458,26 @@ async function loadHistory() {
                 </div>
             `;
             
-            // Al hacer clic en un item del historial, abrimos esa auditoría
-// Al hacer clic en un item del historial, abrimos esa auditoría
+
             div.onclick = async () => {
                 try {
-                    // 1. Usamos TU función para cambiar de pantalla correctamente (sin romper el menú)
+                  
                     if (typeof navigate === 'function') {
                         navigate('audit');
                     }
                     
-                    // 2. Nos aseguramos de que el panel de resultados se muestre
+                  
                     const workspace = document.getElementById('audit-workspace');
                     if (workspace) workspace.style.display = 'block';
 
-                    // 3. Pedimos los datos al backend
+                    
                     const r = await fetch(`/auditoria/${h.id}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
                     if (r.ok) {
                         const data = await r.json();
-                        // 4. Pintamos todo en la pantalla
+                       
                         processAuditResults(data);
                     }
                 } catch(err) {

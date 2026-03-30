@@ -63,14 +63,12 @@ def agente_legal(state: AuditoriaState):
     inicio = time.time()
     logger.info("--- [AGENTE LEGAL / RAG] ---")
     
-    # Extraemos los datos que nos manda el Celery Worker
     h = state['hallazgos_tecnicos'][0]
     vulnerabilidad_real = h.get('vulnerabilidad', 'Desconocida')
     codigo_afectado = h.get('codigo_afectado', 'No disponible')
     linea = h.get('linea', 'Desconocida')
     archivo = h.get('archivo', 'Desconocido')
-    
-    # 1. RECUPERAR CONTEXTO Y METADATOS (FAISS)
+  
     contexto_texto = "No se encontraron referencias normativas."
     referencias_encontradas = []
     
@@ -82,7 +80,7 @@ def agente_legal(state: AuditoriaState):
         if docs:
             contexto_fragmentos = []
             for i, doc in enumerate(docs):
-                # Extraemos los metadatos de la fuente
+               
                 fuente = doc.metadata.get("source", "Documento desconocido")
                 fuente_corta = os.path.basename(fuente)
                 pagina = doc.metadata.get("page", "N/A")
@@ -90,15 +88,15 @@ def agente_legal(state: AuditoriaState):
                 ref_str = f"Documento: {fuente_corta} (Pág {pagina})"
                 referencias_encontradas.append(ref_str)
                 
-                # Delimitamos el contexto
+               
                 contexto_fragmentos.append(f"--- REFERENCIA {i+1} ({ref_str}) ---\n{doc.page_content}")
             
             contexto_texto = "\n\n".join(contexto_fragmentos)
-            referencias_encontradas = list(set(referencias_encontradas)) # Quitar duplicados
+            referencias_encontradas = list(set(referencias_encontradas)) 
     except Exception as e:
         logger.error(f"Fallo al consultar FAISS: {e}")
 
-    # 2. PROMPT ESTRUCTURADO Y DELIMITADO (Checklist del Revisor)
+  
     prompt = f"""Eres un auditor experto en ciberseguridad y normativas legales (ENS, RGPD).
     
 [CONTEXTO NORMATIVO RECUPERADO]
@@ -119,12 +117,12 @@ Devuelve tu respuesta ESTRICTAMENTE en formato JSON válido con las siguientes c
 }}
 """
     
-    # 3. INVOCACIÓN AL LLM Y PARSEO DE RESPUESTA
+ 
     try:
         respuesta = llm.invoke(prompt)
         contenido = respuesta.content.strip()
         
-        # Limpiar posible markdown residual del LLM para extraer el JSON
+    
         if contenido.startswith("```json"):
             contenido = contenido.replace("```json", "").replace("```", "").strip()
         elif contenido.startswith("```"):
@@ -147,7 +145,6 @@ Devuelve tu respuesta ESTRICTAMENTE en formato JSON válido con las siguientes c
     tiempos = state.get('tiempos', {})
     tiempos['legal'] = round(fin - inicio, 2)
     
-    # Devolvemos el veredicto y, de forma separada, las referencias exactas para guardarlas
     return {
         "veredicto_final": veredicto, 
         "referencias_legales": citas_finales,
