@@ -62,7 +62,8 @@ def ejecutar_sast_profesional(directorio_codigo):
                     "linea": start.get("line", 0),
                     "codigo_afectado": extra.get("lines", "No disponible"),
                     "severidad": extra.get("severity", "INFO"),
-                    "mensaje": extra.get("message", "Sin descripción")
+                    "mensaje": extra.get("message", "Sin descripción"),
+                    "regla_semgrep": resultado.get("check_id", "Desconocida")
                 }
                 hallazgos_limpios.append(vuln)
                 

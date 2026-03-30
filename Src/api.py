@@ -374,7 +374,9 @@ def obtener_resultado_auditoria(
             "analisis_legal": v.analisis_legal,
             "linea": v.linea,
             "codigo_afectado": v.codigo_afectado,
-            "referencias_legales": v.referencias_legales
+            "referencias_legales": v.referencias_legales,
+            "modelo_llm": v.modelo_llm,
+            "regla_semgrep": v.regla_semgrep
         })
         
     return {

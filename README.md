@@ -50,3 +50,28 @@ Abre una terminal en la raíz de este proyecto (donde está el archivo docker-co
 
 Abre tu navegador web y ve a la ruta donde esta el archivo `index.html` (Frontend/index.html) para ver la interfaz, o ve directamente a la API en `http://localhost:8000`.
 
+
+
+
+
+## Arquitectura RAG y Modelos de Inteligencia Artificial
+
+Para garantizar que los análisis de vulnerabilidades estén alineados con el Esquema Nacional de Seguridad (ENS) y evitar "alucinaciones" (respuestas inventadas), esta plataforma implementa una arquitectura **RAG (Retrieval-Augmented Generation)**.
+
+### 1. Modelo de Embeddings: `mxbai-embed-large`
+Para la vectorización de los documentos legales (ENS) se utiliza el modelo **`mxbai-embed-large`** a través de Ollama. 
+* **¿Por qué este modelo?** Es un modelo de estado del arte diseñado específicamente para tareas de recuperación de información (Retrieval) y búsqueda semántica, superando a otros modelos estándar en precisión al mapear consultas técnicas con textos legales.
+
+### 2. Base de Datos Vectorial: FAISS
+Los embeddings generados se almacenan y consultan utilizando **FAISS (Facebook AI Similarity Search)**. FAISS permite realizar búsquedas de similitud ultrarrápidas, recuperando los artículos exactos del ENS que aplican a la vulnerabilidad detectada en el código fuente.
+
+### 3. Modelos LLM de Análisis Legal
+El sistema permite al usuario elegir entre dos modelos de lenguaje locales (ejecutados vía Ollama) para realizar el razonamiento jurídico-técnico:
+* **Llama 3.2 (3B)**: Optimizado para velocidad y entornos con recursos limitados.
+* **Llama 3.1 (8B)**: Modelo experto que ofrece un razonamiento más profundo en auditorías críticas (requiere mayor capacidad de RAM).
+
+### 4. Trazabilidad y Evidencia Legal
+El sistema persiste en la base de datos la evidencia completa de cada hallazgo para su posterior auditoría humana:
+* Regla exacta del motor SAST (Semgrep).
+* Modelo LLM utilizado en la inferencia.
+* Fragmentos del ENS recuperados por FAISS y utilizados como contexto estricto.

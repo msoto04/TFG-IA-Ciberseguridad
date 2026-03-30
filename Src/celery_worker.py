@@ -93,7 +93,9 @@ def procesar_auditoria_task(audit_id, zip_path, work_dir, file_name, usuario_id)
                 linea=h.get('linea', 0),                            
                 codigo_afectado=h.get('codigo_afectado', ''),      
                 referencias_legales=referencias,                   
-                analisis_legal=analisis
+                analisis_legal=analisis,
+                modelo_llm=os.getenv("MODELO_ORQUESTADOR", "llama3.2:3b"),
+                regla_semgrep=h.get('regla_semgrep', 'Desconocida')
             )
             db.add(nueva_vuln)
             
