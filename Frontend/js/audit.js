@@ -44,7 +44,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
       
         const res = await fetch('/auditar-zip', { 
             method: 'POST', 
-            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include',
             body: formData 
         });
 
@@ -59,7 +59,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         
-        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/progreso/${auditId}?token=${token}`);
+        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/progreso/${auditId}`);
       
         ws.onopen = () => {
             document.getElementById('progress-text').innerText = "Conexión en vivo establecida. Esperando a la IA...";
@@ -74,17 +74,16 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
             document.getElementById('progress-bar-fill').style.width = msg.progreso + '%';
 
          
-            if (msg.progreso === 100) {
+                if (msg.progreso === 100) {
                 ws.close(); 
                 
-              
-                const token = localStorage.getItem('jwt_token'); 
+               
                 const resFinal = await fetch(`/auditoria/${auditId}`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`, 
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include' 
                 });
                 const dataFinal = await resFinal.json();
             
@@ -377,11 +376,9 @@ function saveToHistory(fileName, count) {
 
 async function loadHistory() {
     try {
-        const token = localStorage.getItem('jwt_token');
-        if (!token) return;
 
         const res = await fetch('/historial', {
-            headers: { 'Authorization': `Bearer ${token}` }
+            credentials: 'include'
         });
         if (!res.ok) return;
 
@@ -394,7 +391,7 @@ async function loadHistory() {
             return;
         }
 
-        // --- 1. CÁLCULOS DEL DASHBOARD GLOBAL ---
+       
         let globalCriticas = 0;
         let globalMedias = 0;
         let globalBajas = 0;
@@ -472,7 +469,7 @@ async function loadHistory() {
 
                     
                     const r = await fetch(`/auditoria/${h.id}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        credentials: 'include'
                     });
                     
                     if (r.ok) {
@@ -522,7 +519,6 @@ function resetAuditoria() {
 
 async function cargarAuditoriaPasada(auditId) {
     try {
-        const token = localStorage.getItem('jwt_token');
         
         if (typeof navigate === 'function') navigate('audit');
         
@@ -539,7 +535,7 @@ async function cargarAuditoriaPasada(auditId) {
         if (progressBar) progressBar.style.width = "100%";
         
         const res = await fetch(`/auditoria/${auditId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            credentials: 'include'
         });
         
         if (res.status === 401) { cerrarSesion(); return; }
@@ -571,14 +567,12 @@ async function cargarAuditoriaPasada(auditId) {
             
             let criticas = 0, medias = 0, bajas = 0;
 
-            data.resultados.forEach((v) => {
+        data.resultados.forEach((v) => {
 
                 const sev = (v.severidad || "").toString().toUpperCase().trim();
-
                 let colorBase = 'var(--success)'; 
                 let icono = 'fa-check-circle';
 
-              
                 if (sev.includes('ERROR') || sev.includes('ALTA') || sev.includes('ALTO') || sev.includes('HIGH') || sev.includes('CRITIC')) {
                     criticas++;
                     colorBase = 'var(--danger)'; 
@@ -591,10 +585,7 @@ async function cargarAuditoriaPasada(auditId) {
                 } 
                 else {
                     bajas++;
-                
                 }
-
-
       
                 const item = document.createElement('div');
                 item.style.padding = '12px';
@@ -606,10 +597,13 @@ async function cargarAuditoriaPasada(auditId) {
                 item.style.cursor = 'pointer';
                 item.style.transition = 'all 0.2s ease';
                 
+             
                 item.innerHTML = `
-                    <div style="font-weight: 600; margin-bottom: 5px; font-size: 0.95em;">${v.vulnerabilidad}</div>
-                    <div style="font-size: 0.8em; color: var(--text-muted);"><i class="fas ${icono}" style="color: ${colorBase}"></i> ${v.severidad.toUpperCase()}</div>
+                    <div class="safe-title" style="font-weight: 600; margin-bottom: 5px; font-size: 0.95em;"></div>
+                    <div style="font-size: 0.8em; color: var(--text-muted);"><i class="fas ${icono}" style="color: ${colorBase}"></i> <span class="safe-sev"></span></div>
                 `;
+                item.querySelector('.safe-title').textContent = v.vulnerabilidad;
+                item.querySelector('.safe-sev').textContent = v.severidad.toUpperCase();
 
               
                 item.onclick = () => {
@@ -617,29 +611,44 @@ async function cargarAuditoriaPasada(auditId) {
                     Array.from(findingsList.children).forEach(c => c.style.background = 'var(--bg-panel)');
                     item.style.background = 'rgba(255, 255, 255, 0.05)'; 
 
-                   
+                  
                     findingDetail.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                            <span style="background: ${colorBase}; color: white; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85em;">
-                                ${v.severidad.toUpperCase()}
-                            </span>
-                            <h3 style="margin: 0; color: var(--text-main); font-size: 1.1em;">${v.vulnerabilidad}</h3>
+                            <span id="det-sev" style="background: ${colorBase}; color: white; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85em;"></span>
+                            <h3 id="det-title" style="margin: 0; color: var(--text-main); font-size: 1.1em;"></h3>
                         </div>
                         
                         <div style="margin-bottom: 20px;">
-                            <h4 style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.85em;">ARCHIVO AFECTADO:</h4>
-                            <code style="background: var(--bg-card); padding: 8px 12px; border-radius: 6px; display: block; color: var(--primary); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace;">
-                                ${v.archivo}
-                            </code>
+                            <h4 style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.85em;">ARCHIVO Y CÓDIGO AFECTADO:</h4>
+                            <code id="det-file" style="background: var(--bg-card); padding: 8px 12px; border-radius: 6px; display: block; color: var(--primary); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; margin-bottom: 10px;"></code>
+                            <pre><code id="det-code" style="background: #1e1e1e; padding: 10px; border-radius: 6px; display: block; color: #d4d4d4; overflow-x: auto;"></code></pre>
                         </div>
 
                         <div>
                             <h4 style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.85em;">ANÁLISIS LEGAL / TÉCNICO:</h4>
-                            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; line-height: 1.6; font-size: 0.95em; border-left: 2px solid var(--border);">
-                                ${v.analisis_legal}
+                            <div id="det-analysis" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; line-height: 1.6; font-size: 0.95em; border-left: 2px solid var(--border); white-space: pre-wrap;"></div>
+                        </div>
+
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(0, 255, 170, 0.05); border-left: 3px solid #00ffaa; border-radius: 6px;">
+                            <h4 style="color: #00ffaa; margin-top: 0; margin-bottom: 10px; font-size: 0.9em;"><i class="fas fa-book"></i> EVIDENCIA RAG (ENS)</h4>
+                            <div id="det-ref" style="font-size: 0.9em; color: #a0aec0; font-family: 'JetBrains Mono', monospace; white-space: pre-wrap; margin-bottom: 12px;"></div>
+                            <div style="font-size: 0.85em; color: #718096; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                                <span style="margin-right: 20px;"><i class="fas fa-robot"></i> Modelo: <strong id="det-model" style="color:#e2e8f0;"></strong></span>
+                                <span><i class="fas fa-shield-alt"></i> Regla: <strong id="det-rule" style="color:#e2e8f0;"></strong></span>
                             </div>
                         </div>
                     `;
+
+                   
+                    document.getElementById('det-sev').textContent = v.severidad.toUpperCase();
+                    document.getElementById('det-title').textContent = v.vulnerabilidad;
+                    document.getElementById('det-file').textContent = v.archivo + (v.linea ? ` (Línea ${v.linea})` : '');
+                    document.getElementById('det-code').textContent = v.codigo_afectado || 'No disponible';
+                    document.getElementById('det-analysis').textContent = v.analisis_legal;
+                    
+                    document.getElementById('det-ref').textContent = v.referencias_legales || 'Sin referencias';
+                    document.getElementById('det-model').textContent = v.modelo_llm || 'N/A';
+                    document.getElementById('det-rule').textContent = v.regla_semgrep || 'N/A';
                 };
 
                 findingsList.appendChild(item);
@@ -656,13 +665,20 @@ async function cargarAuditoriaPasada(auditId) {
                 chartDoughnut.data.datasets[0].data = [criticas, medias, bajas];
                 chartDoughnut.update();
             }
+
+            let confidencialidad = Math.max(0, 100 - (criticas * 20) - (medias * 5));
+            let integridad = Math.max(0, 100 - (criticas * 15) - (medias * 10));
+            let disponibilidad = Math.max(0, 100 - (criticas * 10) - (medias * 5) - (bajas * 2));
+            let trazabilidad = Math.max(0, 100 - (medias * 5) - (bajas * 5));
+            let legalidad = Math.max(0, 100 - (criticas * 25) - (medias * 10) - (bajas * 5));
+
             if (typeof chartRadar !== 'undefined' && chartRadar !== null) {
                 chartRadar.data.datasets[0].data = [
-                    criticas > 0 ? criticas * 10 : 10, 
-                    medias > 0 ? medias * 15 : 20, 
-                    bajas > 0 ? bajas * 20 : 30, 
-                    criticas + medias, 
-                    (criticas + medias + bajas) * 5
+                    confidencialidad,
+                    integridad,
+                    disponibilidad,
+                    trazabilidad,
+                    legalidad
                 ];
                 chartRadar.update();
             }

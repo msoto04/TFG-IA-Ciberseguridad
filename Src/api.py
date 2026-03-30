@@ -10,7 +10,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from Src.celery_worker import procesar_auditoria_task
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -85,7 +85,7 @@ app = FastAPI(title="Sistema Auditoría IA (ENS) - RAG FAISS")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["http://localhost", "http://localhost:8000", "http://127.0.0.1", "http://127.0.0.1:8000"],
     allow_credentials=True,
     allow_methods=["*"], 
     allow_headers=["*"], 
@@ -173,23 +173,36 @@ async def chat_rag(request: ChatRequest):
 
 security = HTTPBearer()
 
-def obtener_usuario_actual(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
-    try:
-        token = credentials.credentials
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
-        
-        if user_id is None:
-            raise HTTPException(status_code=401, detail="Token inválido")
-            
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="El token ha caducado, haz login de nuevo")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Token falso o modificado")
+def obtener_usuario_actual(request: Request, db: Session = Depends(get_db)):
+ 
+    token_cookie = request.cookies.get("access_token")
     
-    user = db.query(Usuario).filter(Usuario.id == user_id).first()
+    
+    auth_header = request.headers.get("Authorization")
+    
+    token = None
+    if token_cookie and token_cookie.startswith("Bearer "):
+        token = token_cookie.split(" ")[1]
+    elif auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+        
+    if not token:
+        raise HTTPException(status_code=401, detail="No autenticado o sesión expirada")
+        
+    try:
+      
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Token inválido")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="El token ha expirado")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Token inválido")
+        
+    user = db.query(Usuario).filter(Usuario.email == email).first()
     if user is None:
-        raise HTTPException(status_code=401, detail="El usuario ya no existe")
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
         
     return user
 
@@ -284,25 +297,40 @@ def registrar_usuario(user: UsuarioRegistro, db: Session = Depends(get_db)):
     
     return {"mensaje": "Usuario creado exitosamente. ¡Ya puedes iniciar sesión!"}
 
-@app.post("/login", response_model=Token)
-def login(user: UsuarioRegistro, db: Session = Depends(get_db)):
-   
-    db_user = db.query(Usuario).filter(Usuario.email == user.email).first()
-    
- 
-    if not db_user or not verificar_password(user.password, db_user.hashed_password):
-        raise HTTPException(status_code=401, detail="Credenciales incorrectas")
+@app.post("/login")  
+def login(usuario: UsuarioRegistro, response: Response, db: Session = Depends(get_db)):
     
 
-    access_token = crear_token_acceso(data={"sub": str(db_user.id)})
+    db_user = db.query(Usuario).filter(Usuario.email == usuario.email).first()
+    if not db_user or not verificar_password(usuario.password, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
     
-    return {"access_token": access_token, "token_type": "bearer"}
+   
+    access_token = crear_token_acceso(data={"sub": db_user.email})
+    
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,  
+        secure=False,   
+        samesite="lax",
+        max_age=120 * 60 
+    )
+    
+   
+    return {"access_token": access_token, "token_type": "bearer", "mensaje": "Login exitoso"}
 
 
 
 
 @app.websocket("/ws/progreso/{audit_id}")
-async def websocket_endpoint(websocket: WebSocket, audit_id: str, token: str = None):
+async def websocket_endpoint(websocket: WebSocket, audit_id: str):
+    # 1. Leemos el token de la Cookie Segura
+    token_cookie = websocket.cookies.get("access_token")
+    
+    token = None
+    if token_cookie and token_cookie.startswith("Bearer "):
+        token = token_cookie.split(" ")[1]
 
     if not token:
         await websocket.close(code=1008) 
@@ -311,17 +339,26 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str, token: str = N
     try:
      
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("sub")
-        if user_id is None:
+        email = payload.get("sub")
+        if email is None:
             await websocket.close(code=1008)
             return
             
-   
+    
         db = SessionLocal()
+      
+        user = db.query(Usuario).filter(Usuario.email == email).first()
+        if not user:
+            db.close()
+            await websocket.close(code=1008)
+            return
+            
+
         auditoria = db.query(Auditoria).filter(Auditoria.id == audit_id).first()
         db.close()
 
-        if auditoria and str(auditoria.usuario_id) != str(user_id):
+   
+        if auditoria and str(auditoria.usuario_id) != str(user.id):
             await websocket.close(code=1008)
             return
 
@@ -329,6 +366,7 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str, token: str = N
         await websocket.close(code=1008)
         return
 
+    
     await websocket.accept()
     
     REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
@@ -422,3 +460,10 @@ def obtener_historial(
             "bajas": bajas
         })
     return resultados
+
+
+@app.post("/logout")
+def cerrar_sesion(response: Response):
+   
+    response.delete_cookie("access_token", httponly=True, samesite="lax")
+    return {"mensaje": "Sesión cerrada con éxito"}

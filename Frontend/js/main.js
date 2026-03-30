@@ -16,19 +16,7 @@ function toggleSettings() {
     modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
 }
 
-document.addEventListener('DOMContentLoaded', checkAuth);
 
-
-function checkAuth() {
-    const token = localStorage.getItem('jwt_token');
-    if (token) {
-        document.getElementById('login-overlay').style.display = 'none'; 
-    } else {
-        document.getElementById('login-overlay').style.display = 'flex'; 
-    }
-}
-
-// Alternar entre pantalla de Login y Registro
 function toggleAuth() {
     const boxLogin = document.getElementById('box-login');
     const boxReg = document.getElementById('box-registro');
@@ -41,12 +29,32 @@ function toggleAuth() {
     }
 }
 
+document.addEventListener('DOMContentLoaded', checkAuth);
+
+
+async function checkAuth() {
+    try {
+   
+        const res = await fetch('/historial', { credentials: 'include' });
+        
+        if (res.ok) {
+      
+            document.getElementById('login-overlay').style.display = 'none'; 
+        } else {
+         
+            document.getElementById('login-overlay').style.display = 'flex'; 
+        }
+    } catch (e) {
+    
+        document.getElementById('login-overlay').style.display = 'flex'; 
+    }
+}
+
 async function registrarUsuario() {
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
     const msgBox = document.getElementById('reg-msg');
     
-
     if (!email || !password) {
         msgBox.style.color = "var(--warning)";
         msgBox.innerText = "Por favor, rellena todos los campos.";
@@ -70,6 +78,7 @@ async function registrarUsuario() {
     } catch (e) { msgBox.innerText = "Error de conexión"; }
 }
 
+
 async function iniciarSesion() {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
@@ -85,21 +94,38 @@ async function iniciarSesion() {
         const res = await fetch('/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include', 
             body: JSON.stringify({ email, password })
         });
         const data = await res.json();
         if (res.ok) {
-            localStorage.setItem('jwt_token', data.access_token);
             document.getElementById('login-overlay').style.display = 'none';
             if (typeof loadHistory === 'function') loadHistory();
         } else {
             msgBox.style.color = "var(--danger)";
             msgBox.innerText = data.detail || "Credenciales incorrectas";
         }
-    } catch (e) { msgBox.innerText = "Error de conexión"; }
+    } catch (e) { 
+        msgBox.style.color = "var(--danger)";
+        msgBox.innerText = "Error de conexión"; 
+    }
 }
 
-function cerrarSesion() {
-    localStorage.removeItem('jwt_token'); 
-    checkAuth(); 
+
+async function cerrarSesion() {
+    try {
+      
+        await fetch('/logout', { 
+            method: 'POST', 
+            credentials: 'include' 
+        });
+        
+   
+        document.getElementById('login-overlay').style.display = 'flex';
+        
+   
+        window.location.reload();
+    } catch (e) {
+        console.error("Error al cerrar sesión", e);
+    }
 }
