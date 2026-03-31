@@ -1,25 +1,50 @@
+# --- IA, LLM y RAG ---
 langchain==0.2.11
 langchain-community==0.2.10
 langchain-core==0.2.23
 langchain-ollama==0.1.1
 langchain-text-splitters==0.2.2
-pydantic
 langgraph
 faiss-cpu
-semgrep
+pypdf
+pymupdf==1.23.26
+
+
+# --- Backend y API (FastAPI) ---
 fastapi
 uvicorn
-python-multipart
-requests
-pypdf
-python-dotenv
+pydantic
+python-multipart==0.0.9
+websockets==12.0
 aiofiles
+python-dotenv
+requests
+
+# --- Base de Datos y ORM ---
 sqlalchemy==2.0.23
+
+
+# --- Tareas en Segundo Plano ---
 celery==5.3.6
 redis==5.0.1
-websockets==12.0
+
+
+# --- Seguridad y Autenticación ---
 PyJWT==2.8.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.9
-pymupdf==1.23.26
 bcrypt==3.2.2
+
+# --- Análisis Estático de Código ---
+semgrep
+python-multipart
+
+
+
+
+
+
+
+
+
+
+

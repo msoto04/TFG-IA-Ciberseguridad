@@ -63,9 +63,30 @@ async function enviarMensaje() {
         let respuestaFormateada = data.respuesta
             .replace(/\n/g, '<br>') 
             .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--primary)">$1</strong>') 
-            .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.3); padding:2px 5px; border-radius:4px; font-family:monospace;">$1</code>'); // Código inline
+            .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.3); padding:2px 5px; border-radius:4px; font-family:monospace;">$1</code>');
 
-       
+    
+        if (data.fuentes && data.fuentes.length > 0) {
+            let htmlFuentes = `
+                <div style="margin-top: 15px; font-size: 0.85em; background-color: rgba(0, 242, 254, 0.05); border-left: 3px solid #00f2fe; padding: 10px; border-radius: 4px;">
+                    <strong style="color: #00f2fe;"><i class="fas fa-book-open"></i> Fuentes normativas consultadas:</strong>
+                    <ul style="margin-top: 8px; margin-bottom: 0; padding-left: 20px; color: #bbb;">
+            `;
+            
+            data.fuentes.forEach(fuente => {
+                htmlFuentes += `
+                    <li style="margin-bottom: 8px;">
+                        <strong style="color: #ddd;">${fuente.origen} (Pág. ${fuente.pagina})</strong><br>
+                        <i style="color: #888;">"${fuente.fragmento.trim()}"</i>
+                    </li>
+                `;
+            });
+            
+            htmlFuentes += `</ul></div>`;
+            respuestaFormateada += htmlFuentes;
+        }
+  
+
         document.getElementById(loadingId).outerHTML = `
             <div class="message bot">
                 <div class="avatar"><i class="fas fa-robot"></i></div>
