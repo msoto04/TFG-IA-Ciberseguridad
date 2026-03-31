@@ -258,17 +258,31 @@ function initCharts() {
 }
 
 function updateCharts(score, severities) {
- 
+    const c = severities.ERROR || 0;
+    const m = severities.WARNING || 0;
+    const b = severities.INFO || 0;
+
+    let fConf = (c * 0.35) + (m * 0.15) + (b * 0.05);
+    let fInt  = (c * 0.40) + (m * 0.20) + (b * 0.05);
+    let fTraz = (c * 0.10) + (m * 0.25) + (b * 0.15);
+    let fAut  = (c * 0.30) + (m * 0.10) + (b * 0.05);
+    let fDisp = (c * 0.25) + (m * 0.15) + (b * 0.10);
+
     if (auditChartRadar) {
-        auditChartRadar.data.datasets[0].data = [score, Math.max(0, score-10), Math.min(100, score+5), Math.max(0, score-5), score];
+        auditChartRadar.data.datasets[0].data = [
+            Math.round(100 * Math.exp(-fConf)),
+            Math.round(100 * Math.exp(-fInt)),
+            Math.round(100 * Math.exp(-fTraz)),
+            Math.round(100 * Math.exp(-fAut)),
+            Math.round(100 * Math.exp(-fDisp))
+        ];
         auditChartRadar.update();
     }
     
     if (auditChartDoughnut) {
-        auditChartDoughnut.data.datasets[0].data = [severities.ERROR || 0, severities.WARNING || 0, severities.INFO || 0];
+        auditChartDoughnut.data.datasets[0].data = [c, m, b];
         auditChartDoughnut.update();
     }
-    
 }
 
 async function generarPDF() {
@@ -427,13 +441,19 @@ async function loadHistory() {
             dashScore.innerText = `${scoreGlobal} / 100 (Media)`;
         }
 
+        let fConfG = (globalCriticas * 0.35) + (globalMedias * 0.15) + (globalBajas * 0.05);
+        let fIntG  = (globalCriticas * 0.40) + (globalMedias * 0.20) + (globalBajas * 0.05);
+        let fTrazG = (globalCriticas * 0.10) + (globalMedias * 0.25) + (globalBajas * 0.15);
+        let fAutG  = (globalCriticas * 0.30) + (globalMedias * 0.10) + (globalBajas * 0.05);
+        let fDispG = (globalCriticas * 0.25) + (globalMedias * 0.15) + (globalBajas * 0.10);
+
         if (typeof chartRadar !== 'undefined' && chartRadar !== null) {
             chartRadar.data.datasets[0].data = [
-                scoreGlobal, 
-                Math.max(0, scoreGlobal - 10), 
-                Math.min(100, scoreGlobal + 5), 
-                Math.max(0, scoreGlobal - 5), 
-                scoreGlobal
+                Math.round(100 * Math.exp(-fConfG)),
+                Math.round(100 * Math.exp(-fIntG)),
+                Math.round(100 * Math.exp(-fTrazG)),
+                Math.round(100 * Math.exp(-fAutG)),
+                Math.round(100 * Math.exp(-fDispG))
             ];
             chartRadar.update();
         }
@@ -666,19 +686,20 @@ async function cargarAuditoriaPasada(auditId) {
                 chartDoughnut.update();
             }
 
-            let confidencialidad = Math.max(0, 100 - (criticas * 20) - (medias * 5));
-            let integridad = Math.max(0, 100 - (criticas * 15) - (medias * 10));
-            let disponibilidad = Math.max(0, 100 - (criticas * 10) - (medias * 5) - (bajas * 2));
-            let trazabilidad = Math.max(0, 100 - (medias * 5) - (bajas * 5));
-            let legalidad = Math.max(0, 100 - (criticas * 25) - (medias * 10) - (bajas * 5));
+
+            let fConf = (criticas * 0.35) + (medias * 0.15) + (bajas * 0.05);
+            let fInt  = (criticas * 0.40) + (medias * 0.20) + (bajas * 0.05);
+            let fTraz = (criticas * 0.10) + (medias * 0.25) + (bajas * 0.15);
+            let fAut  = (criticas * 0.30) + (medias * 0.10) + (bajas * 0.05);
+            let fDisp = (criticas * 0.25) + (medias * 0.15) + (bajas * 0.10);
 
             if (typeof chartRadar !== 'undefined' && chartRadar !== null) {
                 chartRadar.data.datasets[0].data = [
-                    confidencialidad,
-                    integridad,
-                    disponibilidad,
-                    trazabilidad,
-                    legalidad
+                    Math.round(100 * Math.exp(-fConf)), // Confidencialidad
+                    Math.round(100 * Math.exp(-fInt)),  // Integridad
+                    Math.round(100 * Math.exp(-fTraz)), // Trazabilidad
+                    Math.round(100 * Math.exp(-fAut)),  // Autenticidad
+                    Math.round(100 * Math.exp(-fDisp))  // Disponibilidad
                 ];
                 chartRadar.update();
             }
