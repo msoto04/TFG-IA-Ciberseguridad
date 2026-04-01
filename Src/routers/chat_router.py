@@ -105,7 +105,7 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str):
         try:
             await websocket.close()
         except Exception as e:
-           
+
             pass
 
 
