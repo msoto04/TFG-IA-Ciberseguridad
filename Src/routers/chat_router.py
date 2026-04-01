@@ -5,9 +5,9 @@ import redis.asyncio as redis_async
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
-from Src.database import SessionLocal
-from Src.models import Usuario, Auditoria
-from Src.config import settings
+from Src.core.database import SessionLocal
+from Src.db_models.models import Usuario, Auditoria
+from Src.core.config import settings
 
 
 from langchain_community.chat_models import ChatOllama

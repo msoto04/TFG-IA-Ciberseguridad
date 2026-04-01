@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 
-from Src.database import engine, Base, SessionLocal
+from Src.core.database import engine, Base, SessionLocal
 from Src.routers.auth_router import router as auth_router
 from Src.routers.audit_router import router as audit_router
 from Src.routers.chat_router import router as chat_router
@@ -41,7 +41,7 @@ EXTRACT_DIR = os.getenv("EXTRACT_DIR", "/app/auditoria_temp")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("app.log"), logging.StreamHandler()],
+    handlers=[logging.FileHandler("data/app.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger("SecureAudit_API")
 

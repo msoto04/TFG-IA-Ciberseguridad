@@ -14,7 +14,7 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 120
 
     # Base de Datos
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./secureaudit.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./data/secureaudit.db")
 
     # Redis para Celery/WebSockets
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://redis:6379/0")

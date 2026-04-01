@@ -3,11 +3,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 import jwt
 
-from Src.database import SessionLocal
-from Src.models import Usuario
-from Src.auth import get_password_hash, verificar_password, crear_token_acceso
+from Src.core.database import SessionLocal
+from Src.db_models.models import Usuario
+from Src.core.auth import get_password_hash, verificar_password, crear_token_acceso
 
-from Src.config import settings
+from Src.core.config import settings
 
 router = APIRouter(tags=["Autenticación"])
 

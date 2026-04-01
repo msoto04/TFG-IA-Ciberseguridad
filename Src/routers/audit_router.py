@@ -5,10 +5,10 @@ import aiofiles
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
-from Src.database import SessionLocal
-from Src.models import Auditoria, Usuario
+from Src.core.database import SessionLocal
+from Src.db_models.models import Auditoria, Usuario
 from Src.routers.auth_router import obtener_usuario_actual
-from Src.celery_worker import procesar_auditoria_task
+from Src.workers.celery_worker import procesar_auditoria_task
 
 
 logger = logging.getLogger(__name__)

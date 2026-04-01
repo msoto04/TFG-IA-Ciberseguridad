@@ -1,7 +1,7 @@
 import os
 import json
-from Src.sast_scanner import ejecutar_sast_profesional
-from Src.orquestador import app
+from Src.security_tools.sast_scanner import ejecutar_sast_profesional
+from Src.ai_engine.orquestador import app
 
 
 def ejecutar_auditoria_completa(ruta):

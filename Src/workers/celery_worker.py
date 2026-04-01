@@ -6,10 +6,10 @@ import redis
 from celery import Celery
 from celery.utils.log import get_task_logger
 
-from Src.database import SessionLocal
-from Src.models import Vulnerabilidad
-from Src.sast_scanner import ejecutar_sast_profesional
-from Src.orquestador import app as grafo_agentes
+from Src.core.database import SessionLocal
+from Src.db_models.models import Vulnerabilidad
+from Src.security_tools.sast_scanner import ejecutar_sast_profesional
+from Src.ai_engine.orquestador import app as grafo_agentes
 
 
 logger = get_task_logger(__name__)
