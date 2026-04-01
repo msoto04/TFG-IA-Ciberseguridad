@@ -38,7 +38,11 @@ bcrypt==3.2.2
 semgrep
 python-multipart
 
-
+# --- Calidad de Código y Pruebas (QA/CI) ---
+pytest==8.0.0
+httpx>=0.27.0
+black==24.2.0
+ruff==0.2.0
 
 
 
