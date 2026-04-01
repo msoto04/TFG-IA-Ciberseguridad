@@ -40,6 +40,8 @@ class Vulnerabilidad(Base):
     codigo_afectado = Column(String, nullable=True)    # Fragmento de código vulnerable
     referencias_legales = Column(String, nullable=True) # Fuentes normativas (FAISS) usadas por la IA
 
+    consulta_index = Column(String, nullable=True)
+
     modelo_llm = Column(String, nullable=True)         # Modelo LLM que tomó la decisión
     regla_semgrep = Column(String, nullable=True)      # Regla completa del motor SAST
 

@@ -86,14 +86,21 @@ def procesar_auditoria_task(self, audit_id, zip_path, work_dir, file_name, usuar
             except Exception:
                 h['codigo_completo'] = "Contenido no disponible"
          
+            # --- INICIALIZAMOS LAS VARIABLES ANTES DEL TRY ---
+            analisis = "Sin análisis"
+            referencias = "Sin referencias"
+            consulta_real = "Desconocida"
+
             try:
                 respuesta = grafo_agentes.invoke({"hallazgos_tecnicos": [h], "tiempos": {}})
                 analisis = respuesta.get('veredicto_final', 'Sin análisis')
                 referencias = respuesta.get('referencias_legales', 'Sin referencias')
+                consulta_real = respuesta.get('consulta_index', 'Desconocida') # <-- ¡Esta es la línea que faltaba!
             except Exception as e:
                 logger.warning(f"[{audit_id}] Error en IA al analizar hallazgo {i+1}: {str(e)}")
                 analisis = f"Error en IA: {str(e)}"
                 referencias = "Error al procesar referencias"
+                consulta_real = "Error en consulta" 
 
             nueva_vuln = Vulnerabilidad(
                 auditoria_id=audit_id,
@@ -105,7 +112,8 @@ def procesar_auditoria_task(self, audit_id, zip_path, work_dir, file_name, usuar
                 referencias_legales=referencias,                   
                 analisis_legal=analisis,
                 modelo_llm=os.getenv("MODELO_ORQUESTADOR", "llama3.2:3b"),
-                regla_semgrep=h.get('regla_semgrep', 'Desconocida')
+                regla_semgrep=h.get('regla_semgrep', 'Desconocida'),
+                consulta_index=consulta_real
             )
             db.add(nueva_vuln)
             

@@ -33,6 +33,7 @@ class AuditoriaState(TypedDict):
     articulos_legales: str
     veredicto_final: str
     referencias_legales: str  
+    consulta_index: str
     tiempos: dict
 
 def agente_tecnico(state: AuditoriaState):
@@ -148,6 +149,7 @@ Devuelve tu respuesta ESTRICTAMENTE en formato JSON válido con las siguientes c
     return {
         "veredicto_final": veredicto, 
         "referencias_legales": citas_finales,
+        "consulta_index": vulnerabilidad_real,
         "tiempos": tiempos
     }
 
