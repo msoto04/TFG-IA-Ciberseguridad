@@ -36,8 +36,10 @@ jobs:
     - name: Análisis estático (Ruff Linter)
       run: ruff check .
 
-    - name: Ejecutar Pruebas Unitarias (Pytest)
+    - name: 🧪 Ejecutar Pruebas Unitarias (Pytest)
       env:
         PYTHONPATH: .
         REDIS_URL: redis://localhost:6379/0
+        UPLOAD_DIR: ./uploads
+        EXTRACT_DIR: ./auditoria_temp
       run: pytest tests/
