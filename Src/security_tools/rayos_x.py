@@ -2,7 +2,6 @@ import os
 from langchain_community.vectorstores import FAISS
 from langchain_ollama import OllamaEmbeddings
 
-
 os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 

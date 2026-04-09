@@ -37,18 +37,18 @@ def agente_tecnico(state: AuditoriaState):
     inicio = time.time()
     logger.info("--- [AGENTE TÉCNICO] Analizando fallo de código... ---")
 
-    
     modelo_seleccionado = state.get("modelo_ia", MODELO_ORQUESTADOR)
     temp_seleccionada = state.get("temperatura", 0.0)
-    
 
-    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL)
+    llm_dinamico = ChatOllama(
+        model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL
+    )
 
     hallazgo = state["hallazgos_tecnicos"][0]
     prompt = f"Explica brevemente el riesgo técnico de la vulnerabilidad '{hallazgo['vulnerabilidad']}' encontrada en el archivo '{hallazgo['archivo']}'. Sé directo y técnico."
 
     try:
-       
+
         respuesta = llm_dinamico.invoke(prompt)
         explicacion = respuesta.content
         logger.info(f"Análisis técnico generado para {hallazgo['vulnerabilidad']}")
@@ -68,14 +68,13 @@ def agente_legal(state: AuditoriaState):
     inicio = time.time()
     logger.info("--- [AGENTE LEGAL / RAG] ---")
 
-
-
-   
     modelo_seleccionado = state.get("modelo_ia", MODELO_ORQUESTADOR)
     temp_seleccionada = state.get("temperatura", 0.0)
-    
-    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL)
-  
+
+    llm_dinamico = ChatOllama(
+        model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL
+    )
+
     h = state["hallazgos_tecnicos"][0]
     vulnerabilidad_real = h.get("vulnerabilidad", "Desconocida")
     codigo_afectado = h.get("codigo_afectado", "No disponible")
@@ -133,9 +132,9 @@ Devuelve tu respuesta ESTRICTAMENTE en formato JSON válido con las siguientes c
 """
 
     try:
-      
+
         respuesta = llm_dinamico.invoke(prompt)
-      
+
         contenido = respuesta.content.strip()
 
         if contenido.startswith("```json"):

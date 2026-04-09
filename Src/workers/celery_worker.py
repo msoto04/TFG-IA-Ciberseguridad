@@ -11,7 +11,6 @@ from Src.db_models.models import Vulnerabilidad
 from Src.security_tools.sast_scanner import ejecutar_sast_profesional
 from Src.ai_engine.orquestador import app as grafo_agentes
 
-
 logger = get_task_logger(__name__)
 
 
@@ -30,7 +29,16 @@ def emitir_progreso(audit_id, mensaje, progreso):
 
 
 @celery_app.task(bind=True, name="procesar_auditoria", max_retries=3)
-def procesar_auditoria_task(self, audit_id, zip_path, work_dir, file_name, usuario_id, modelo_ia="llama3.2:3b", temperatura=0.0):
+def procesar_auditoria_task(
+    self,
+    audit_id,
+    zip_path,
+    work_dir,
+    file_name,
+    usuario_id,
+    modelo_ia="llama3.2:3b",
+    temperatura=0.0,
+):
     logger.info(f"[{audit_id}] Iniciando auditoría para el archivo: {file_name}")
     db = SessionLocal()
 
@@ -114,7 +122,6 @@ def procesar_auditoria_task(self, audit_id, zip_path, work_dir, file_name, usuar
             except Exception:
                 h["codigo_completo"] = "Contenido no disponible"
 
-          
             analisis = "Sin análisis"
             referencias = "Sin referencias"
             consulta_real = "Desconocida"
@@ -122,17 +129,15 @@ def procesar_auditoria_task(self, audit_id, zip_path, work_dir, file_name, usuar
             try:
                 respuesta = grafo_agentes.invoke(
                     {
-                        "hallazgos_tecnicos": [h], 
+                        "hallazgos_tecnicos": [h],
                         "tiempos": {},
                         "modelo_ia": modelo_ia,
-                        "temperatura": float(temperatura)
+                        "temperatura": float(temperatura),
                     }
                 )
                 analisis = respuesta.get("veredicto_final", "Sin análisis")
                 referencias = respuesta.get("referencias_legales", "Sin referencias")
-                consulta_real = respuesta.get(
-                    "consulta_index", "Desconocida"
-                )  
+                consulta_real = respuesta.get("consulta_index", "Desconocida")
             except Exception as e:
                 logger.warning(
                     f"[{audit_id}] Error en IA al analizar hallazgo {i+1}: {str(e)}"

@@ -3,7 +3,6 @@ import json
 import os
 import logging
 
-
 logger = logging.getLogger("SecureAudit_SAST")
 
 
@@ -60,34 +59,44 @@ def ejecutar_sast_profesional(directorio_codigo):
             for resultado in resultados:
                 extra = resultado.get("extra", {})
                 start = resultado.get("start", {})
-                
+
                 archivo_vuln = resultado.get("path", "Desconocido")
                 linea_vuln = start.get("line", 0)
-                
+
                 codigo_real = extra.get("lines", "No disponible")
-              
+
                 try:
-                  
-                    ruta_completa = archivo_vuln if os.path.isabs(archivo_vuln) else os.path.join(directorio_codigo, archivo_vuln)
-                    
+
+                    ruta_completa = (
+                        archivo_vuln
+                        if os.path.isabs(archivo_vuln)
+                        else os.path.join(directorio_codigo, archivo_vuln)
+                    )
+
                     if os.path.exists(ruta_completa) and linea_vuln > 0:
                         with open(ruta_completa, "r", encoding="utf-8") as f:
                             for num_linea, linea_texto in enumerate(f, 1):
                                 if num_linea == linea_vuln:
-                                    codigo_real = linea_texto.strip() 
-                                  
-                                    if "requires login" in codigo_real or codigo_real == "":
-                                        pass 
+                                    codigo_real = linea_texto.strip()
+
+                                    if (
+                                        "requires login" in codigo_real
+                                        or codigo_real == ""
+                                    ):
+                                        pass
                                     break
                 except Exception as e:
-                    logger.warning(f"No se pudo extraer la línea real de {archivo_vuln}: {e}")
+                    logger.warning(
+                        f"No se pudo extraer la línea real de {archivo_vuln}: {e}"
+                    )
 
-              
                 vuln = {
-                    "vulnerabilidad": resultado.get("check_id", "Desconocida").split(".")[-1],
+                    "vulnerabilidad": resultado.get("check_id", "Desconocida").split(
+                        "."
+                    )[-1],
                     "archivo": archivo_vuln,
                     "linea": linea_vuln,
-                    "codigo_afectado": codigo_real, 
+                    "codigo_afectado": codigo_real,
                     "severidad": extra.get("severity", "INFO"),
                     "mensaje": extra.get("message", "Sin descripción"),
                     "regla_semgrep": resultado.get("check_id", "Desconocida"),

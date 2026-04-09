@@ -111,7 +111,9 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str):
 
 
 @router.post("/chat")
-async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener_usuario_actual) ):
+async def chat_rag(
+    request: ChatRequest, current_user: Usuario = Depends(obtener_usuario_actual)
+):
     try:
         logger.info(
             f"Petición Chat RAG recibida. Modelo: {request.modelo}, Temperatura: {request.temperature}"
@@ -134,8 +136,7 @@ async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener
             model=request.modelo, temperature=request.temperature, base_url=OLLAMA_URL
         )
 
-        prompt_template = ChatPromptTemplate.from_template(
-            """
+        prompt_template = ChatPromptTemplate.from_template("""
             Eres un Auditor IA Jefe experto en Ciberseguridad y normativas legales.
 
             CONTEXTO RECUPERADO DE LOS DOCUMENTOS:
@@ -149,8 +150,7 @@ async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener
 
             PREGUNTA DEL USUARIO:
             {input}
-            """
-        )
+            """)
 
         document_chain = create_stuff_documents_chain(llm_dinamico, prompt_template)
         retriever = vector_db.as_retriever(search_kwargs={"k": 10})
