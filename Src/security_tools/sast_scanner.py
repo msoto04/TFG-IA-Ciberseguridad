@@ -68,9 +68,7 @@ def ejecutar_sast_profesional(directorio_codigo):
                 try:
 
                     ruta_completa = (
-                        archivo_vuln
-                        if os.path.isabs(archivo_vuln)
-                        else os.path.join(directorio_codigo, archivo_vuln)
+                        archivo_vuln if os.path.isabs(archivo_vuln) else os.path.join(directorio_codigo, archivo_vuln)
                     )
 
                     if os.path.exists(ruta_completa) and linea_vuln > 0:
@@ -79,21 +77,14 @@ def ejecutar_sast_profesional(directorio_codigo):
                                 if num_linea == linea_vuln:
                                     codigo_real = linea_texto.strip()
 
-                                    if (
-                                        "requires login" in codigo_real
-                                        or codigo_real == ""
-                                    ):
+                                    if "requires login" in codigo_real or codigo_real == "":
                                         pass
                                     break
                 except Exception as e:
-                    logger.warning(
-                        f"No se pudo extraer la línea real de {archivo_vuln}: {e}"
-                    )
+                    logger.warning(f"No se pudo extraer la línea real de {archivo_vuln}: {e}")
 
                 vuln = {
-                    "vulnerabilidad": resultado.get("check_id", "Desconocida").split(
-                        "."
-                    )[-1],
+                    "vulnerabilidad": resultado.get("check_id", "Desconocida").split(".")[-1],
                     "archivo": archivo_vuln,
                     "linea": linea_vuln,
                     "codigo_afectado": codigo_real,
@@ -103,9 +94,7 @@ def ejecutar_sast_profesional(directorio_codigo):
                 }
                 hallazgos_limpios.append(vuln)
 
-            logger.info(
-                f"Escaneo SAST completado. Se encontraron {len(hallazgos_limpios)} vulnerabilidades."
-            )
+            logger.info(f"Escaneo SAST completado. Se encontraron {len(hallazgos_limpios)} vulnerabilidades.")
             return hallazgos_limpios
 
         else:

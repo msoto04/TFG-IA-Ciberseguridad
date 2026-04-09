@@ -25,9 +25,7 @@ class Auditoria(Base):
 
     propietario = relationship("Usuario", back_populates="auditorias")
 
-    vulnerabilidades = relationship(
-        "Vulnerabilidad", back_populates="auditoria", cascade="all, delete-orphan"
-    )
+    vulnerabilidades = relationship("Vulnerabilidad", back_populates="auditoria", cascade="all, delete-orphan")
 
 
 class Vulnerabilidad(Base):
@@ -41,9 +39,7 @@ class Vulnerabilidad(Base):
 
     linea = Column(Integer, nullable=True)  # Línea exacta del fallo
     codigo_afectado = Column(String, nullable=True)  # Fragmento de código vulnerable
-    referencias_legales = Column(
-        String, nullable=True
-    )  # Fuentes normativas (FAISS) usadas por la IA
+    referencias_legales = Column(String, nullable=True)  # Fuentes normativas (FAISS) usadas por la IA
 
     consulta_index = Column(String, nullable=True)
 

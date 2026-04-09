@@ -39,9 +39,7 @@ async def auditar_zip(
 ):
 
     if not file.filename.lower().endswith(".zip"):
-        raise HTTPException(
-            status_code=400, detail="Rechazado: El archivo debe tener extensión .zip"
-        )
+        raise HTTPException(status_code=400, detail="Rechazado: El archivo debe tener extensión .zip")
 
     if file.content_type not in [
         "application/zip",
@@ -84,9 +82,7 @@ async def auditar_zip(
         if os.path.exists(zip_path):
             os.remove(zip_path)
         logger.error(f"Error procesando la subida del ZIP: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail="Error interno al procesar el archivo."
-        )
+        raise HTTPException(status_code=500, detail="Error interno al procesar el archivo.")
 
     nueva_auditoria = Auditoria(
         id=audit_id,
@@ -159,10 +155,7 @@ def obtener_historial(
 ):
 
     auditorias = (
-        db.query(Auditoria)
-        .filter(Auditoria.usuario_id == current_user.id)
-        .order_by(Auditoria.fecha.desc())
-        .all()
+        db.query(Auditoria).filter(Auditoria.usuario_id == current_user.id).order_by(Auditoria.fecha.desc()).all()
     )
 
     resultados = []

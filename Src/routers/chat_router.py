@@ -59,9 +59,7 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str):
 
     try:
 
-        payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email = payload.get("sub")
         if email is None:
             await websocket.close(code=1008)
@@ -111,20 +109,14 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str):
 
 
 @router.post("/chat")
-async def chat_rag(
-    request: ChatRequest, current_user: Usuario = Depends(obtener_usuario_actual)
-):
+async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener_usuario_actual)):
     try:
-        logger.info(
-            f"Petición Chat RAG recibida. Modelo: {request.modelo}, Temperatura: {request.temperature}"
-        )
+        logger.info(f"Petición Chat RAG recibida. Modelo: {request.modelo}, Temperatura: {request.temperature}")
 
         embeddings = OllamaEmbeddings(model="mxbai-embed-large", base_url=OLLAMA_URL)
 
         try:
-            vector_db = FAISS.load_local(
-                FAISS_PATH, embeddings, allow_dangerous_deserialization=True
-            )
+            vector_db = FAISS.load_local(FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
         except Exception as e:
             logger.error(f"Error cargando FAISS: {e}")
             raise HTTPException(
@@ -132,9 +124,7 @@ async def chat_rag(
                 detail="Error: No encuentro la base de conocimientos (FAISS).",
             )
 
-        llm_dinamico = ChatOllama(
-            model=request.modelo, temperature=request.temperature, base_url=OLLAMA_URL
-        )
+        llm_dinamico = ChatOllama(model=request.modelo, temperature=request.temperature, base_url=OLLAMA_URL)
 
         prompt_template = ChatPromptTemplate.from_template("""
             Eres un Auditor IA Jefe experto en Ciberseguridad y normativas legales.
@@ -156,9 +146,7 @@ async def chat_rag(
         retriever = vector_db.as_retriever(search_kwargs={"k": 10})
         rag_chain = create_retrieval_chain(retriever, document_chain)
 
-        respuesta = await asyncio.to_thread(
-            rag_chain.invoke, {"input": request.mensaje}
-        )
+        respuesta = await asyncio.to_thread(rag_chain.invoke, {"input": request.mensaje})
 
         logger.info("Respuesta del chat generada con éxito.")
 

@@ -40,9 +40,7 @@ def obtener_usuario_actual(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="No autenticado")
 
     try:
-        payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
             raise HTTPException(status_code=401, detail="Token inválido")

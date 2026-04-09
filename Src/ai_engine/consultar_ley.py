@@ -12,9 +12,7 @@ def consultar_ens():
     embeddings = OllamaEmbeddings(model="mxbai-embed-large")
 
     print("Cargando base de datos FAISS...")
-    vector_db = FAISS.load_local(
-        db_path, embeddings, allow_dangerous_deserialization=True
-    )
+    vector_db = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
 
     pregunta = "Artículo 1. Objeto del Esquema Nacional de Seguridad"
 

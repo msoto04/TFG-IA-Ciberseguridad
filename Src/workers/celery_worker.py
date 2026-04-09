@@ -43,44 +43,29 @@ def procesar_auditoria_task(
     db = SessionLocal()
 
     try:
-        emitir_progreso(
-            audit_id, "Descomprimiendo y analizando seguridad del ZIP...", 5
-        )
+        emitir_progreso(audit_id, "Descomprimiendo y analizando seguridad del ZIP...", 5)
 
         MAX_UNCOMPRESSED_SIZE = 400 * 1024 * 1024
         total_extracted_size = 0
 
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             for zip_info in zip_ref.infolist():
-                if (
-                    zip_info.filename.count("/") > 10
-                    or zip_info.filename.count("\\") > 10
-                ):
-                    raise ValueError(
-                        f"Estructura demasiado profunda rechazada: {zip_info.filename}"
-                    )
+                if zip_info.filename.count("/") > 10 or zip_info.filename.count("\\") > 10:
+                    raise ValueError(f"Estructura demasiado profunda rechazada: {zip_info.filename}")
 
                 if (zip_info.external_attr >> 16) & 0o120000 == 0o120000:
-                    raise ValueError(
-                        f"Enlaces simbólicos bloqueados por seguridad: {zip_info.filename}"
-                    )
+                    raise ValueError(f"Enlaces simbólicos bloqueados por seguridad: {zip_info.filename}")
                 if zip_info.file_size > MAX_UNCOMPRESSED_SIZE:
-                    raise ValueError(
-                        f"Archivo sospechoso detectado (demasiado grande): {zip_info.filename}"
-                    )
+                    raise ValueError(f"Archivo sospechoso detectado (demasiado grande): {zip_info.filename}")
 
                 total_extracted_size += zip_info.file_size
                 if total_extracted_size > MAX_UNCOMPRESSED_SIZE:
-                    raise ValueError(
-                        "Ataque de Zip Bomb detectado: El tamaño total supera el límite seguro."
-                    )
+                    raise ValueError("Ataque de Zip Bomb detectado: El tamaño total supera el límite seguro.")
 
                 target_path = os.path.abspath(os.path.join(work_dir, zip_info.filename))
 
                 if not target_path.startswith(os.path.abspath(work_dir)):
-                    raise ValueError(
-                        f"Ataque de Path Traversal bloqueado: {zip_info.filename}"
-                    )
+                    raise ValueError(f"Ataque de Path Traversal bloqueado: {zip_info.filename}")
 
                 zip_ref.extract(zip_info, work_dir)
 
@@ -88,24 +73,16 @@ def procesar_auditoria_task(
             os.remove(zip_path)
 
         logger.info(f"[{audit_id}] ZIP extraído con éxito. Iniciando escáner SAST.")
-        emitir_progreso(
-            audit_id, "Archivos extraídos de forma segura. Iniciando escáner...", 10
-        )
+        emitir_progreso(audit_id, "Archivos extraídos de forma segura. Iniciando escáner...", 10)
 
         hallazgos = ejecutar_sast_profesional(work_dir)
 
         if not hallazgos:
-            logger.info(
-                f"[{audit_id}] No se encontraron vulnerabilidades. Código seguro."
-            )
-            emitir_progreso(
-                audit_id, "No se encontraron vulnerabilidades. Código seguro.", 100
-            )
+            logger.info(f"[{audit_id}] No se encontraron vulnerabilidades. Código seguro.")
+            emitir_progreso(audit_id, "No se encontraron vulnerabilidades. Código seguro.", 100)
             return
 
-        logger.info(
-            f"[{audit_id}] Se encontraron {len(hallazgos)} vulnerabilidades. Iniciando análisis IA."
-        )
+        logger.info(f"[{audit_id}] Se encontraron {len(hallazgos)} vulnerabilidades. Iniciando análisis IA.")
 
         for i, h in enumerate(hallazgos):
             progreso_actual = 10 + int((i / len(hallazgos)) * 55)
@@ -139,9 +116,7 @@ def procesar_auditoria_task(
                 referencias = respuesta.get("referencias_legales", "Sin referencias")
                 consulta_real = respuesta.get("consulta_index", "Desconocida")
             except Exception as e:
-                logger.warning(
-                    f"[{audit_id}] Error en IA al analizar hallazgo {i+1}: {str(e)}"
-                )
+                logger.warning(f"[{audit_id}] Error en IA al analizar hallazgo {i+1}: {str(e)}")
                 analisis = f"Error en IA: {str(e)}"
                 referencias = "Error al procesar referencias"
                 consulta_real = "Error en consulta"
@@ -182,9 +157,7 @@ def procesar_auditoria_task(
             )
             self.retry(exc=e, countdown=tiempo_espera)
         except self.MaxRetriesExceededError:
-            logger.error(
-                f"[{audit_id}] Se agotaron los 3 reintentos. Abortando auditoría."
-            )
+            logger.error(f"[{audit_id}] Se agotaron los 3 reintentos. Abortando auditoría.")
             emitir_progreso(audit_id, f"Error crítico tras 3 reintentos: {str(e)}", -1)
 
     finally:

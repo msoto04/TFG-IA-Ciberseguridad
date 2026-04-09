@@ -14,9 +14,7 @@ def test_ollama():
     except requests.exceptions.Timeout:
         print("ERROR: El modelo tardó demasiado en responder. ¿Tienes suficiente RAM?")
     except requests.exceptions.ConnectionError:
-        print(
-            "ERROR: No se pudo conectar. ¿Está el icono de la ovejita de Ollama abierto?"
-        )
+        print("ERROR: No se pudo conectar. ¿Está el icono de la ovejita de Ollama abierto?")
     except Exception as e:
         print(f"ERROR inesperado: {e}")
 

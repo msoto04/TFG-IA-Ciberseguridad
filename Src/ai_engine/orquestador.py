@@ -40,9 +40,7 @@ def agente_tecnico(state: AuditoriaState):
     modelo_seleccionado = state.get("modelo_ia", MODELO_ORQUESTADOR)
     temp_seleccionada = state.get("temperatura", 0.0)
 
-    llm_dinamico = ChatOllama(
-        model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL
-    )
+    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL)
 
     hallazgo = state["hallazgos_tecnicos"][0]
     prompt = f"Explica brevemente el riesgo técnico de la vulnerabilidad '{hallazgo['vulnerabilidad']}' encontrada en el archivo '{hallazgo['archivo']}'. Sé directo y técnico."
@@ -71,9 +69,7 @@ def agente_legal(state: AuditoriaState):
     modelo_seleccionado = state.get("modelo_ia", MODELO_ORQUESTADOR)
     temp_seleccionada = state.get("temperatura", 0.0)
 
-    llm_dinamico = ChatOllama(
-        model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL
-    )
+    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL)
 
     h = state["hallazgos_tecnicos"][0]
     vulnerabilidad_real = h.get("vulnerabilidad", "Desconocida")
@@ -85,9 +81,7 @@ def agente_legal(state: AuditoriaState):
     referencias_encontradas = []
 
     try:
-        vectorstore = FAISS.load_local(
-            DB_PATH, embeddings, allow_dangerous_deserialization=True
-        )
+        vectorstore = FAISS.load_local(DB_PATH, embeddings, allow_dangerous_deserialization=True)
         retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
         docs = retriever.invoke(vulnerabilidad_real)
 
@@ -102,9 +96,7 @@ def agente_legal(state: AuditoriaState):
                 ref_str = f"Documento: {fuente_corta} (Pág {pagina})"
                 referencias_encontradas.append(ref_str)
 
-                contexto_fragmentos.append(
-                    f"--- REFERENCIA {i+1} ({ref_str}) ---\n{doc.page_content}"
-                )
+                contexto_fragmentos.append(f"--- REFERENCIA {i+1} ({ref_str}) ---\n{doc.page_content}")
 
             contexto_texto = "\n\n".join(contexto_fragmentos)
             referencias_encontradas = list(set(referencias_encontradas))
@@ -158,11 +150,7 @@ Devuelve tu respuesta ESTRICTAMENTE en formato JSON válido con las siguientes c
     except Exception as e:
         logger.error(f"Fallo parseando JSON del LLM: {e}")
         veredicto = f"**Análisis (Recuperado en crudo):**\n{contenido}"
-        citas_finales = (
-            ", ".join(referencias_encontradas)
-            if referencias_encontradas
-            else "Sin referencias claras"
-        )
+        citas_finales = ", ".join(referencias_encontradas) if referencias_encontradas else "Sin referencias claras"
 
     fin = time.time()
     tiempos = state.get("tiempos", {})

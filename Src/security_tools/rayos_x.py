@@ -11,9 +11,7 @@ def ver_memoria():
     db_path = "D:/TFG_Ciberseguridad/faiss_index"
 
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
-    vector_db = FAISS.load_local(
-        db_path, embeddings, allow_dangerous_deserialization=True
-    )
+    vector_db = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
 
     pregunta = "¿Qué es la vulnerabilidad A03 del OWASP Top 10?"
     print(f"\nBuscando en los PDFs: {pregunta}")

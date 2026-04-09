@@ -35,9 +35,7 @@ def crear_base_datos():
                 loader = PyMuPDFLoader(ruta)
                 docs = loader.load()
                 caracteres = sum(len(d.page_content) for d in docs)
-                print(
-                    f"EXITO: Leídas {len(docs)} páginas, {caracteres} caracteres extraídos."
-                )
+                print(f"EXITO: Leídas {len(docs)} páginas, {caracteres} caracteres extraídos.")
                 documentos_totales.extend(docs)
             except Exception as e:
                 print(f"ERROR al leer PDF {archivo}: {e}")
@@ -56,9 +54,7 @@ def crear_base_datos():
                 caracteres = sum(len(d.page_content) for d in docs)
 
                 if caracteres == 0:
-                    print(
-                        f"ERROR CRTICO: El archivo {archivo} está vacio (0 caracteres) para la IA."
-                    )
+                    print(f"ERROR CRTICO: El archivo {archivo} está vacio (0 caracteres) para la IA.")
                 else:
                     print(f"ÉXITO: {caracteres} caracteres extraidos perfectamente.")
 
@@ -70,9 +66,7 @@ def crear_base_datos():
             print(f"Omitiendo archivo no soportado o extensión oculta: {archivo}")
 
     if not documentos_totales:
-        print(
-            "\nERROR FATAL: No se ha podido extraer texto de NINGÚN archivo. Abortando."
-        )
+        print("\nERROR FATAL: No se ha podido extraer texto de NINGÚN archivo. Abortando.")
         sys.exit(1)
 
     print("\nCortando texto en fragmentos...")
