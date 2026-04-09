@@ -20,11 +20,18 @@ async function enviarMensaje() {
     if (!txt) return; 
 
    
-    history.innerHTML += `
-        <div class="message user">
-            <div class="text">${txt}</div>
-        </div>
-    `;
+  
+    const userMsgDiv = document.createElement('div');
+    userMsgDiv.className = 'message user';
+    
+    // Crear contenedor del texto de forma segura
+    const textDiv = document.createElement('div');
+    textDiv.className = 'text';
+    textDiv.textContent = txt; 
+    
+   
+    userMsgDiv.appendChild(textDiv);
+    history.appendChild(userMsgDiv);
     
    
     input.value = '';

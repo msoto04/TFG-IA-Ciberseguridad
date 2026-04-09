@@ -32,7 +32,7 @@ El contenedor de Docker se conectará al Ollama de tu máquina anfitriona.
 
 &nbsp;  `ollama run llama3.1:8b` (Modelo principal)
 
-&nbsp;  `ollama run nomic-embed-text` (Modelo de embeddings para el RAG)
+&nbsp;  `ollama run mxbai-embed-large` (Modelo de embeddings para el RAG)
 
 
 
@@ -51,7 +51,7 @@ Abre una terminal en la raíz de este proyecto (donde está el archivo docker-co
 Abre tu navegador web y ve a la ruta donde esta el archivo `index.html` (Frontend/index.html) para ver la interfaz, o ve directamente a la API en `http://localhost:8000`.
 
 
-
+Nota: Antes de la primera auditoría, ejecuta el script de ingesta para crear la base de datos legal: python Src/ai_engine/ingesta_vectores.py
 
 
 ## Arquitectura RAG y Modelos de Inteligencia Artificial

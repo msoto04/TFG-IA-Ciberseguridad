@@ -39,7 +39,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     try {
    
        
-        const token = localStorage.getItem('jwt_token');
+        //const token = localStorage.getItem('jwt_token');
 
       
         const res = await fetch('/auditar-zip', { 

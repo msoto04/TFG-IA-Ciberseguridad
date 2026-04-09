@@ -4,7 +4,8 @@ import asyncio
 import redis.asyncio as redis_async
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
-
+from fastapi import Depends
+from Src.routers.auth_router import obtener_usuario_actual
 from Src.core.database import SessionLocal
 from Src.db_models.models import Usuario, Auditoria
 from Src.core.config import settings
@@ -110,7 +111,7 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str):
 
 
 @router.post("/chat")
-async def chat_rag(request: ChatRequest):
+async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener_usuario_actual) ):
     try:
         logger.info(
             f"Petición Chat RAG recibida. Modelo: {request.modelo}, Temperatura: {request.temperature}"

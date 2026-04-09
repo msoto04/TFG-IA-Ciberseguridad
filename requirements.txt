@@ -36,7 +36,7 @@ bcrypt==3.2.2
 
 # --- Análisis Estático de Código ---
 semgrep
-python-multipart
+
 
 # --- Calidad de Código y Pruebas (QA/CI) ---
 pytest==8.0.0

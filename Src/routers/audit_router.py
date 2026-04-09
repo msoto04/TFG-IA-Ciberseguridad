@@ -2,7 +2,7 @@ import os
 import uuid
 import logging
 import aiofiles
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
 from Src.core.database import SessionLocal
@@ -33,6 +33,8 @@ def get_db():
 @router.post("/auditar-zip")
 async def auditar_zip(
     file: UploadFile = File(...),
+    modelo_ia: str = Form("llama3.2:3b"),  
+    temperatura: float = Form(0.0),        
     current_user: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db),
 ):
@@ -96,8 +98,10 @@ async def auditar_zip(
     db.add(nueva_auditoria)
     db.commit()
 
+
     procesar_auditoria_task.apply_async(
-        args=[audit_id, zip_path, work_dir, file.filename, current_user.id], countdown=2
+        args=[audit_id, zip_path, work_dir, file.filename, current_user.id, modelo_ia, temperatura], 
+        countdown=2
     )
 
     return {"estado": "Procesando", "audit_id": audit_id}
