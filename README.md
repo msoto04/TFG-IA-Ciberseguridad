@@ -1,77 +1,63 @@
-Este proyecto consiste en una plataforma de auditoría de ciberseguridad que combina análisis estático de código (SAST) con un sistema RAG (Generación Aumentada por Recuperación) para consultar la normativa de seguridad.
+Aquí tienes el archivo README.md actualizado con las instrucciones precisas sobre el comando de ejecución y la advertencia crucial sobre la espera en la terminal.
 
+Está listo para copiar, pegar y lucir en tu repositorio:
 
+SECUREAUDIT ENS | Plataforma de Auditoría de Ciberseguridad AI
+Esta plataforma combina el análisis estático de código (SAST) con un sistema de Inteligencia Artificial Soberana (RAG) para auditar software bajo el marco del Esquema Nacional de Seguridad (ENS).
 
-Todo el procesamiento de Inteligencia Artificial se realiza de forma local utilizando modelos de la familia Llama, garantizando que el código y los datos auditados no salgan del equipo.
+Todo el procesamiento se realiza de forma 100% local, garantizando la privacidad del código fuente y los datos auditados.
 
+Instalación y Puesta en Marcha
+Gracias a la arquitectura de contenedores, la plataforma se despliega con una intervención mínima.
 
+1. Requisitos Previos
+Docker Desktop (con Docker Compose).
 
-\## Requisitos Previos
+Ollama instalado y ejecutándose en la máquina anfitriona.
 
+2. Preparar los Modelos de IA (Ollama)
+Antes de arrancar la aplicación, asegúrate de tener descargados los modelos necesarios ejecutando estos comandos en tu terminal:
 
+Bash
+ollama run llama3.1:8b          # Modelo de razonamiento experto
+ollama run mxbai-embed-large   # Modelo de embeddings para normativa ENS
 
-Para ejecutar este proyecto en tu máquina, necesitas tener instalados:
+3. Configuración del Entorno
+Copia el archivo de ejemplo: cp .env.example .env
 
-1\. Docker Desktop (para levantar el backend, Redis, los workers y la base de datos vectorial de forma aislada).
+(Opcional) Revisa los valores en .env, aunque los valores por defecto están optimizados para el entorno Docker.
 
-2\. Ollama (para ejecutar los modelos de IA localmente).
+4. Despliegue y Ejecución
+Desde la raíz del proyecto, ejecuta el siguiente comando para construir y levantar todos los servicios:
 
+Bash
+docker-compose up --build
+[!IMPORTANTE]
+⚠️ NOTA CRÍTICA SOBRE LA PRIMERA EJECUCIÓN:
+La primera vez que inicies el sistema, el contenedor detectará que la base de datos de normativa ENS no existe. Debes observar la terminal (CMD/Logs). >
+Verás mensajes indicando: Iniciando ingesta de vectores automática.... Este proceso puede tardar varios minutos dependiendo de la potencia de tu procesador y RAM, ya que la IA está leyendo y procesando todos los documentos legales del ENS.
 
+Por favor, espera hasta que la terminal deje de mostrar procesos de lectura antes de intentar realizar tu primera auditoría.
 
-\## Instrucciones de Instalación y Ejecución
+Acceso a la Plataforma
+Una vez que los servicios estén listos y la ingesta haya finalizado, accede a:
 
+Panel de Usuario (Frontend): http://localhost:3000
 
+Documentación de API (Swagger UI): http://localhost:8000/docs
 
-\### Paso 1: Preparar la Inteligencia Artificial (Ollama)
+Arquitectura RAG y Motor de IA
+Para evitar "alucinaciones" y garantizar el cumplimiento normativo, el sistema implementa una arquitectura Retrieval-Augmented Generation:
 
-El contenedor de Docker se conectará al Ollama de tu máquina anfitriona. 
+Modelo de Embeddings (mxbai-embed-large): Utilizado para transformar la normativa técnica del ENS en vectores matemáticos de alta precisión.
 
-1\. Abre Ollama en tu ordenador.
+Base de Datos Vectorial (FAISS): Almacena el conocimiento legal de la aplicación, permitiendo búsquedas semánticas ultrarrápidas.
 
-2\. Abre una terminal y descarga los modelos necesarios ejecutando:
+Orquestador LangGraph: Coordina el flujo entre los hallazgos técnicos (Semgrep) y la validación legal (Llama 3.1/3.2), asegurando que cada vulnerabilidad esté vinculada a un artículo específico del ENS.
 
-&nbsp;  `ollama run llama3.1:8b` (Modelo principal)
+Características de Seguridad
+Análisis SAST Profesional: Integración con reglas personalizadas de Semgrep para la detección profunda de vulnerabilidades.
 
-&nbsp;  `ollama run mxbai-embed-large` (Modelo de embeddings para el RAG)
+Privacidad Total: No se envían datos a APIs externas (OpenAI, Anthropic, etc.). Todo el flujo de datos permanece en tu infraestructura.
 
-
-
-\### Paso 2: Levantar la Aplicación
-
-Abre una terminal en la raíz de este proyecto (donde está el archivo docker-compose.yml) y ejecuta este único comando para construir y arrancar todos los servicios a la vez:
-
-
-
-&nbsp;  `docker-compose up --build`
-
-
-
-\### Paso 3: Acceso
-
-Abre tu navegador web y ve a la ruta donde esta el archivo `index.html` (Frontend/index.html) para ver la interfaz, o ve directamente a la API en `http://localhost:8000`.
-
-
-Nota: Antes de la primera auditoría, ejecuta el script de ingesta para crear la base de datos legal: python Src/ai_engine/ingesta_vectores.py
-
-
-## Arquitectura RAG y Modelos de Inteligencia Artificial
-
-Para garantizar que los análisis de vulnerabilidades estén alineados con el Esquema Nacional de Seguridad (ENS) y evitar "alucinaciones" (respuestas inventadas), esta plataforma implementa una arquitectura **RAG (Retrieval-Augmented Generation)**.
-
-### 1. Modelo de Embeddings: `mxbai-embed-large`
-Para la vectorización de los documentos legales (ENS) se utiliza el modelo **`mxbai-embed-large`** a través de Ollama. 
-* **¿Por qué este modelo?** Es un modelo de estado del arte diseñado específicamente para tareas de recuperación de información (Retrieval) y búsqueda semántica, superando a otros modelos estándar en precisión al mapear consultas técnicas con textos legales.
-
-### 2. Base de Datos Vectorial: FAISS
-Los embeddings generados se almacenan y consultan utilizando **FAISS (Facebook AI Similarity Search)**. FAISS permite realizar búsquedas de similitud ultrarrápidas, recuperando los artículos exactos del ENS que aplican a la vulnerabilidad detectada en el código fuente.
-
-### 3. Modelos LLM de Análisis Legal
-El sistema permite al usuario elegir entre dos modelos de lenguaje locales (ejecutados vía Ollama) para realizar el razonamiento jurídico-técnico:
-* **Llama 3.2 (3B)**: Optimizado para velocidad y entornos con recursos limitados.
-* **Llama 3.1 (8B)**: Modelo experto que ofrece un razonamiento más profundo en auditorías críticas (requiere mayor capacidad de RAM).
-
-### 4. Trazabilidad y Evidencia Legal
-El sistema persiste en la base de datos la evidencia completa de cada hallazgo para su posterior auditoría humana:
-* Regla exacta del motor SAST (Semgrep).
-* Modelo LLM utilizado en la inferencia.
-* Fragmentos del ENS recuperados por FAISS y utilizados como contexto estricto.
+Trazabilidad y Evidencia: Cada informe generado incluye el fragmento exacto de la normativa ENS recuperada por la IA como evidencia legal.

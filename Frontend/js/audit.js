@@ -42,7 +42,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
         //const token = localStorage.getItem('jwt_token');
 
       
-        const res = await fetch('/auditar-zip', { 
+        const res = await fetch('http://localhost:8000/auditar-zip', { 
             method: 'POST', 
             credentials: 'include',
             body: formData 
@@ -59,7 +59,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         
-        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/progreso/${auditId}`);
+        const ws = new WebSocket(`ws://localhost:8000/ws/progreso/${auditId}`);
       
         ws.onopen = () => {
             document.getElementById('progress-text').innerText = "Conexión en vivo establecida. Esperando a la IA...";
@@ -78,7 +78,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
                 ws.close(); 
                 
                
-                const resFinal = await fetch(`/auditoria/${auditId}`, {
+                const resFinal = await fetch(`http://localhost:8000/auditoria/${auditId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -391,7 +391,7 @@ function saveToHistory(fileName, count) {
 async function loadHistory() {
     try {
 
-        const res = await fetch('/historial', {
+        const res = await fetch('http://localhost:8000/historial', {
             credentials: 'include'
         });
         if (!res.ok) return;
@@ -488,7 +488,7 @@ async function loadHistory() {
                     if (workspace) workspace.style.display = 'block';
 
                     
-                    const r = await fetch(`/auditoria/${h.id}`, {
+                    const r = await fetch(`http://localhost:8000/auditoria/${h.id}`, {
                         credentials: 'include'
                     });
                     
@@ -554,7 +554,7 @@ async function cargarAuditoriaPasada(auditId) {
         const progressBar = document.getElementById('progress-bar-fill');
         if (progressBar) progressBar.style.width = "100%";
         
-        const res = await fetch(`/auditoria/${auditId}`, {
+        const res = await fetch(`http://localhost:8000/auditoria/${auditId}`, {
             credentials: 'include'
         });
         

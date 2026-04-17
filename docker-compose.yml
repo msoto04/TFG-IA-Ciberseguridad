@@ -1,6 +1,14 @@
-version: '3.8'
-
 services:
+  frontend:
+    image: nginx:alpine
+    container_name: secureaudit-frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./Frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+
   backend:
     build: .
     container_name: secureaudit-backend
@@ -8,33 +16,35 @@ services:
       - "8000:8000"
     volumes:
       - ./:/app
-    environment:
-      - OLLAMA_URL=http://host.docker.internal:11434
-      - REDIS_URL=redis://redis:6379/0  
-      - MODELO_ORQUESTADOR=llama3.1:8b
+    env_file:
+      - .env
     extra_hosts:
       - "host.docker.internal:host-gateway" 
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
 
   redis:
     image: redis:alpine
     container_name: secureaudit-redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   worker:
     build: .
     container_name: secureaudit-worker
- 
     command: celery -A Src.workers.celery_worker.celery_app worker --loglevel=info
     volumes:
       - ./:/app
-    environment:
-      - OLLAMA_URL=http://host.docker.internal:11434
-      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - .env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      - redis
-      - backend
+      redis:
+        condition: service_healthy

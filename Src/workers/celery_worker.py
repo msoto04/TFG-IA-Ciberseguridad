@@ -1,8 +1,29 @@
 import os
+import pathlib         
+import subprocess  
+import sys
+
+
+
+if sys.argv and 'celery' in sys.argv[0]:
+    if not pathlib.Path('/app/faiss_index/index.faiss').exists():
+        print("================================================================")
+        print("Iniciando ingesta de vectores automática...")
+        print("⚠️ ESTO PUEDE TARDAR VARIOS MINUTOS DEPENDIENDO DE TU PC ⚠️")
+        print("================================================================")
+        try:
+            subprocess.run(['python', 'Src/ai_engine/ingesta_vectores.py'], check=True)
+            print("Vectores creados correctamente. Arrancando el sistema...")
+        except Exception as e:
+            print(f"Error crítico creando vectores: {e}")
+
+
 import shutil
 import zipfile
 import json
 import redis
+    
+from celery.signals import worker_ready
 from celery import Celery
 from celery.utils.log import get_task_logger
 
@@ -10,6 +31,8 @@ from Src.core.database import SessionLocal
 from Src.db_models.models import Vulnerabilidad
 from Src.security_tools.sast_scanner import ejecutar_sast_profesional
 from Src.ai_engine.orquestador import app as grafo_agentes
+
+
 
 logger = get_task_logger(__name__)
 

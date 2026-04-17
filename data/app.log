@@ -174,3 +174,49 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2026-04-09 13:17:00,057 - faiss.loader - INFO - Loading faiss with AVX2 support.
 2026-04-09 13:17:03,381 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
 2026-04-09 13:20:23,226 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-09 14:54:58,089 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-09 14:54:58,137 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-04-09 14:54:58,441 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-04-09 14:57:39,642 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-09 14:58:39,905 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-09 15:00:55,212 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-09 15:01:47,994 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-09 15:04:37,383 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-09 15:07:31,497 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-09 15:09:34,757 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 08:40:03,900 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 08:40:03,986 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-04-14 08:40:04,440 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-04-14 08:44:11,048 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 08:46:36,460 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 08:48:35,257 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 08:49:47,020 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 08:51:53,687 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 08:53:16,973 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 08:55:19,013 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 10:56:33,147 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 10:59:18,632 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 11:13:02,951 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 11:17:07,179 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 11:17:54,078 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 11:20:02,201 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 11:20:24,347 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 11:22:03,945 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 11:22:24,978 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 11:24:09,574 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-14 11:24:29,254 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-14 11:26:20,834 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-17 08:03:40,825 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-17 08:03:40,902 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-04-17 08:03:41,555 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-04-17 08:05:50,079 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-17 08:40:35,564 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-17 08:40:35,581 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-04-17 08:40:35,608 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-04-17 08:42:29,315 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-17 08:51:05,449 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-17 08:54:40,422 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-17 10:19:26,531 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-17 10:19:26,613 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-04-17 10:19:27,233 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-04-17 10:21:59,821 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.

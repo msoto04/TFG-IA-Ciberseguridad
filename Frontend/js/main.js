@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', checkAuth);
 async function checkAuth() {
     try {
    
-        const res = await fetch('/historial', { credentials: 'include' });
+        const res = await fetch('http://localhost:8000/historial', { credentials: 'include' });
         
         if (res.ok) {
       
@@ -62,7 +62,7 @@ async function registrarUsuario() {
     }
     
     try {
-        const res = await fetch('/registro', {
+        const res = await fetch('http://localhost:8000/registro', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -91,7 +91,7 @@ async function iniciarSesion() {
     }
     
     try {
-        const res = await fetch('/login', {
+        const res = await fetch('http://localhost:8000/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include', 
@@ -115,7 +115,7 @@ async function iniciarSesion() {
 async function cerrarSesion() {
     try {
       
-        await fetch('/logout', { 
+        await fetch('http://localhost:8000/logout', { 
             method: 'POST', 
             credentials: 'include' 
         });

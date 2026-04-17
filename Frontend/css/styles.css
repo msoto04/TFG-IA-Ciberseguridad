@@ -77,6 +77,25 @@ h1, h2, h3 { font-family: 'JetBrains Mono', monospace; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 
+
+::-webkit-scrollbar {
+    width: 8px; 
+    height: 8px; 
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent; 
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary); 
+}
+
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -167,3 +186,21 @@ h1, h2, h3 { font-family: 'JetBrains Mono', monospace; }
 .auth-buttons { display: flex; gap: 10px; margin-top: 20px; }
 .auth-buttons button { flex: 1; padding: 10px; cursor: pointer; border-radius: 6px; border: none; font-weight: bold;}
 .auth-msg { margin-top: 15px; font-size: 0.9em; min-height: 20px; font-weight: bold; }
+
+
+#history-list {
+    flex: 1;             
+    overflow-y: auto;   
+    min-height: 0;     
+    padding-right: 10px;
+    margin-bottom: 5px;  
+}
+
+
+#history-list::-webkit-scrollbar {
+    width: 6px;
+}
+#history-list::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 10px;
+}

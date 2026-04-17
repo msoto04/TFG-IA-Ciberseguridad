@@ -51,9 +51,10 @@ async function enviarMensaje() {
 
     try {
       
-        const res = await fetch('/chat',{
+        const res = await fetch('http://localhost:8000/chat',{
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({
                 mensaje: txt,
                 temperature: tempValue, 
