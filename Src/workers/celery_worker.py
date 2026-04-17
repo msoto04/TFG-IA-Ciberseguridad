@@ -23,7 +23,7 @@ import zipfile
 import json
 import redis
     
-from celery.signals import worker_ready
+
 from celery import Celery
 from celery.utils.log import get_task_logger
 
