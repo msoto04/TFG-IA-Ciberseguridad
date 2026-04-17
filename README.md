@@ -1,24 +1,34 @@
 
+# SECUREAUDIT ENS | Plataforma de Auditoría de Ciberseguridad AI
 
-SECUREAUDIT ENS | Plataforma de Auditoría de Ciberseguridad AI
-Esta plataforma combina el análisis estático de código (SAST) con un sistema de Inteligencia Artificial Soberana (RAG) para auditar software bajo el marco del Esquema Nacional de Seguridad (ENS).
+Esta plataforma combina el análisis estático de código (**SAST**) con un sistema de Inteligencia Artificial Soberana (**RAG**) para auditar software bajo el marco del **Esquema Nacional de Seguridad (ENS)**.
 
-Todo el procesamiento se realiza de forma 100% local, garantizando la privacidad del código fuente y los datos auditados.
+Todo el procesamiento se realiza de forma **100% local**, garantizando la privacidad del código fuente y los datos auditados.
 
-Instalación y Puesta en Marcha
+---
+
+## Instalación y Puesta en Marcha
+
 Gracias a la arquitectura de contenedores, la plataforma se despliega con una intervención mínima.
 
-1. Requisitos Previos
-Docker Desktop (con Docker Compose).
+### 1. Requisitos Previos
+* **Docker Desktop** (con Docker Compose).
+* **Ollama** instalado y ejecutándose en la máquina anfitriona.
 
-Ollama instalado y ejecutándose en la máquina anfitriona.
-
-2. Preparar los Modelos de IA (Ollama)
+### 2. Preparar los Modelos de IA (Ollama)
 Antes de arrancar la aplicación, asegúrate de tener descargados los modelos necesarios ejecutando estos comandos en tu terminal:
 
-Bash
+```bash
 ollama run llama3.1:8b          # Modelo de razonamiento experto
 ollama run mxbai-embed-large   # Modelo de embeddings para normativa ENS
+
+
+
+
+
+
+
+
 
 3. Configuración del Entorno
 Copia el archivo de ejemplo: cp .env.example .env
