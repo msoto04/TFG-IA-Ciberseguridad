@@ -21,6 +21,7 @@ Antes de arrancar la aplicación, asegúrate de tener descargados los modelos ne
 ```bash
 ollama run llama3.1:8b          # Modelo de razonamiento experto
 ollama run mxbai-embed-large   # Modelo de embeddings para normativa ENS
+```
 
 ### 3. Configuración del Entorno
 1. Copia el archivo de ejemplo: `cp .env.example .env`
@@ -31,7 +32,7 @@ Desde la raíz del proyecto, ejecuta el siguiente comando para construir y levan
 
 ```bash
 docker-compose up --build
-
+```
 
 > [!IMPORTANT]
 > **⚠️ NOTA CRÍTICA SOBRE LA PRIMERA EJECUCIÓN:**
