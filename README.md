@@ -1,6 +1,4 @@
-Aquí tienes el archivo README.md actualizado con las instrucciones precisas sobre el comando de ejecución y la advertencia crucial sobre la espera en la terminal.
 
-Está listo para copiar, pegar y lucir en tu repositorio:
 
 SECUREAUDIT ENS | Plataforma de Auditoría de Ciberseguridad AI
 Esta plataforma combina el análisis estático de código (SAST) con un sistema de Inteligencia Artificial Soberana (RAG) para auditar software bajo el marco del Esquema Nacional de Seguridad (ENS).
