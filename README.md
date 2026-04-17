@@ -35,7 +35,7 @@ docker-compose up --build
 ```
 
 > [!IMPORTANT]
-> **⚠️ NOTA CRÍTICA SOBRE LA PRIMERA EJECUCIÓN:**
+> **NOTA CRÍTICA SOBRE LA PRIMERA EJECUCIÓN:**
 > La primera vez que inicies el sistema, el contenedor detectará que la base de datos de normativa ENS no existe. **Debes observar la terminal (CMD/Logs).** > 
 > Verás mensajes indicando: `Iniciando ingesta de vectores automática...`. **Este proceso puede tardar varios minutos** dependiendo de la potencia de tu procesador y RAM, ya que la IA está leyendo y procesando todos los documentos legales del ENS. 
 > 
