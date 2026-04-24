@@ -105,14 +105,33 @@
                 </div>
             </div>
 
-            <div class="charts-row">
-                <div class="chart-container">
+            <div class="charts-row" style="display: flex; gap: 20px;">
+                <div class="chart-container" style="flex: 1; height: 380px; display: block; position: relative;">
                     <h4><i class="fas fa-radar"></i> Cobertura Dominios ENS</h4>
-                    <canvas id="radarChart"></canvas>
+                    <div style="height: 300px; width: 100%; position: relative;">
+                        <canvas id="radarChart"></canvas>
+                    </div>
                 </div>
-                <div class="chart-container">
+                <div class="chart-container" style="flex: 1; height: 380px; display: block; position: relative;">
                     <h4><i class="fas fa-chart-pie"></i> Distribución de Severidad</h4>
-                    <canvas id="doughnutChart"></canvas>
+                    <div style="height: 300px; width: 100%; position: relative;">
+                        <canvas id="doughnutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row" style="margin-top: 20px; display: flex; gap: 20px;">
+                <div class="chart-container" style="flex: 2; height: 380px; display: block; position: relative;">
+                    <h4><i class="fas fa-chart-line"></i> Evolución Temporal</h4>
+                    <div style="height: 300px; width: 100%; position: relative;">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container" style="flex: 1; height: 380px; display: block; position: relative;">
+                    <h4><i class="fas fa-chart-bar"></i> Comparativa Reciente</h4>
+                    <div style="height: 300px; width: 100%; position: relative;">
+                        <canvas id="barChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -163,16 +182,21 @@
         </div>
     </div>
 
-    <div class="charts-grid">
-        <div class="chart-container">
-            <h3>Nivel de Cumplimiento (Radar ENS)</h3>
-            <canvas id="auditRadarChart"></canvas>
+    <div style="display: flex; gap: 20px; margin-bottom: 20px; width: 100%;">
+            <div class="chart-container" style="flex: 1; min-width: 0; display: block !important;">
+                <h3 style="margin-top: 0; margin-bottom: 15px;">Nivel de Cumplimiento (Radar ENS)</h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="auditRadarChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container" style="flex: 1; min-width: 0; display: block !important;">
+                <h3 style="margin-top: 0; margin-bottom: 15px;">Distribución de Severidad</h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="auditDoughnutChart"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="chart-container">
-            <h3>Distribución de Severidad</h3>
-            <canvas id="auditDoughnutChart"></canvas>
-        </div>
-    </div>
 
     <div class="findings-section" style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
         <div>

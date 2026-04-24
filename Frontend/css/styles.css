@@ -39,8 +39,7 @@ h1, h2, h3 { font-family: 'JetBrains Mono', monospace; }
 .icon-box.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
 
 /* GRÁFICAS */
-.charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; height: 400px; }
-.chart-container { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; }
+
 
 /* AUDITORÍA */
 .upload-area { border: 2px dashed var(--border); border-radius: 16px; height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; background: rgba(30, 41, 59, 0.5); }
@@ -140,24 +139,43 @@ h1, h2, h3 { font-family: 'JetBrains Mono', monospace; }
     margin-bottom: 30px;
 }
 
+
+.charts-row {
+    display: flex !important;
+    gap: 25px !important;       
+    margin-bottom: 25px;       
+    width: 100%;
+}
+
+
 .chart-container {
     background: var(--bg-panel);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
     position: relative;
-    height: 320px; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: block !important;  
+    min-width: 0;              
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
 }
 
-.chart-container h3 {
+
+.chart-container h3, 
+.chart-container h4 {
     margin-top: 0;
     color: var(--text-main);
     font-size: 1rem;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
+
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
 
 .findings-section {
     background: var(--bg-panel);

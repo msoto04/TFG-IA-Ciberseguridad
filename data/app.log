@@ -224,3 +224,7 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2026-04-18 11:50:55,158 - faiss.loader - INFO - Loading faiss with AVX2 support.
 2026-04-18 11:50:55,805 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
 2026-04-18 11:53:38,206 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-04-24 14:37:24,907 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
+2026-04-24 14:37:25,096 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-04-24 14:37:25,424 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-04-24 14:39:40,107 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.

@@ -3,6 +3,8 @@ let chartRadar = null;
 let chartDoughnut = null; 
 let auditChartRadar = null; 
 let auditChartDoughnut = null; 
+let trendChart = null;
+let barChart = null;
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -269,37 +271,167 @@ function showDetail(item, divElement) {
 }
 
 function initCharts() {
-    const radarOptions = {
-        scales: { r: { angleLines: { color: '#334155' }, grid: { color: '#334155' }, suggestMin: 0, suggestMax: 100, ticks: { display: false }, pointLabels: { color: '#ffffff', font: { size: 14, weight: 'bold' } } } },
-        plugins: { legend: { display: false } }
-    };
-    const doughnutOptions = { cutout: '70%', plugins: { legend: { position: 'right', labels: { color: '#fff' } } } };
+
+
+    if (chartRadar) chartRadar.destroy();
+    if (chartDoughnut) chartDoughnut.destroy();
+    if (trendChart) trendChart.destroy();
+    if (barChart) barChart.destroy();
+    if (auditChartRadar) auditChartRadar.destroy();
+    if (auditChartDoughnut) auditChartDoughnut.destroy();
+
+    const ctxRadar = document.getElementById('radarChart');
+    if (ctxRadar) {
+        chartRadar = new Chart(ctxRadar.getContext('2d'), {
+            type: 'radar',
+            data: {
+                labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'],
+                datasets: [{
+                    label: 'Nivel de Protección',
+                    data: [0, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(0, 242, 254, 0.2)',
+                    borderColor: '#00f2fe',
+                    pointBackgroundColor: '#00f2fe'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                resizeDelay: 200,
+                scales: {
+                    r: { angleLines: { color: '#334155' }, grid: { color: '#334155' }, pointLabels: { color: '#94a3b8' }, ticks: { display: false }, suggestMin: 0, suggestMax: 100 }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    
+    const ctxDoughnut = document.getElementById('doughnutChart');
+    if (ctxDoughnut) {
+        chartDoughnut = new Chart(ctxDoughnut.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Crítica', 'Media', 'Baja'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                resizeDelay: 200,
+                plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20 } } },
+                cutout: '70%'
+            }
+        });
+    }
+
+ 
+    const ctxTrend = document.getElementById('trendChart');
+    if (ctxTrend) {
+        trendChart = new Chart(ctxTrend.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Vulnerabilidades Totales',
+                    data: [],
+                    borderColor: '#00f2fe',
+                    backgroundColor: 'rgba(0, 242, 254, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, 
+                resizeDelay: 200,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+    }
 
    
-    chartRadar = new Chart(document.getElementById('radarChart').getContext('2d'), {
-        type: 'radar',
-        data: { labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'], datasets: [{ label: 'Nivel', data: [0,0,0,0,0], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3b82f6', borderWidth: 2, pointBackgroundColor: '#fff' }] },
-        options: radarOptions
-    });
+    const ctxBar = document.getElementById('barChart');
+    if (ctxBar) {
+        barChart = new Chart(ctxBar.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Críticas', data: [], backgroundColor: '#ef4444' },
+                    { label: 'Medias', data: [], backgroundColor: '#f59e0b' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, 
+                resizeDelay: 200,
+                plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } },
+                scales: {
+                    y: { stacked: true, beginAtZero: true, grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                    x: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+    }
 
-    chartDoughnut = new Chart(document.getElementById('doughnutChart').getContext('2d'), {
-        type: 'doughnut',
-        data: { labels: ['Crítico', 'Medio', 'Bajo'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'], borderWidth: 0 }] },
-        options: doughnutOptions
-    });
 
-   
-    auditChartRadar = new Chart(document.getElementById('auditRadarChart').getContext('2d'), {
-        type: 'radar',
-        data: { labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'], datasets: [{ label: 'Nivel', data: [0,0,0,0,0], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3b82f6', borderWidth: 2, pointBackgroundColor: '#fff' }] },
-        options: radarOptions
-    });
+    const ctxAuditRadar = document.getElementById('auditRadarChart');
+    if (ctxAuditRadar) {
+        auditChartRadar = new Chart(ctxAuditRadar.getContext('2d'), {
+            type: 'radar',
+            data: {
+                labels: ['Confidencialidad', 'Integridad', 'Trazabilidad', 'Autenticidad', 'Disponibilidad'],
+                datasets: [{
+                    label: 'Nivel de Protección',
+                    data: [0, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(139, 92, 246, 0.2)', 
+                    borderColor: '#8b5cf6',
+                    pointBackgroundColor: '#8b5cf6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: { angleLines: { color: '#334155' }, grid: { color: '#334155' }, pointLabels: { color: '#94a3b8' }, ticks: { display: false }, suggestMin: 0, suggestMax: 100 }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
 
-    auditChartDoughnut = new Chart(document.getElementById('auditDoughnutChart').getContext('2d'), {
-        type: 'doughnut',
-        data: { labels: ['Crítico', 'Medio', 'Bajo'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'], borderWidth: 0 }] },
-        options: doughnutOptions
-    });
+
+    const ctxAuditDoughnut = document.getElementById('auditDoughnutChart');
+    if (ctxAuditDoughnut) {
+        auditChartDoughnut = new Chart(ctxAuditDoughnut.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Crítica', 'Media', 'Baja'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20 } } },
+                cutout: '70%'
+            }
+        });
+    }
+
+
 }
 
 function updateCharts(score, severities) {
@@ -435,7 +567,6 @@ function saveToHistory(fileName, count) {
 
 async function loadHistory() {
     try {
-
         const res = await fetch('http://localhost:8000/historial', {
             credentials: 'include'
         });
@@ -450,7 +581,6 @@ async function loadHistory() {
             return;
         }
 
-       
         let globalCriticas = 0;
         let globalMedias = 0;
         let globalBajas = 0;
@@ -460,15 +590,30 @@ async function loadHistory() {
             globalCriticas += (h.criticas || 0);
             globalMedias += (h.medias || 0);
             globalBajas += (h.bajas || 0);
-            globalTotal += (h.total_vulnerabilidades || 0);
+           
+            globalTotal += ((h.criticas || 0) + (h.medias || 0) + (h.bajas || 0)); 
         });
 
+     
         if (typeof trendChart !== 'undefined' && trendChart !== null) {
             const historialOrdenado = [...history].reverse(); 
-            trendChart.data.labels = historialOrdenado.map(h => h.fecha || 'Auditoría');
-            trendChart.data.datasets[0].data = historialOrdenado.map(h => h.total_vulnerabilidades || 0);
+            trendChart.data.labels = historialOrdenado.map(h => (h.fecha || 'N/A').split(',')[0]);
+            // Aquí calculamos el total sumando para que la gráfica de línea funcione
+            trendChart.data.datasets[0].data = historialOrdenado.map(h => (h.criticas || 0) + (h.medias || 0) + (h.bajas || 0));
             trendChart.update();
         }
+
+        if (typeof barChart !== 'undefined' && barChart !== null) {
+            const ultimas = [...history].slice(0, 5); 
+            barChart.data.labels = ultimas.map(h => {
+                let nom = h.nombre_archivo || 'N/A';
+                return nom.length > 12 ? nom.substring(0, 12) + '...' : nom; 
+            });
+            barChart.data.datasets[0].data = ultimas.map(h => h.criticas || 0);
+            barChart.data.datasets[1].data = ultimas.map(h => h.medias || 0);
+            barChart.update();
+        }
+   
 
         if (typeof chartDoughnut !== 'undefined' && chartDoughnut !== null) {
             chartDoughnut.data.datasets[0].data = [globalCriticas, globalMedias, globalBajas];
@@ -478,21 +623,32 @@ async function loadHistory() {
         const dashVuln = document.getElementById('stat-vuln');
         if (dashVuln) dashVuln.innerText = `${globalTotal} Totales`;
         
+
         const dashScore = document.getElementById('stat-score');
         let scoreGlobal = 100;
+
+      
+        const totalAuditorias = history.length > 0 ? history.length : 1;
+        const mediaCriticas = globalCriticas / totalAuditorias;
+        const mediaMedias = globalMedias / totalAuditorias;
+        const mediaBajas = globalBajas / totalAuditorias;
+
         if (dashScore) {
-            let penalizacion = (globalCriticas * 5) + (globalMedias * 2) + (globalBajas * 1);
+          
+            let penalizacion = (mediaCriticas * 5) + (mediaMedias * 2) + (mediaBajas * 1);
             scoreGlobal = Math.max(0, 100 - penalizacion);
-            dashScore.innerText = `${scoreGlobal} / 100 (Media)`;
+            dashScore.innerText = `${Math.round(scoreGlobal)} / 100 (Media)`;
         }
 
-        let fConfG = (globalCriticas * 0.35) + (globalMedias * 0.15) + (globalBajas * 0.05);
-        let fIntG  = (globalCriticas * 0.40) + (globalMedias * 0.20) + (globalBajas * 0.05);
-        let fTrazG = (globalCriticas * 0.10) + (globalMedias * 0.25) + (globalBajas * 0.15);
-        let fAutG  = (globalCriticas * 0.30) + (globalMedias * 0.10) + (globalBajas * 0.05);
-        let fDispG = (globalCriticas * 0.25) + (globalMedias * 0.15) + (globalBajas * 0.10);
+     
+        let fConfG = (mediaCriticas * 0.35) + (mediaMedias * 0.15) + (mediaBajas * 0.05);
+        let fIntG  = (mediaCriticas * 0.40) + (mediaMedias * 0.20) + (mediaBajas * 0.05);
+        let fTrazG = (mediaCriticas * 0.10) + (mediaMedias * 0.25) + (mediaBajas * 0.15);
+        let fAutG  = (mediaCriticas * 0.30) + (mediaMedias * 0.10) + (mediaBajas * 0.05);
+        let fDispG = (mediaCriticas * 0.25) + (mediaMedias * 0.15) + (mediaBajas * 0.10);
 
-        if (typeof chartRadar !== 'undefined' && chartRadar !== null) {
+      
+        if (chartRadar) { 
             chartRadar.data.datasets[0].data = [
                 Math.round(100 * Math.exp(-fConfG)),
                 Math.round(100 * Math.exp(-fIntG)),
@@ -502,8 +658,14 @@ async function loadHistory() {
             ];
             chartRadar.update();
         }
+    
 
-   
+                
+                if (chartDoughnut) {
+                    chartDoughnut.data.datasets[0].data = [globalCriticas, globalMedias, globalBajas];
+                    chartDoughnut.update();
+                }
+
         container.innerHTML = ''; 
 
         history.forEach(h => {
@@ -512,34 +674,32 @@ async function loadHistory() {
             div.style.cursor = 'pointer';
             div.style.padding = '10px';
             div.style.borderBottom = '1px solid var(--border)';
+            
+           
+            const totalItem = (h.criticas || 0) + (h.medias || 0) + (h.bajas || 0);
+            
             div.innerHTML = `
                 <div style="font-weight: bold; font-size: 0.9em;">${h.nombre_archivo || 'Auditoría'}</div>
                 <div style="font-size: 0.8em; color: var(--text-muted);">${h.fecha}</div>
                 <div style="font-size: 0.8em; margin-top: 5px;">
-                    <span style="color: #ef4444; margin-right: 5px;"><i class="fas fa-bug"></i> ${h.total_vulnerabilidades || 0}</span>
+                    <span style="color: #ef4444; margin-right: 5px;"><i class="fas fa-bug"></i> ${totalItem}</span>
                 </div>
             `;
             
-
             div.onclick = async () => {
                 try {
-                  
                     if (typeof navigate === 'function') {
                         navigate('audit');
                     }
-                    
-                  
                     const workspace = document.getElementById('audit-workspace');
                     if (workspace) workspace.style.display = 'block';
 
-                    
                     const r = await fetch(`http://localhost:8000/auditoria/${h.id}`, {
                         credentials: 'include'
                     });
                     
                     if (r.ok) {
                         const data = await r.json();
-                       
                         processAuditResults(data);
                     }
                 } catch(err) {
