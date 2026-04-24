@@ -12,6 +12,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 document.getElementById('upload-zone').onclick = () => document.getElementById('fileInput').click();
+
+
+
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('fileInput');
+
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    }, false);
+});
+
+
+['dragenter', 'dragover'].forEach(eventName => {
+    uploadZone.addEventListener(eventName, () => {
+        uploadZone.style.border = "2px dashed var(--primary)";
+        uploadZone.style.background = "rgba(0, 242, 254, 0.1)"; 
+    }, false);
+});
+
+
+['dragleave', 'drop'].forEach(eventName => {
+    uploadZone.addEventListener(eventName, () => {
+        uploadZone.style.border = ""; 
+        uploadZone.style.background = "";
+    }, false);
+});
+
+
+uploadZone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files && files.length > 0) {
+      
+        fileInput.files = files;
+      
+        fileInput.dispatchEvent(new Event('change'));
+    }
+});
+
+
+
 document.getElementById('fileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
