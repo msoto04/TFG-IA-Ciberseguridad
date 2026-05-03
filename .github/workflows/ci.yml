@@ -42,4 +42,5 @@ jobs:
         REDIS_URL: redis://localhost:6379/0
         UPLOAD_DIR: ./uploads
         EXTRACT_DIR: ./auditoria_temp
+        SECRET_KEY: "clave_falsa_solo_para_que_pasen_los_tests_en_github" 
       run: pytest tests/
