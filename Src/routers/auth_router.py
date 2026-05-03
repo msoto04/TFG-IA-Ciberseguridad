@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 import jwt
 
@@ -12,9 +12,16 @@ from Src.core.config import settings
 router = APIRouter(tags=["Autenticación"])
 
 
+
 class UsuarioRegistro(BaseModel):
-    email: str
-    password: str
+  
+    email: EmailStr 
+    password: str = Field(..., min_length=8, description="La contraseña debe tener al menos 8 caracteres")
+
+
+class UsuarioLogin(BaseModel):
+    email: str      
+    password: str   
 
 
 class Token(BaseModel):
@@ -70,7 +77,7 @@ def registrar_usuario(usuario: UsuarioRegistro, db: Session = Depends(get_db)):
 
 
 @router.post("/login")
-def login(usuario: UsuarioRegistro, response: Response, db: Session = Depends(get_db)):
+def login(usuario: UsuarioLogin, response: Response, db: Session = Depends(get_db)): 
     db_user = db.query(Usuario).filter(Usuario.email == usuario.email).first()
     if not db_user or not verificar_password(usuario.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")

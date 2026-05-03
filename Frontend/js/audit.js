@@ -207,7 +207,7 @@ function processAuditResults(data) {
        
         const lineaIndicador = item.linea ? `<span style="color:#ff4757; margin-left:5px;">(Línea ${item.linea})</span>` : '';
 
-        div.innerHTML = `
+        div.innerHTML = DOMPurify.sanitize(`
             <div style="display:flex; justify-content:space-between">
                 <strong>${item.vulnerabilidad}</strong>
                 <span style="font-size:0.8em; font-weight:bold" class="severity-badge sev-${item.severidad.toLowerCase()}">${item.severidad}</span>
@@ -215,8 +215,7 @@ function processAuditResults(data) {
             <div style="font-size:0.8em; color:#94a3b8; margin-top:5px">
                 <i class="far fa-file-code"></i> ${item.archivo.split('/').pop()} ${lineaIndicador}
             </div>
-        `;
-        
+        `);
       
         div.onclick = () => showDetail(item, div);
         list.appendChild(div);
@@ -250,7 +249,7 @@ function showDetail(item, divElement) {
         </div>` : '';
 
    
-    detailContainer.innerHTML = `
+    detailContainer.innerHTML = DOMPurify.sanitize(`
         <h3 style="margin-top: 0; color: #fff;">${item.vulnerabilidad}</h3>
         <div style="color: var(--text-muted); margin-bottom: 15px;">
             <i class="fas fa-file-alt"></i> ${item.archivo} 
@@ -267,7 +266,7 @@ function showDetail(item, divElement) {
         </div>
 
         ${referenciasHtml}
-    `;
+    `);
 }
 
 function initCharts() {
@@ -598,7 +597,6 @@ async function loadHistory() {
         if (typeof trendChart !== 'undefined' && trendChart !== null) {
             const historialOrdenado = [...history].reverse(); 
             trendChart.data.labels = historialOrdenado.map(h => (h.fecha || 'N/A').split(',')[0]);
-            // Aquí calculamos el total sumando para que la gráfica de línea funcione
             trendChart.data.datasets[0].data = historialOrdenado.map(h => (h.criticas || 0) + (h.medias || 0) + (h.bajas || 0));
             trendChart.update();
         }
@@ -678,13 +676,13 @@ async function loadHistory() {
            
             const totalItem = (h.criticas || 0) + (h.medias || 0) + (h.bajas || 0);
             
-            div.innerHTML = `
+            div.innerHTML = DOMPurify.sanitize(`
                 <div style="font-weight: bold; font-size: 0.9em;">${h.nombre_archivo || 'Auditoría'}</div>
                 <div style="font-size: 0.8em; color: var(--text-muted);">${h.fecha}</div>
                 <div style="font-size: 0.8em; margin-top: 5px;">
                     <span style="color: #ef4444; margin-right: 5px;"><i class="fas fa-bug"></i> ${totalItem}</span>
                 </div>
-            `;
+            `);
             
             div.onclick = async () => {
                 try {

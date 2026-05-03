@@ -68,16 +68,26 @@ async function registrarUsuario() {
             body: JSON.stringify({ email, password })
         });
         const data = await res.json();
+        
         if (res.ok) {
             msgBox.style.color = "var(--success)";
             msgBox.innerText = "¡Registrado! Ahora haz clic en 'Inicia sesión'.";
         } else {
             msgBox.style.color = "var(--danger)";
-            msgBox.innerText = data.detail || "Error al registrar";
+            
+            
+            if (Array.isArray(data.detail)) {
+                msgBox.innerText = "Error de formato: " + data.detail[0].msg;
+            } else {
+                msgBox.innerText = data.detail || "Error al registrar";
+            }
+      
         }
-    } catch (e) { msgBox.innerText = "Error de conexión"; }
+    } catch (e) { 
+        msgBox.style.color = "var(--danger)"; 
+        msgBox.innerText = "Error de conexión"; 
+    }
 }
-
 
 async function iniciarSesion() {
     const email = document.getElementById('login-email').value;
@@ -98,12 +108,19 @@ async function iniciarSesion() {
             body: JSON.stringify({ email, password })
         });
         const data = await res.json();
+        
         if (res.ok) {
             document.getElementById('login-overlay').style.display = 'none';
             if (typeof loadHistory === 'function') loadHistory();
         } else {
             msgBox.style.color = "var(--danger)";
-            msgBox.innerText = data.detail || "Credenciales incorrectas";
+            
+            if (Array.isArray(data.detail)) {
+                msgBox.innerText = "Error de formato: " + data.detail[0].msg;
+            } else {
+               
+                msgBox.innerText = data.detail || "Credenciales incorrectas";
+            }
         }
     } catch (e) { 
         msgBox.style.color = "var(--danger)";

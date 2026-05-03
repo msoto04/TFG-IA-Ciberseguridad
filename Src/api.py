@@ -2,13 +2,13 @@ import os
 import logging
 from dotenv import load_dotenv
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 
 from Src.core.database import engine, Base, SessionLocal
@@ -53,6 +53,17 @@ app = FastAPI(title="Sistema Auditoría IA (ENS) - RAG FAISS")
 app.include_router(auth_router)
 app.include_router(audit_router)
 app.include_router(chat_router)
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+   
+    logger.error(f"Fallo no controlado en la ruta {request.url.path}: {exc}")
+
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Se ha producido un error interno en el servidor. El incidente ha sido registrado."},
+    )
 
 
 app.add_middleware(

@@ -94,11 +94,12 @@ async function enviarMensaje() {
             respuestaFormateada += htmlFuentes;
         }
   
+        const respuestaSegura = DOMPurify.sanitize(respuestaFormateada);
 
         document.getElementById(loadingId).outerHTML = `
             <div class="message bot">
                 <div class="avatar"><i class="fas fa-robot"></i></div>
-                <div class="text">${respuestaFormateada}</div>
+                <div class="text">${respuestaSegura}</div>
             </div>
         `;
 
