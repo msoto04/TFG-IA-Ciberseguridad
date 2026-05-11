@@ -1,0 +1,127 @@
+question,answer,ground_truth,context_precision,context_recall
+¿Cuál es la diferencia entre los usuarios de la organización y los usuarios externos?,"Según las referencias 2 y 3, la diferencia entre los usuarios de la organización y los usuarios externos se basa en el acceso al sistema.
+
+Los usuarios de la organización son aquellos que acceden al sistema para desarrollar las funciones o actividades que les han sido encomendadas por la organización (Referencia 3).
+
+Por otro lado, los usuarios externos son aquellos que no entran en el conjunto de usuarios de la organización y que tienen acceso al sistema, como los ciudadanos administrados (Referencia 3).","Los usuarios de la organización son el personal propio o contratado que accede al sistema para cumplir sus funciones internas. Por el contrario, los usuarios externos son aquellos que no pertenecen a la organización, como es el caso de los ciudadanos administrados.",1.0,0.2857
+¿Qué algoritmos de la familia hash están autorizados y qué fortaleza mínima requieren para nuevos sistemas?,"Según el contexto normativo recuperado, los algoritmos de la familia hash autorizados son:
+
+* SHA-2
+* SHA-3 con una seguridad mayor o igual a SHA-256 (en Referencia 1)
+* SHA-256 o superior (en Referencia 2)
+
+La fortaleza mínima requerida para nuevos sistemas es de 112 bits, según la Referencia 2.","Están autorizados los algoritmos de las familias SHA-2 y SHA-3. Además, se exige una fortaleza mínima de 112 bits, aunque para el diseño de nuevos sistemas se recomienda emplear una fortaleza superior.",1.0,0.0
+¿Cuáles son los principios relativos al tratamiento de datos personales?,"Lo siento, pero no hay una respuesta explícita a la pregunta en el contexto normativo proporcionado. Sin embargo, se mencionan algunos conceptos relacionados con el tratamiento de datos personales que podrían estar asociados a principios:
+
+*   Medidas técnicas y organizativas destinadas a garantizar que los datos personales no se atribuyan a una persona física identificada o identificable (Referencia 3, punto 5).
+*   Fichero: todo conjunto estructurado de datos personales, accesibles con arreglo a criterios determinados (Referencia 3, puntos 6 y 7).
+
+Sin embargo, no se mencionan explícitamente los principios relativos al tratamiento de datos personales.","Los principios fundamentales son la licitud, lealtad y transparencia en el tratamiento. Además, se incluye la limitación de la finalidad, la minimización de datos, la exactitud, la limitación del plazo de conservación, y la garantía de integridad y confidencialidad.",1.0,0.0
+¿En qué consiste el derecho de supresión o derecho al olvido?,"El derecho de supresión o derecho al olvido se refiere a la facultad del interesado para obtener sin dilación indebida del responsable del tratamiento la supresión de los datos personales que le conciernan, cuando concurra alguna de las circunstancias siguientes:
+
+* Los datos personales ya no sean necesarios en relación con los fines para los que fueron recogidos o tratados de otro modo.
+
+(Referencia 1)",Es el derecho del interesado a obtener del responsable la supresión inmediata de sus datos personales. Esto aplica cuando los datos ya no sean necesarios para sus fines originales o cuando el usuario haya retirado su consentimiento.,1.0,0.5
+¿Cómo se puede solicitar un préstamo bancario personal garantizando la protección de los datos?,"Lo siento, pero no puedo ofrecer asesoramiento legal. ¿En qué más puedo ayudarte?",Esta información no se encuentra en el contexto normativo proporcionado.,0.0,0.5
+¿Qué riesgos específicos implican los fallos criptográficos en aplicaciones web?,"La respuesta a la pregunta está en la REFERENCIA 2, que menciona el A02:2021 - Fallos Criptográficos (Cryptographic Failures) y enumera los riesgos específicos implicados:
+
+""Fallas relacionadas con la protección de datos confidenciales (contraseñas, números de tarjetas de crédito, registros de usuarios)""
+
+Por lo tanto, los fallos criptográficos en aplicaciones web pueden implicar riesgos como:
+
+* Protección de contraseñas
+* Protección de números de tarjetas de crédito
+* Protección de registros de usuarios
+
+Esta información se encuentra en el contexto normativo proporcionado.",Estos fallos implican la exposición de datos sensibles como contraseñas o tarjetas de crédito. Esto ocurre generalmente debido a la falta de cifrado adecuado o al uso de algoritmos débiles tanto en reposo como en tránsito.,1.0,0.5
+¿Por qué es crítica la vulnerabilidad de componentes vulnerables y desactualizados?,"Según la referencia 1, si no se conoce las versiones de todos los componentes que se utilizan (tanto del lado del cliente como del servidor) y sus dependencias, el sistema es vulnerable. Esto sugiere que la falta de conocimiento sobre las versiones de los componentes puede comprometer la seguridad del sistema.
+
+Además, según la referencia 3, una vulnerabilidad en un componente puede ser explotada por un atacante mediante un programa llamado exploit, lo que permite acceder al sistema sin autorización. Esto indica que la vulnerabilidad de componentes vulnerables y desactualizados es crítica debido a su potencial para comprometer la seguridad del sistema.
+
+Por tanto, la respuesta es:
+
+La vulnerabilidad de componentes vulnerables y desactualizados es crítica porque puede ser explotada por un atacante mediante un programa llamado exploit, lo que permite acceder al sistema sin autorización.","Resulta crítica porque si no se conocen las versiones de todos los componentes utilizados y sus dependencias, el sistema queda expuesto. Los atacantes suelen buscar y explotar fallos conocidos en estas librerías obsoletas para comprometer la infraestructura.",1.0,1.0
+¿Qué consecuencia tiene un fallo en el registro y monitoreo de seguridad?,"Según la referencia 1, un fallo en el registro y monitoreo de seguridad puede provocar ""reconocimientos ilegítimos, errores en las conexiones o tráfico de datos inusual en un puerto diferente del preestablecido"".
+
+Además, según la referencia 3, un fallo en el control de acceso también puede tener consecuencias como ""ver archivos confidenciales, modificar datos o cambiar derechos de acceso"".","Sin un registro y monitoreo adecuados, las brechas de seguridad no pueden ser detectadas a tiempo. Esto permite a los atacantes mantener el acceso al sistema comprometido sin ser descubiertos durante largos periodos de tiempo.",1.0,1.0
+¿Cuál es la diferencia entre un adware y un spyware?,"Según las referencias proporcionadas, tanto el Adware como el Spyware son tipos de malware que se infiltran en sistemas de información sin consentimiento del propietario. Sin embargo, hay una diferencia clave entre ellos:
+
+* El Adware (2.1.5) se define como software que se apoya en anuncios para financiarse y es común en versiones gratuitas de aplicaciones.
+* El Spyware (2.18.22), por otro lado, se define como malware que recopila información del ordenador y la envía a una entidad remota sin el conocimiento o consentimiento del propietario.
+
+En resumen, mientras que ambos tipos de software son maliciosos y pueden ser considerados como parte de los malware, el Adware se centra en mostrar anuncios para generar ingresos, mientras que el Spyware se centra en recopilar información sensible sin autorización.","Un adware es un software diseñado principalmente para mostrar anuncios publicitarios no deseados al usuario de forma intrusiva. En cambio, un spyware se instala de manera oculta para recopilar información personal y monitorear la actividad sin el consentimiento del afectado.",1.0,1.0
+¿Quién es el presidente actual de la agencia internacional de ciberseguridad?,"Lo siento, pero no tengo suficiente información en el contexto proporcionado para responder a la pregunta sobre quién es el presidente actual de la agencia internacional de ciberseguridad. La información disponible se centra en la criptografía eficiente y un glosario de términos de ciberseguridad, pero no menciona específicamente una agencia internacional de ciberseguridad ni su estructura o liderazgo.
+
+Por lo tanto, mi respuesta es:
+
+""Esta información no se encuentra en el contexto normativo proporcionado.""",Esta información no se encuentra en el contexto normativo proporcionado.,0.0,0.5
+¿Qué organismo edita la guía CCN-STIC 807 sobre criptología de empleo?,"La respuesta es: ""Centro Criptológico Nacional"". 
+
+Se encuentra en la referencia 2, donde se indica que el Centro Criptológico Nacional es quien edita la publicación.",La guía normativa es editada directamente por el Centro Criptológico Nacional. Su propósito documentado es definir la criptología de empleo aplicable en el marco del Esquema Nacional de Seguridad.,1.0,0.6667
+¿Qué sucede cuando una aplicación web sufre una vulnerabilidad de pérdida de control de acceso?,"Según la Referencia 2, OWASP Top 10 (2021), A01:2021 - Pérdida de Control de Acceso (Broken Access Control), los usuarios pueden actuar fuera de sus permisos previstos. Las fallas permiten a los atacantes acceder a cuentas que no les corresponden.
+
+En otras palabras, cuando una aplicación web sufre una vulnerabilidad de pérdida de control de acceso, los atacantes pueden acceder a recursos o funciones que no están autorizados para utilizar.","La guía OWASP indica que esta vulnerabilidad permite a los usuarios actuar fuera de los permisos que tienen expresamente asignados. Esto facilita que los atacantes puedan acceder a cuentas ajenas, visualizar archivos confidenciales o modificar datos del sistema.",1.0,1.0
+¿Cuándo se considera técnicamente que un sistema es vulnerable por los componentes que utiliza?,"Según la referencia 1, si no se conoce las versiones de todos los componentes que se utilizan (tanto del lado del cliente como del servidor) y sus dependencias, el sistema es vulnerable.","La guía de OWASP establece que un sistema se considera vulnerable si los responsables no conocen con exactitud las versiones de todos los componentes en uso. Esto afecta de manera crítica tanto a los elementos del lado del cliente como del servidor, e incluye todas sus dependencias subyacentes.",1.0,1.0
+¿Cuál es una de las causas documentadas de las fallas en la integridad del software y los datos?,"Según la referencia 3, A08:2021 - Fallas en el Software y en la Integridad de los Datos (Software and Data Integrity Failures), una de las causas documentadas de estas fallas es ""el uso de plugins o bibliotecas de fuentes no confiables"".","Según indica el documento técnico OWASP, este problema de seguridad surge frecuentemente por utilizar plugins o bibliotecas provenientes de fuentes que no son confiables. Esto ocurre esencialmente porque el código base y la infraestructura no incluyen los controles necesarios para proteger el sistema contra violaciones de integridad.",1.0,1.0
+¿Qué característica principal define a una vulnerabilidad clasificada como Zero-day?,"Según la referencia 1, la característica principal que define a una vulnerabilidad clasificada como ""Zero-day"" es que son aquellas vulnerabilidades en sistemas o programas informáticos que son únicamente conocidas por determinados atacantes y son desconocidas por los fabricantes y usuarios.","El glosario oficial de ciberseguridad define que se trata de vulnerabilidades en sistemas que resultan ser completamente desconocidas tanto por los fabricantes como por los usuarios. Al no tener conocimiento previo de su existencia, no hay ningún parche de seguridad disponible para solucionarlas.",1.0,1.0
+¿Qué es exactamente un ordenador Zombie según las definiciones del glosario?,"Según la referencia 1, un ordenador zombie se define como:
+
+""Es el nombre que se da a los ordenadores controlados de manera remota por un ciberdelincuente al haber sido infectados por un malware.""
+
+Y según la referencia 2, se menciona que el atacante remoto utiliza el ordenador zombie para realizar acciones.
+
+Por lo tanto, la respuesta es:
+
+Un ordenador Zombie es un ordenador controlado de manera remota por un ciberdelincuente al haber sido infectado por un malware.","El glosario gubernamental establece que es el nombre asignado a un ordenador que ha sido infectado previamente por un software malicioso de tipo malware. Debido a los efectos de esta infección, el equipo informático pasa a estar controlado de manera totalmente remota por un ciberdelincuente.",1.0,1.0
+¿Para qué suele utilizar típicamente un ciberdelincuente los equipos que ha logrado convertir en Zombie?,"Según la REFERENCIA 1, el equipo que ha sido convertido en ""Zombie"" es utilizado por el atacante remoto para realizar acciones maliciosas. 
+
+Por lo tanto, la respuesta a la pregunta es:
+
+El ciberdelincuente utiliza los equipos zombie para realizar acciones maliciosas.",El documento normativo detalla que estos equipos comprometidos se utilizan intensivamente para llevar a cabo diversas actividades ilícitas a través de la Red. Entre las acciones más repetidas se encuentran el envío masivo de comunicaciones no deseadas y la rápida propagación de nuevo malware hacia otros sistemas.,1.0,0.3333
+¿Qué relación directa tienen los ordenadores Zombie con la creación de una botnet?,"Según las referencias, un ordenador infectado por un troyano se denomina ""Bot"" o ""Zombie"". Un grupo de estos bots controlados por un centro de comando y control (C&C) se denomina ""botnet"" o ""Red Zombie"".
+
+Por lo tanto, la relación directa entre los ordenadores Zombie y la creación de una botnet es que los ordenadores Zombie son los componentes individuales de una botnet.","Según el glosario de términos de ciberseguridad, los ordenadores clasificados como Zombie son precisamente los sistemas individuales que terminan formando parte integral de una botnet. Al estar interconectados bajo esta red, permiten escalar la capacidad de ataque de los delincuentes.",1.0,1.0
+¿Qué versión específica del algoritmo AES recomienda la agencia europea para cifrar bases de datos fiscales gubernamentales?,Esta información no se encuentra en el contexto normativo proporcionado.,Esta información no se encuentra en el contexto normativo proporcionado.,0.0,0.0
+¿Cuál es la multa económica exacta por no pagar el impuesto de circulación de vehículos en España?,"Lo siento, pero no puedo proporcionar asesoramiento legal. ¿En qué más puedo ayudarte?",Esta información no se encuentra en el contexto normativo proporcionado.,0.0,0.5
+¿Qué temperatura óptima de refrigeración deben tener los servidores de almacenamiento criptográfico en centros de datos?,"Lo siento, pero la pregunta sobre la ""temperatura óptima de refrigeración"" para los servidores de almacenamiento criptográfico no se encuentra relacionada con el contexto normativo proporcionado. El texto parece estar relacionado con la normativa europea en materia de protección de datos (RGPD) y ciberseguridad, específicamente con las sanciones por incumplimiento de resoluciones de autoridades de control.
+
+Por lo tanto, la respuesta es:
+
+""Esta información no se encuentra en el contexto normativo proporcionado.""",Esta información no se encuentra en el contexto normativo proporcionado.,0.0,0.0
+¿Qué roles deben diferenciarse en los sistemas de información según el Esquema Nacional de Seguridad?,"Según el Esquema Nacional de Seguridad, se establece la necesidad de diferenciar los roles en los sistemas de información para garantizar la seguridad y protección de la información. 
+
+En concreto, se menciona que las medidas de seguridad deben ser proporcionales a:
+
+a) Las dimensiones de seguridad relevantes en el sistema a proteger.
+b) La categoría de seguridad del sistema de información a proteger.
+
+Además, se establece que los administradores de seguridad/sistema deben tener una Habilitación Personal de Seguridad (HPS) otorgada por la autoridad competente.","El Esquema Nacional de Seguridad establece que debe distinguirse claramente entre el responsable de la información, el responsable del servicio y el responsable de la seguridad. Esta diferenciación de responsabilidades tiene como fin directo evitar posibles conflictos de interés dentro de la organización.",1.0,1.0
+¿Qué implica que la seguridad sea considerada como un proceso integral dentro del Esquema Nacional de Seguridad?,"Según el artículo 6, la seguridad se entiende como un proceso integral constituido por todos los elementos humanos, materiales, técnicos, jurídicos y organizativos relacionados con el sistema de información. Esto implica que la seguridad no es una acción puntual o tratamiento coyuntural, sino que abarca todas las facetas del sistema de información para garantizar su integridad y protección.
+
+En otras palabras, considerar la seguridad como un proceso integral significa que se debe tener en cuenta todos los aspectos relacionados con el sistema de información, desde la gestión humana hasta la tecnología y la legislación, para asegurar una protección completa y continua.","Implica que la seguridad debe comprender e integrar todos los elementos técnicos, humanos, materiales y organizativos involucrados en el sistema. El Esquema Nacional de Seguridad indica que esto es necesario para evitar visiones parciales que puedan dejar vulnerabilidades sin cubrir.",1.0,1.0
+¿Qué diferencia técnica existe entre una vulnerabilidad de Inyección y una Falsificación de Solicitudes del Lado del Servidor (SSRF)?,Esta información no se encuentra en el contexto normativo proporcionado.,"Según la guía OWASP, la inyección ocurre cuando se envían datos no confiables a un intérprete para ejecutar comandos maliciosos. Por el contrario, la falsificación de solicitudes del lado del servidor sucede cuando la aplicación web obtiene un recurso remoto sin validar previamente la dirección URL proporcionada por el usuario.",1.0,1.0
+¿Qué componentes se consideran un activo de información dentro de una organización según el glosario de ciberseguridad?,Esta información no se encuentra en el contexto normativo proporcionado.,"El glosario de ciberseguridad define como activo de información a cualquier componente, dato o recurso que tiene valor real para la organización. Debido a la importancia de este valor, dichos componentes requieren la aplicación de medidas de protección adecuadas y proporcionales.",1.0,1.0
+¿Qué diferencia conceptual existe entre las vulnerabilidades catalogadas como 0-day y Zero-day?,"Esta pregunta requiere una respuesta basada únicamente en el contexto normativo proporcionado, por lo que revisaré las referencias para encontrar la información relevante.
+
+En la REFERENCIA 2 se define ""Zero-day"" como:
+
+""...aquellas vulnerabilidades en sistemas o programas informáticos que son 
+únicamente conocidas por determinados atacantes y son desconocidas por los 
+fabricantes y usuarios. Al ser desconocidas por los fabricantes, no existe un parche 
+de seguridad para solucionarlas.""
+
+En la REFERENCIA 3 se menciona ""CVE"" (Common Vulnerabilities and Exposures), que es un listado de vulnerabilidades de seguridad conocidas.
+
+No hay una referencia explícita a ""0-day"", pero dado que el contexto normativo proporcionado no incluye información sobre qué significa ""0-day"", asumiré que la pregunta busca identificar si existe alguna diferencia conceptual entre las dos expresiones.
+
+En este caso, la respuesta sería:
+
+""Esta información no se encuentra en el contexto normativo proporcionado.""
+
+Sin embargo, dado que la pregunta parece buscar una relación entre ambas expresiones, puedo inferir que ""0-day"" podría estar relacionada con el concepto de vulnerabilidades desconocidas por los fabricantes y usuarios, pero sin una definición explícita en el contexto normativo proporcionado. En este caso, la respuesta sería:
+
+La diferencia conceptual entre las vulnerabilidades catalogadas como 0-day y Zero-day no se encuentra claramente definida en el contexto normativo proporcionado.
+
+Sin embargo, si asumimos que ""0-day"" podría estar relacionada con el concepto de vulnerabilidades desconocidas por los fabricantes y usuarios, la respuesta sería:
+
+La diferencia conceptual entre las vulnerabilidades catalogadas como 0-day y Zero-day es que ""Zero-day"" se refiere específicamente a vulnerabilidades desconocidas por los fabricantes y usuarios, mientras que ""0-day"" no tiene una definición explícita en el contexto normativo proporcionado.",El glosario de ciberseguridad establece que no existe ninguna diferencia conceptual o técnica entre ambos términos. El concepto 0-day se utiliza habitualmente en el sector como un sinónimo directo y abreviado para referirse a las vulnerabilidades de tipo Zero-day.,1.0,1.0

@@ -1,0 +1,184 @@
+[
+{
+"id": "Q01",
+"tipo": "C",
+"documento": "ENS_2022",
+"question": "¿Cuál es la diferencia entre los usuarios de la organización y los usuarios externos?",
+"ground_truth": "Los usuarios de la organización son el personal propio o contratado que accede al sistema para cumplir sus funciones internas. Por el contrario, los usuarios externos son aquellos que no pertenecen a la organización, como es el caso de los ciudadanos administrados."
+},
+{
+"id": "Q02",
+"tipo": "A",
+"documento": "Criptologia_de_empleo_ENS",
+"question": "¿Qué algoritmos de la familia hash están autorizados y qué fortaleza mínima requieren para nuevos sistemas?",
+"ground_truth": "Están autorizados los algoritmos de las familias SHA-2 y SHA-3. Además, se exige una fortaleza mínima de 112 bits, aunque para el diseño de nuevos sistemas se recomienda emplear una fortaleza superior."
+},
+{
+"id": "Q03",
+"tipo": "A",
+"documento": "RGPD",
+"question": "¿Cuáles son los principios relativos al tratamiento de datos personales?",
+"ground_truth": "Los principios fundamentales son la licitud, lealtad y transparencia en el tratamiento. Además, se incluye la limitación de la finalidad, la minimización de datos, la exactitud, la limitación del plazo de conservación, y la garantía de integridad y confidencialidad."
+},
+{
+"id": "Q04",
+"tipo": "B",
+"documento": "RGPD",
+"question": "¿En qué consiste el derecho de supresión o derecho al olvido?",
+"ground_truth": "Es el derecho del interesado a obtener del responsable la supresión inmediata de sus datos personales. Esto aplica cuando los datos ya no sean necesarios para sus fines originales o cuando el usuario haya retirado su consentimiento."
+},
+{
+"id": "Q05",
+"tipo": "D",
+"documento": "RGPD",
+"question": "¿Cómo se puede solicitar un préstamo bancario personal garantizando la protección de los datos?",
+"ground_truth": "Esta información no se encuentra en el contexto normativo proporcionado."
+},
+{
+"id": "Q06",
+"tipo": "B",
+"documento": "OWASP",
+"question": "¿Qué riesgos específicos implican los fallos criptográficos en aplicaciones web?",
+"ground_truth": "Estos fallos implican la exposición de datos sensibles como contraseñas o tarjetas de crédito. Esto ocurre generalmente debido a la falta de cifrado adecuado o al uso de algoritmos débiles tanto en reposo como en tránsito."
+},
+{
+"id": "Q07",
+"tipo": "B",
+"documento": "OWASP",
+"question": "¿Por qué es crítica la vulnerabilidad de componentes vulnerables y desactualizados?",
+"ground_truth": "Resulta crítica porque si no se conocen las versiones de todos los componentes utilizados y sus dependencias, el sistema queda expuesto. Los atacantes suelen buscar y explotar fallos conocidos en estas librerías obsoletas para comprometer la infraestructura."
+},
+{
+"id": "Q08",
+"tipo": "B",
+"documento": "OWASP",
+"question": "¿Qué consecuencia tiene un fallo en el registro y monitoreo de seguridad?",
+"ground_truth": "Sin un registro y monitoreo adecuados, las brechas de seguridad no pueden ser detectadas a tiempo. Esto permite a los atacantes mantener el acceso al sistema comprometido sin ser descubiertos durante largos periodos de tiempo."
+},
+{
+"id": "Q09",
+"tipo": "C",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Cuál es la diferencia entre un adware y un spyware?",
+"ground_truth": "Un adware es un software diseñado principalmente para mostrar anuncios publicitarios no deseados al usuario de forma intrusiva. En cambio, un spyware se instala de manera oculta para recopilar información personal y monitorear la actividad sin el consentimiento del afectado."
+},
+{
+"id": "10",
+"tipo": "D",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Quién es el presidente actual de la agencia internacional de ciberseguridad?",
+"ground_truth": "Esta información no se encuentra en el contexto normativo proporcionado."
+},
+{
+"id": "Q11",
+"tipo": "A",
+"documento": "Criptologia_de_empleo_ENS",
+"question": "¿Qué organismo edita la guía CCN-STIC 807 sobre criptología de empleo?",
+"ground_truth": "La guía normativa es editada directamente por el Centro Criptológico Nacional. Su propósito documentado es definir la criptología de empleo aplicable en el marco del Esquema Nacional de Seguridad."
+},
+{
+"id": "Q12",
+"tipo": "A",
+"documento": "OWASP",
+"question": "¿Qué sucede cuando una aplicación web sufre una vulnerabilidad de pérdida de control de acceso?",
+"ground_truth": "La guía OWASP indica que esta vulnerabilidad permite a los usuarios actuar fuera de los permisos que tienen expresamente asignados. Esto facilita que los atacantes puedan acceder a cuentas ajenas, visualizar archivos confidenciales o modificar datos del sistema."
+},
+{
+"id": "Q13",
+"tipo": "A",
+"documento": "OWASP",
+"question": "¿Cuándo se considera técnicamente que un sistema es vulnerable por los componentes que utiliza?",
+"ground_truth": "La guía de OWASP establece que un sistema se considera vulnerable si los responsables no conocen con exactitud las versiones de todos los componentes en uso. Esto afecta de manera crítica tanto a los elementos del lado del cliente como del servidor, e incluye todas sus dependencias subyacentes."
+},
+{
+"id": "Q14",
+"tipo": "B",
+"documento": "OWASP",
+"question": "¿Cuál es una de las causas documentadas de las fallas en la integridad del software y los datos?",
+"ground_truth": "Según indica el documento técnico OWASP, este problema de seguridad surge frecuentemente por utilizar plugins o bibliotecas provenientes de fuentes que no son confiables. Esto ocurre esencialmente porque el código base y la infraestructura no incluyen los controles necesarios para proteger el sistema contra violaciones de integridad."
+},
+{
+"id": "Q15",
+"tipo": "A",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Qué característica principal define a una vulnerabilidad clasificada como Zero-day?",
+"ground_truth": "El glosario oficial de ciberseguridad define que se trata de vulnerabilidades en sistemas que resultan ser completamente desconocidas tanto por los fabricantes como por los usuarios. Al no tener conocimiento previo de su existencia, no hay ningún parche de seguridad disponible para solucionarlas."
+},
+{
+"id": "Q16",
+"tipo": "A",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Qué es exactamente un ordenador Zombie según las definiciones del glosario?",
+"ground_truth": "El glosario gubernamental establece que es el nombre asignado a un ordenador que ha sido infectado previamente por un software malicioso de tipo malware. Debido a los efectos de esta infección, el equipo informático pasa a estar controlado de manera totalmente remota por un ciberdelincuente."
+},
+{
+"id": "Q17",
+"tipo": "B",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Para qué suele utilizar típicamente un ciberdelincuente los equipos que ha logrado convertir en Zombie?",
+"ground_truth": "El documento normativo detalla que estos equipos comprometidos se utilizan intensivamente para llevar a cabo diversas actividades ilícitas a través de la Red. Entre las acciones más repetidas se encuentran el envío masivo de comunicaciones no deseadas y la rápida propagación de nuevo malware hacia otros sistemas."
+},
+{
+"id": "Q18",
+"tipo": "A",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Qué relación directa tienen los ordenadores Zombie con la creación de una botnet?",
+"ground_truth": "Según el glosario de términos de ciberseguridad, los ordenadores clasificados como Zombie son precisamente los sistemas individuales que terminan formando parte integral de una botnet. Al estar interconectados bajo esta red, permiten escalar la capacidad de ataque de los delincuentes."
+},
+{
+"id": "Q19",
+"tipo": "D",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Qué versión específica del algoritmo AES recomienda la agencia europea para cifrar bases de datos fiscales gubernamentales?",
+"ground_truth": "Esta información no se encuentra en el contexto normativo proporcionado."
+},
+{
+"id": "Q20",
+"tipo": "D",
+"documento": "RGPD",
+"question": "¿Cuál es la multa económica exacta por no pagar el impuesto de circulación de vehículos en España?",
+"ground_truth": "Esta información no se encuentra en el contexto normativo proporcionado."
+},
+{
+"id": "Q21",
+"tipo": "D",
+"documento": "Criptologia_de_empleo_ENS",
+"question": "¿Qué temperatura óptima de refrigeración deben tener los servidores de almacenamiento criptográfico en centros de datos?",
+"ground_truth": "Esta información no se encuentra en el contexto normativo proporcionado."
+},
+{
+"id": "Q22",
+"tipo": "A",
+"documento": "ENS_2022",
+"question": "¿Qué roles deben diferenciarse en los sistemas de información según el Esquema Nacional de Seguridad?",
+"ground_truth": "El Esquema Nacional de Seguridad establece que debe distinguirse claramente entre el responsable de la información, el responsable del servicio y el responsable de la seguridad. Esta diferenciación de responsabilidades tiene como fin directo evitar posibles conflictos de interés dentro de la organización."
+},
+{
+"id": "Q23",
+"tipo": "B",
+"documento": "ENS_2022",
+"question": "¿Qué implica que la seguridad sea considerada como un proceso integral dentro del Esquema Nacional de Seguridad?",
+"ground_truth": "Implica que la seguridad debe comprender e integrar todos los elementos técnicos, humanos, materiales y organizativos involucrados en el sistema. El Esquema Nacional de Seguridad indica que esto es necesario para evitar visiones parciales que puedan dejar vulnerabilidades sin cubrir."
+},
+{
+"id": "Q24",
+"tipo": "C",
+"documento": "OWASP",
+"question": "¿Qué diferencia técnica existe entre una vulnerabilidad de Inyección y una Falsificación de Solicitudes del Lado del Servidor (SSRF)?",
+"ground_truth": "Según la guía OWASP, la inyección ocurre cuando se envían datos no confiables a un intérprete para ejecutar comandos maliciosos. Por el contrario, la falsificación de solicitudes del lado del servidor sucede cuando la aplicación web obtiene un recurso remoto sin validar previamente la dirección URL proporcionada por el usuario."
+},
+{
+"id": "Q25",
+"tipo": "A",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Qué componentes se consideran un activo de información dentro de una organización según el glosario de ciberseguridad?",
+"ground_truth": "El glosario de ciberseguridad define como activo de información a cualquier componente, dato o recurso que tiene valor real para la organización. Debido a la importancia de este valor, dichos componentes requieren la aplicación de medidas de protección adecuadas y proporcionales."
+},
+{
+"id": "Q26",
+"tipo": "C",
+"documento": "Glosario_ciberseguridad",
+"question": "¿Qué diferencia conceptual existe entre las vulnerabilidades catalogadas como 0-day y Zero-day?",
+"ground_truth": "El glosario de ciberseguridad establece que no existe ninguna diferencia conceptual o técnica entre ambos términos. El concepto 0-day se utiliza habitualmente en el sector como un sinónimo directo y abreviado para referirse a las vulnerabilidades de tipo Zero-day."
+}
+]
