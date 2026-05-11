@@ -5,10 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import nest_asyncio
 from datasets import Dataset
-from ragas import evaluate
 from ragas.metrics import (
-    faithfulness,
-    answer_relevancy,
     context_precision,
     context_recall,
 )
