@@ -597,7 +597,10 @@ async function loadHistory() {
         if (typeof trendChart !== 'undefined' && trendChart !== null) {
             const historialOrdenado = [...history].reverse(); 
             trendChart.data.labels = historialOrdenado.map(h => (h.fecha || 'N/A').split(',')[0]);
-            trendChart.data.datasets[0].data = historialOrdenado.map(h => (h.criticas || 0) + (h.medias || 0) + (h.bajas || 0));
+            trendChart.data.datasets[0].data = historialOrdenado.map(h => 
+                h.puntuacion > 0 ? h.puntuacion : 
+                Math.max(0, 100 - ((h.criticas || 0) * 15) - ((h.medias || 0) * 8) - ((h.bajas || 0) * 3))
+            );
             trendChart.update();
         }
 

@@ -183,6 +183,7 @@ def obtener_historial(
                 "criticas": criticas,
                 "medias": medias,
                 "bajas": bajas,
+                "puntuacion": a.puntuacion if a.puntuacion is not None else 0.0,
             }
         )
     return resultados
