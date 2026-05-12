@@ -13,8 +13,7 @@ async function enviarMensaje() {
     const tempValue = slider ? parseFloat(slider.value) : 0.0;
 
     
-    const modelSelect = document.getElementById('model-select');
-    const modelValue = modelSelect ? modelSelect.value : "llama3.1:8b";
+    const modelValue = window.modeloIA || (document.getElementById('model-select') ? document.getElementById('model-select').value : "llama3.1:8b");
 
     const txt = input.value.trim();
     if (!txt) return; 

@@ -146,3 +146,24 @@ async function cerrarSesion() {
         console.error("Error al cerrar sesión", e);
     }
 }
+
+function guardarConfigIA() {
+    const modelo = document.getElementById('model-select').value;
+    const temperatura = document.querySelector('input[type="range"]').value;
+    
+    // Guardar en variables globales accesibles por audit.js y chat.js
+    window.modeloIA = modelo;
+    window.temperaturaIA = parseFloat(temperatura);
+    
+    toggleSettings();
+    
+    // Feedback visual
+    const btn = document.querySelector('.btn-primary');
+    const textoOriginal = btn.innerText;
+    btn.innerText = '✓ Guardado';
+    btn.style.background = 'var(--success)';
+    setTimeout(() => {
+        btn.innerText = textoOriginal;
+        btn.style.background = '';
+    }, 1500);
+}

@@ -82,6 +82,8 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('modelo_ia', window.modeloIA || document.getElementById('model-select').value || 'llama3.2:3b');
+    formData.append('temperatura', window.temperaturaIA !== undefined ? window.temperaturaIA : 0.0);
 
     try {
    
