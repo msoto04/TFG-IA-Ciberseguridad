@@ -28,7 +28,7 @@ from celery import Celery
 from celery.utils.log import get_task_logger
 
 from Src.core.database import SessionLocal
-from Src.db_models.models import Vulnerabilidad
+from Src.db_models.models import Vulnerabilidad, Auditoria
 from Src.security_tools.sast_scanner import ejecutar_sast_profesional
 from Src.ai_engine.orquestador import app as grafo_agentes
 
@@ -49,6 +49,23 @@ def emitir_progreso(audit_id, mensaje, progreso):
         redis_client.publish(f"progreso_{audit_id}", evento)
     except Exception as e:
         logger.error(f"[{audit_id}] Error emitiendo progreso a Redis: {e}")
+
+def calcular_puntuacion(hallazgos: list) -> float:
+    """
+    Calcula una puntuación de seguridad (0-100) basada en los hallazgos SAST.
+    Parte de 100 y descuenta puntos según la severidad de cada vulnerabilidad.
+    """
+    puntuacion = 100.0
+    for h in hallazgos:
+        sev = str(h.get("severidad", "INFO")).upper()
+        if any(k in sev for k in ["ERROR", "ALTA", "ALTO", "HIGH", "CRIT"]):
+            puntuacion -= 15
+        elif any(k in sev for k in ["WARNING", "MEDIA", "MEDIO", "MEDIUM", "WARN"]):
+            puntuacion -= 8
+        else:
+            puntuacion -= 3
+    return max(0.0, round(puntuacion, 2))
+
 
 
 @celery_app.task(bind=True, name="procesar_auditoria", max_retries=3)
@@ -158,6 +175,13 @@ def procesar_auditoria_task(
                 consulta_index=consulta_real,
             )
             db.add(nueva_vuln)
+
+        # Calcular y persistir la puntuación global de la auditoría
+        puntuacion_final = calcular_puntuacion(hallazgos)
+        auditoria_db = db.query(Auditoria).filter(Auditoria.id == audit_id).first()
+        if auditoria_db:
+            auditoria_db.puntuacion = puntuacion_final
+            logger.info(f"[{audit_id}] Puntuación calculada: {puntuacion_final}/100")
 
         db.commit()
         logger.info(f"[{audit_id}] Auditoría completada y guardada exitosamente.")
