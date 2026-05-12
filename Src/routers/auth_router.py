@@ -8,6 +8,10 @@ from Src.db_models.models import Usuario
 from Src.core.auth import get_password_hash, verificar_password, crear_token_acceso
 
 from Src.core.config import settings
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(tags=["Autenticación"])
 
@@ -61,7 +65,8 @@ def obtener_usuario_actual(request: Request, db: Session = Depends(get_db)):
 
 
 @router.post("/registro", response_model=Token)
-def registrar_usuario(usuario: UsuarioRegistro, db: Session = Depends(get_db)):
+@limiter.limit("3/minute")
+def registrar_usuario(request: Request, usuario: UsuarioRegistro, db: Session = Depends(get_db)):
     db_user = db.query(Usuario).filter(Usuario.email == usuario.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="El email ya está registrado")
@@ -77,7 +82,8 @@ def registrar_usuario(usuario: UsuarioRegistro, db: Session = Depends(get_db)):
 
 
 @router.post("/login")
-def login(usuario: UsuarioLogin, response: Response, db: Session = Depends(get_db)): 
+@limiter.limit("5/minute")
+def login(request: Request, usuario: UsuarioLogin, response: Response, db: Session = Depends(get_db)):
     db_user = db.query(Usuario).filter(Usuario.email == usuario.email).first()
     if not db_user or not verificar_password(usuario.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")

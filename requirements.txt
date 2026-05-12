@@ -50,6 +50,7 @@ datasets==2.20.0
 pandas==2.2.2
 matplotlib==3.9.2
 nest-asyncio==1.6.0
+slowapi==0.1.9
 
 
 

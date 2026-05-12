@@ -16,6 +16,11 @@ from Src.routers.auth_router import router as auth_router
 from Src.routers.audit_router import router as audit_router
 from Src.routers.chat_router import router as chat_router
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from Src.routers.auth_router import limiter
+
 
 class Token(BaseModel):
     access_token: str
@@ -50,6 +55,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
 
 app = FastAPI(title="Sistema Auditoría IA (ENS) - RAG FAISS")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 app.include_router(auth_router)
 app.include_router(audit_router)
 app.include_router(chat_router)

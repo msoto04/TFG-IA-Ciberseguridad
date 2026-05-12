@@ -102,11 +102,13 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str):
     finally:
         await pubsub.unsubscribe()
         try:
+            await pubsub.aclose()
+        except Exception:
+            pass
+        try:
             await websocket.close()
         except Exception:
-
             pass
-
 
 @router.post("/chat")
 async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener_usuario_actual)):
