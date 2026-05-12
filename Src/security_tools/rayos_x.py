@@ -8,7 +8,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 def ver_memoria():
     print("Conectando con la base de datos...")
 
-    db_path = "D:/TFG_Ciberseguridad/faiss_index"
+    db_path = os.getenv("FAISS_PATH", "/app/faiss_index")
 
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
     vector_db = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)

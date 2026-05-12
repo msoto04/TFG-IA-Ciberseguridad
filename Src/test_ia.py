@@ -1,23 +1,31 @@
+import pytest
 import requests
 
 
-def test_ollama():
+@pytest.mark.skip(
+    reason="Test de integración manual — requiere Ollama activo en localhost:11434. "
+           "Ejecutar manualmente con: pytest Src/test_ia.py -v -k test_ollama --no-header -s"
+)
+def test_ollama_responde_correctamente():
+    """
+    Verifica que el motor de inferencia local Ollama está activo
+    y responde correctamente a una petición de generación de texto.
+    Requiere que Ollama esté ejecutándose en el host anfitrión (puerto 11434).
+    """
     url = "http://localhost:11434/api/generate"
-    data = {"model": "deepseek-r1:8b", "prompt": "Responde solo: OK", "stream": False}
+    data = {
+        "model": "llama3.2:3b",
+        "prompt": "Responde solo con la palabra: OK",
+        "stream": False
+    }
 
-    print("Conectando con Ollama... (esto puede tardar si el modelo se está cargando)")
     try:
-
         response = requests.post(url, json=data, timeout=60)
         response.raise_for_status()
-        print("Respuesta recibida:", response.json()["response"])
+        respuesta = response.json().get("response", "")
+        assert respuesta, "Ollama respondió pero la respuesta está vacía"
+        assert len(respuesta) > 0, "La respuesta del modelo no contiene texto"
     except requests.exceptions.Timeout:
-        print("ERROR: El modelo tardó demasiado en responder. ¿Tienes suficiente RAM?")
+        pytest.fail("Timeout: Ollama tardó más de 60 segundos. ¿Tiene suficiente RAM?")
     except requests.exceptions.ConnectionError:
-        print("ERROR: No se pudo conectar. ¿Está el icono de la ovejita de Ollama abierto?")
-    except Exception as e:
-        print(f"ERROR inesperado: {e}")
-
-
-if __name__ == "__main__":
-    test_ollama()
+        pytest.fail("ConnectionError: No se pudo conectar a Ollama. ¿Está el servicio activo?")

@@ -1,3 +1,4 @@
+import os
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
@@ -5,7 +6,7 @@ import os
 
 def procesar_documentos():
 
-    docs_path = "D:/TFG_Ciberseguridad/docs"
+    docs_path = os.getenv("DOCS_PATH", "/app/docs")
     documentos_totales = []
 
     for archivo in os.listdir(docs_path):

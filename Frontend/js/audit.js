@@ -820,7 +820,7 @@ async function cargarAuditoriaPasada(auditId) {
                 item.style.cursor = 'pointer';
                 item.style.transition = 'all 0.2s ease';
                 
-             
+                // Plantilla estática — datos insertados con .textContent debajo.
                 item.innerHTML = `
                     <div class="safe-title" style="font-weight: 600; margin-bottom: 5px; font-size: 0.95em;"></div>
                     <div style="font-size: 0.8em; color: var(--text-muted);"><i class="fas ${icono}" style="color: ${colorBase}"></i> <span class="safe-sev"></span></div>
@@ -835,6 +835,10 @@ async function cargarAuditoriaPasada(auditId) {
                     item.style.background = 'rgba(255, 255, 255, 0.05)'; 
 
                   
+                    // Estructura HTML estática del panel de detalle.
+                    // Los datos dinámicos (v.vulnerabilidad, v.analisis_legal, etc.)
+                    // se insertan a continuación exclusivamente mediante .textContent
+                    // para prevenir ataques XSS. Ver líneas siguientes.
                     findingDetail.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                             <span id="det-sev" style="background: ${colorBase}; color: white; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85em;"></span>

@@ -6,7 +6,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 
 def consultar_ens():
-    db_path = "D:/TFG_Ciberseguridad/faiss_index"
+    db_path = os.getenv("FAISS_PATH", "/app/faiss_index")
 
     print("Cargando modelo de embeddings...")
     embeddings = OllamaEmbeddings(model="mxbai-embed-large")

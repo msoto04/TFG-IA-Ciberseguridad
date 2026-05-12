@@ -1,3 +1,12 @@
+"""
+Script de línea de comandos para pruebas de desarrollo del pipeline SAST + IA.
+Genera informes en formato Markdown (.md) para inspección rápida durante el desarrollo.
+
+NOTA: Este script es una utilidad de desarrollo y no forma parte del flujo de producción.
+La generación de informes PDF para el usuario final se implementa en la capa de
+presentación del Frontend mediante la librería jsPDF (Frontend/js/audit.js).
+"""
+
 import os
 import json
 from Src.security_tools.sast_scanner import ejecutar_sast_profesional
