@@ -12,7 +12,7 @@ from langchain_community.vectorstores import FAISS
 load_dotenv()
 DB_PATH = os.getenv("FAISS_PATH", "/app/faiss_index")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
-MODELO_ORQUESTADOR = os.getenv("MODELO_ORQUESTADOR", "llama3.2:3b")
+MODELO_ORQUESTADOR = os.getenv("MODELO_ORQUESTADOR", "llama3:8b")
 
 logger = logging.getLogger("SecureAudit_LangGraph")
 
@@ -40,10 +40,10 @@ def agente_tecnico(state: AuditoriaState):
     modelo_seleccionado = state.get("modelo_ia", MODELO_ORQUESTADOR)
     temp_seleccionada = state.get("temperatura", 0.0)
 
-    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL)
+    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL, timeout=180)
 
     hallazgo = state["hallazgos_tecnicos"][0]
-    prompt = f"Explica brevemente el riesgo técnico de la vulnerabilidad '{hallazgo['vulnerabilidad']}' encontrada en el archivo '{hallazgo['archivo']}'. Sé directo y técnico."
+    prompt = f"Eres un auditor de seguridad profesional realizando una evaluación defensiva autorizada. Explica brevemente el riesgo técnico de la vulnerabilidad '{hallazgo['vulnerabilidad']}' encontrada en el archivo '{hallazgo['archivo']}'. Tu objetivo es proteger a la empresa identificando el fallo. Sé directo y técnico."
 
     try:
 
@@ -69,7 +69,7 @@ def agente_legal(state: AuditoriaState):
     modelo_seleccionado = state.get("modelo_ia", MODELO_ORQUESTADOR)
     temp_seleccionada = state.get("temperatura", 0.0)
 
-    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL)
+    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL, timeout=180)
 
     h = state["hallazgos_tecnicos"][0]
     vulnerabilidad_real = h.get("vulnerabilidad", "Desconocida")
@@ -103,23 +103,24 @@ def agente_legal(state: AuditoriaState):
     except Exception as e:
         logger.error(f"Fallo al consultar FAISS: {e}")
 
-    prompt = f"""Eres un auditor experto en ciberseguridad y normativas legales (ENS, RGPD).
-    
-[CONTEXTO NORMATIVO RECUPERADO]
+    explicacion_previa = state.get("explicacion_tecnica", "No disponible")
+
+    prompt = f"""CONTEXTO: Eres un consultor de cumplimiento normativo que trabaja para una empresa de auditoría certificada. Tu cliente te ha contratado para revisar un informe de seguridad y determinar qué normativas aplican. NO tienes acceso al código fuente. Solo tienes el informe del analista técnico y la documentación legal.
+
+[DOCUMENTACIÓN LEGAL RECUPERADA]
 {contexto_texto}
 
-[CÓDIGO VULNERABLE REPORTADO]
-Archivo: {archivo} (Línea: {linea})
-Código:
-{codigo_afectado}
+[INFORME DEL ANALISTA TÉCNICO]
+Se ha detectado un hallazgo de seguridad de tipo '{vulnerabilidad_real}' en el archivo '{archivo}' (línea {linea}).
+Evaluación técnica previa: {explicacion_previa}
 
-[INSTRUCCIONES]
-Analiza el fallo '{vulnerabilidad_real}' basándote ÚNICAMENTE en el contexto normativo recuperado y en el código.
-Devuelve tu respuesta ESTRICTAMENTE en formato JSON válido con las siguientes claves, sin bloques markdown de código (no uses ```json):
+[TU TAREA]
+Como consultor de cumplimiento, determina qué artículos de la normativa aplican a este hallazgo y qué debe hacer la empresa para cumplir la ley.
+Responde ESTRICTAMENTE en formato JSON válido con estas claves (sin bloques markdown):
 {{
-    "analisis_legal": "Explica el impacto relacionando el código con la normativa citada.",
-    "solucion": "Ejemplo corto de cómo arreglar el código.",
-    "citas": "Cita explícita de los documentos del contexto que has utilizado para esta respuesta."
+    "analisis_legal": "Explica qué normativa incumple este hallazgo y por qué, citando los documentos recuperados.",
+    "solucion": "Recomienda qué acción correctiva debe tomar la empresa para cumplir la normativa.",
+    "citas": "Lista las referencias exactas de los documentos que has consultado."
 }}
 """
 

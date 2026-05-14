@@ -32,7 +32,7 @@ def get_db():
 @router.post("/auditar-zip")
 async def auditar_zip(
     file: UploadFile = File(...),
-    modelo_ia: str = Form("llama3.2:3b"),
+    modelo_ia: str = Form("llama3:8b"),
     temperatura: float = Form(0.0),
     current_user: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db),

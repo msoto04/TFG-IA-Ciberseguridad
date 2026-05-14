@@ -50,6 +50,29 @@ def emitir_progreso(audit_id, mensaje, progreso):
     except Exception as e:
         logger.error(f"[{audit_id}] Error emitiendo progreso a Redis: {e}")
 
+def deduplicar_hallazgos(hallazgos: list) -> list:
+    """
+    Agrupa vulnerabilidades que apuntan al mismo archivo y línea,
+    combinando las reglas de Semgrep en un solo hallazgo para evitar
+    llamadas redundantes al LLM.
+    """
+    vistos = {}
+    for h in hallazgos:
+        clave = f"{h.get('archivo', '')}:{h.get('linea', 0)}"
+        if clave in vistos:
+            regla_existente = vistos[clave].get("regla_semgrep", "")
+            regla_nueva = h.get("regla_semgrep", "")
+            if regla_nueva not in regla_existente:
+                vistos[clave]["regla_semgrep"] = f"{regla_existente} | {regla_nueva}"
+            sev_actual = str(vistos[clave].get("severidad", "")).upper()
+            sev_nueva = str(h.get("severidad", "")).upper()
+            if "ERROR" in sev_nueva and "ERROR" not in sev_actual:
+                vistos[clave]["severidad"] = h["severidad"]
+        else:
+            vistos[clave] = dict(h)
+    return list(vistos.values())
+
+
 def calcular_puntuacion(hallazgos: list) -> float:
     """
     Calcula una puntuación de seguridad (0-100) basada en los hallazgos SAST.
@@ -76,7 +99,7 @@ def procesar_auditoria_task(
     work_dir,
     file_name,
     usuario_id,
-    modelo_ia="llama3.2:3b",
+    modelo_ia="llama3:8b",
     temperatura=0.0,
 ):
     logger.info(f"[{audit_id}] Iniciando auditoría para el archivo: {file_name}")
@@ -116,6 +139,7 @@ def procesar_auditoria_task(
         emitir_progreso(audit_id, "Archivos extraídos de forma segura. Iniciando escáner...", 10)
 
         hallazgos = ejecutar_sast_profesional(work_dir)
+        hallazgos = deduplicar_hallazgos(hallazgos)
 
         if not hallazgos:
             logger.info(f"[{audit_id}] No se encontraron vulnerabilidades. Código seguro.")
@@ -216,3 +240,4 @@ def procesar_auditoria_task(
                 os.remove(zip_path)
         except Exception as e:
             logger.error(f"[{audit_id}] Error limpiando archivos temporales: {e}")
+

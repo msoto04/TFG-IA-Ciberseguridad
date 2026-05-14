@@ -250,3 +250,13 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2026-05-12 17:35:02,817 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
 2026-05-12 18:07:09,828 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.0
 2026-05-12 18:09:46,410 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-12 19:22:46,448 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.2:3b, Temperatura: 0.3
+2026-05-12 19:22:46,501 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-05-12 19:22:46,962 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-05-12 19:23:53,415 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-12 19:26:59,501 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.2:3b, Temperatura: 0.3
+2026-05-12 19:27:15,245 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-12 19:32:37,429 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.1:8b, Temperatura: 0.3
+2026-05-12 19:34:19,717 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-12 19:35:07,306 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: llama3.2:3b, Temperatura: 0.0
+2026-05-12 19:36:13,039 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
