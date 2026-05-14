@@ -73,7 +73,7 @@ def agente_legal(state: AuditoriaState):
 
     h = state["hallazgos_tecnicos"][0]
     vulnerabilidad_real = h.get("vulnerabilidad", "Desconocida")
-    codigo_afectado = h.get("codigo_afectado", "No disponible")
+   
     linea = h.get("linea", "Desconocida")
     archivo = h.get("archivo", "Desconocido")
 
