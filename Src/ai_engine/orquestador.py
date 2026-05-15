@@ -32,6 +32,56 @@ class AuditoriaState(TypedDict):
     modelo_ia: str
     temperatura: float
 
+TRADUCCION_CONOCIDAS = {
+    "subprocess-injection": "ejecución remota de comandos no autorizados mediante inyección en procesos del sistema",
+    "dangerous-system-call": "brecha de seguridad por ejecución de comandos del sistema operativo sin validación",
+    "command-injection-os-system": "inyección de comandos maliciosos en el sistema operativo",
+    "os-system-injection": "ejecución arbitraria de comandos del sistema operativo",
+    "tainted-sql-string": "inyección SQL por concatenación de datos de usuario sin sanitizar",
+    "sqlalchemy-execute-raw-query": "inyección SQL mediante ejecución de consultas sin parametrizar",
+    "insecure-hash-algorithm-md5": "uso de algoritmo hash criptográficamente débil MD5 para protección de datos",
+    "md5-used-as-password": "uso de MD5 como función hash para almacenamiento de contraseñas",
+    "secure-set-cookie": "configuración insegura de cookies sin protección HttpOnly ni Secure",
+    "avoid-hardcoded-config-debug": "modo depuración activado en entorno de producción exponiendo configuración",
+    "avoid-app-run-with-bad-host": "servidor web expuesto en todas las interfaces de red sin restricción",
+    "detected-stripe-api-key": "credenciales de API expuestas en el código fuente sin cifrar",
+    "path-traversal-open": "acceso no autorizado a archivos del sistema mediante manipulación de rutas",
+    "hardcoded-password": "contraseñas almacenadas directamente en el código fuente",
+}
+
+
+def traducir_vulnerabilidad(nombre_semgrep: str, llm) -> str:
+    """
+    Traduce el identificador técnico de Semgrep a lenguaje natural.
+    Usa un diccionario de traducciones conocidas para vulnerabilidades comunes
+    y recurre al LLM solo para vulnerabilidades no catalogadas.
+    """
+    nombre_lower = nombre_semgrep.lower().replace("_", "-")
+    
+    # Primero: buscar en diccionario de traducciones conocidas
+    for clave, traduccion in TRADUCCION_CONOCIDAS.items():
+        if clave in nombre_lower:
+            logger.info(f"Traducción por diccionario: '{nombre_semgrep}' → '{traduccion}'")
+            return traduccion
+    
+    # Segundo: si no está en el diccionario, usar LLM como fallback
+    logger.info(f"Vulnerabilidad no catalogada: '{nombre_semgrep}', usando LLM para traducir")
+    prompt = (
+        f"Traduce este identificador técnico de seguridad a una frase corta en español "
+        f"que describa el riesgo de ciberseguridad. Solo responde con la frase, nada más.\n"
+        f"Identificador: {nombre_semgrep}\n"
+        f"Traducción:"
+    )
+    try:
+        respuesta = llm.invoke(prompt)
+        traduccion = respuesta.content.strip().replace("\n", " ").replace("\r", "")
+        traduccion = traduccion.strip(' " \u201c \u201d \' ')
+        if 5 < len(traduccion) < 300:
+            return traduccion
+    except Exception as e:
+        logger.error(f"Error en traducción LLM: {e}")
+    
+    return nombre_semgrep
 
 def agente_tecnico(state: AuditoriaState):
     inicio = time.time()
@@ -73,6 +123,8 @@ def agente_legal(state: AuditoriaState):
 
     h = state["hallazgos_tecnicos"][0]
     vulnerabilidad_real = h.get("vulnerabilidad", "Desconocida")
+    consulta_faiss = traducir_vulnerabilidad(vulnerabilidad_real, llm_dinamico)
+    logger.info(f"Traducción FAISS: '{vulnerabilidad_real}' → '{consulta_faiss}'")
    
     linea = h.get("linea", "Desconocida")
     archivo = h.get("archivo", "Desconocido")
@@ -82,20 +134,32 @@ def agente_legal(state: AuditoriaState):
 
     try:
         vectorstore = FAISS.load_local(DB_PATH, embeddings, allow_dangerous_deserialization=True)
-        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-        docs = retriever.invoke(vulnerabilidad_real)
+        
+        # Búsqueda dual: sin traducir + traducido, se queda con los mejores
+        docs_original = vectorstore.similarity_search_with_score(vulnerabilidad_real, k=3)
+        docs_traducido = vectorstore.similarity_search_with_score(consulta_faiss, k=3)
+        
+        # Combinar y ordenar por menor distancia (mejor similitud)
+        todos = {}
+        for doc, score in docs_original + docs_traducido:
+            clave = doc.page_content[:100]
+            if clave not in todos or score < todos[clave][1]:
+                todos[clave] = (doc, score)
+        
+        mejores = sorted(todos.values(), key=lambda x: x[1])[:3]
+        docs = [doc for doc, score in mejores]
+        
+        logger.info(f"Búsqueda dual: {len(docs_original)} originales + {len(docs_traducido)} traducidos → {len(docs)} mejores")
 
         if docs:
             contexto_fragmentos = []
             for i, doc in enumerate(docs):
-
                 fuente = doc.metadata.get("source", "Documento desconocido")
                 fuente_corta = os.path.basename(fuente)
                 pagina = doc.metadata.get("page", "N/A")
 
                 ref_str = f"Documento: {fuente_corta} (Pág {pagina})"
                 referencias_encontradas.append(ref_str)
-
                 contexto_fragmentos.append(f"--- REFERENCIA {i+1} ({ref_str}) ---\n{doc.page_content}")
 
             contexto_texto = "\n\n".join(contexto_fragmentos)
@@ -137,7 +201,7 @@ Responde ESTRICTAMENTE en formato JSON válido con estas claves (sin bloques mar
 
         import json
 
-        resultado_json = json.loads(contenido)
+        resultado_json = json.loads(contenido, strict=False)
 
         veredicto = f"**Análisis:** {resultado_json.get('analisis_legal', '')}\n\n**Solución:** {resultado_json.get('solucion', '')}"
 
