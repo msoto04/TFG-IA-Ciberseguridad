@@ -12,7 +12,7 @@ from langchain_community.vectorstores import FAISS
 load_dotenv()
 DB_PATH = os.getenv("FAISS_PATH", "/app/faiss_index")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
-MODELO_ORQUESTADOR = os.getenv("MODELO_ORQUESTADOR", "llama3:8b")
+MODELO_ORQUESTADOR = os.getenv("MODELO_ORQUESTADOR", "deepseek-r1:8b")
 
 logger = logging.getLogger("SecureAudit_LangGraph")
 
@@ -47,6 +47,9 @@ TRADUCCION_CONOCIDAS = {
     "detected-stripe-api-key": "credenciales de API expuestas en el código fuente sin cifrar",
     "path-traversal-open": "acceso no autorizado a archivos del sistema mediante manipulación de rutas",
     "hardcoded-password": "contraseñas almacenadas directamente en el código fuente",
+    "ssrf-injection-requests": "falsificación de solicitudes del lado del servidor SSRF que permite enviar solicitudes manipuladas a destinos inesperados",
+    "ssrf-requests": "falsificación de solicitudes del lado del servidor SSRF que permite obtener recursos remotos sin validar la URL",
+    "insecure-deserialization": "deserialización insegura que permite la ejecución de código arbitrario y violación de integridad de datos",
 }
 
 
@@ -136,8 +139,8 @@ def agente_legal(state: AuditoriaState):
         vectorstore = FAISS.load_local(DB_PATH, embeddings, allow_dangerous_deserialization=True)
         
         # Búsqueda dual: sin traducir + traducido, se queda con los mejores
-        docs_original = vectorstore.similarity_search_with_score(vulnerabilidad_real, k=3)
-        docs_traducido = vectorstore.similarity_search_with_score(consulta_faiss, k=3)
+        docs_original = vectorstore.similarity_search_with_score(vulnerabilidad_real, k=4)
+        docs_traducido = vectorstore.similarity_search_with_score(consulta_faiss, k=4)
         
         # Combinar y ordenar por menor distancia (mejor similitud)
         todos = {}
@@ -146,7 +149,7 @@ def agente_legal(state: AuditoriaState):
             if clave not in todos or score < todos[clave][1]:
                 todos[clave] = (doc, score)
         
-        mejores = sorted(todos.values(), key=lambda x: x[1])[:3]
+        mejores = sorted(todos.values(), key=lambda x: x[1])[:4]
         docs = [doc for doc, score in mejores]
         
         logger.info(f"Búsqueda dual: {len(docs_original)} originales + {len(docs_traducido)} traducidos → {len(docs)} mejores")
@@ -180,6 +183,8 @@ Evaluación técnica previa: {explicacion_previa}
 
 [TU TAREA]
 Como consultor de cumplimiento, determina qué artículos de la normativa aplican a este hallazgo y qué debe hacer la empresa para cumplir la ley.
+REGLA DE PRIORIDAD: Si el contexto recuperado contiene fragmentos de OWASP, prioriza SIEMPRE la normativa OWASP sobre cualquier otra fuente, ya que es la referencia técnica directa para vulnerabilidades de aplicaciones web. Usa el RGPD o ENS solo como complemento.
+REGLA CRÍTICA: SOLO puedes citar normativas que aparezcan TEXTUALMENTE en la sección [DOCUMENTACIÓN LEGAL RECUPERADA] de arriba. Los únicos documentos válidos son: ENS_2022.pdf, RGPD.pdf, OWASP.txt, Criptologia_de_empleo_ENS.pdf y Glosario_Ciberseguridad.pdf. Si citas cualquier otra fuente (como LOPD, ISO 27001, LSSI-CE, o cualquier normativa no listada), tu respuesta será INVÁLIDA. Si no encuentras normativa aplicable en el contexto, di explícitamente que no se encontró normativa directamente aplicable.
 Responde ESTRICTAMENTE en formato JSON válido con estas claves (sin bloques markdown):
 {{
     "analisis_legal": "Explica qué normativa incumple este hallazgo y por qué, citando los documentos recuperados.",
@@ -187,6 +192,8 @@ Responde ESTRICTAMENTE en formato JSON válido con estas claves (sin bloques mar
     "citas": "Lista las referencias exactas de los documentos que has consultado."
 }}
 """
+
+    contenido = ""
 
     try:
 

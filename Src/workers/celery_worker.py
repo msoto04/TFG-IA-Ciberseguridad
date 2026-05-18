@@ -50,6 +50,54 @@ def emitir_progreso(audit_id, mensaje, progreso):
     except Exception as e:
         logger.error(f"[{audit_id}] Error emitiendo progreso a Redis: {e}")
 
+DOMINIOS_ENS = {
+    # Inyección y manipulación de datos → Integridad + Confidencialidad
+    "tainted-sql-string":           {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 0},
+    "sqlalchemy-execute-raw-query": {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 0},
+    "sql-injection":                {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 0},
+
+    # Criptografía débil → Confidencialidad + Autenticidad
+    "insecure-hash-algorithm-md5":  {"confidencialidad": 1, "integridad": 0, "trazabilidad": 0, "autenticidad": 1, "disponibilidad": 0},
+    "md5-used-as-password":         {"confidencialidad": 1, "integridad": 0, "trazabilidad": 0, "autenticidad": 1, "disponibilidad": 0},
+
+    # Cookies inseguras → Confidencialidad + Autenticidad
+    "secure-set-cookie":            {"confidencialidad": 1, "integridad": 0, "trazabilidad": 0, "autenticidad": 1, "disponibilidad": 0},
+
+    # Ejecución de comandos → Integridad + Disponibilidad + Confidencialidad
+    "command-injection-os-system":  {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 1},
+    "os-system-injection":          {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 1},
+    "dangerous-system-call":        {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 1},
+    "subprocess-injection":         {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 1},
+
+    # Configuración insegura → Trazabilidad + Disponibilidad
+    "avoid-hardcoded-config-debug": {"confidencialidad": 0, "integridad": 0, "trazabilidad": 1, "autenticidad": 0, "disponibilidad": 1},
+    "avoid-app-run-with-bad-host":  {"confidencialidad": 0, "integridad": 0, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 1},
+
+    # Credenciales expuestas → Confidencialidad + Trazabilidad
+    "detected-stripe-api-key":      {"confidencialidad": 1, "integridad": 0, "trazabilidad": 1, "autenticidad": 0, "disponibilidad": 0},
+    "hardcoded-password":           {"confidencialidad": 1, "integridad": 0, "trazabilidad": 1, "autenticidad": 0, "disponibilidad": 0},
+
+    # Path traversal → Confidencialidad + Integridad
+    "path-traversal-open":          {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 0},
+
+    # Deserialización → Integridad + Disponibilidad + Confidencialidad
+    "insecure-deserialization":     {"confidencialidad": 1, "integridad": 1, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 1},
+
+    # SSRF → Confidencialidad + Disponibilidad
+    "ssrf-injection-requests":      {"confidencialidad": 1, "integridad": 0, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 1},
+    "ssrf-requests":                {"confidencialidad": 1, "integridad": 0, "trazabilidad": 0, "autenticidad": 0, "disponibilidad": 1},
+}
+
+
+def clasificar_dominios(regla_semgrep: str) -> dict:
+    """Clasifica una vulnerabilidad por los dominios ENS que afecta."""
+    regla_lower = regla_semgrep.lower().replace("_", "-")
+    for clave, dominios in DOMINIOS_ENS.items():
+        if clave in regla_lower:
+            return dominios
+    # Default: afecta a todos por precaución
+    return {"confidencialidad": 1, "integridad": 1, "trazabilidad": 1, "autenticidad": 1, "disponibilidad": 1}
+
 def deduplicar_hallazgos(hallazgos: list) -> list:
     """
     Agrupa vulnerabilidades que apuntan al mismo archivo y línea,
@@ -185,6 +233,9 @@ def procesar_auditoria_task(
                 referencias = "Error al procesar referencias"
                 consulta_real = "Error en consulta"
 
+            dominios = clasificar_dominios(h.get("regla_semgrep", ""))
+            dominios_str = json.dumps(dominios)
+
             nueva_vuln = Vulnerabilidad(
                 auditoria_id=audit_id,
                 nombre=h.get("vulnerabilidad", "Desconocida"),
@@ -197,6 +248,7 @@ def procesar_auditoria_task(
                 modelo_llm=modelo_ia,
                 regla_semgrep=h.get("regla_semgrep", "Desconocida"),
                 consulta_index=consulta_real,
+                dominios_ens=dominios_str,
             )
             db.add(nueva_vuln)
 

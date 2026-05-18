@@ -47,5 +47,6 @@ class Vulnerabilidad(Base):
     regla_semgrep = Column(String, nullable=True)  # Regla completa del motor SAST
 
     analisis_legal = Column(String)
+    dominios_ens = Column(String, nullable=True)  # JSON con dominios ENS afectados
 
     auditoria = relationship("Auditoria", back_populates="vulnerabilidades")

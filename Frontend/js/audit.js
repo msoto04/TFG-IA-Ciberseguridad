@@ -224,7 +224,7 @@ function processAuditResults(data) {
     });
 
     
-    updateCharts(score, severities);
+   updateCharts(score, severities, data.resultados);
 }
 
 function showDetail(item, divElement) {
@@ -435,28 +435,63 @@ function initCharts() {
 
 }
 
-function updateCharts(score, severities) {
+function updateCharts(score, severities, vulnerabilidades) {
     const c = severities.ERROR || 0;
     const m = severities.WARNING || 0;
     const b = severities.INFO || 0;
 
-    let fConf = (c * 0.35) + (m * 0.15) + (b * 0.05);
-    let fInt  = (c * 0.40) + (m * 0.20) + (b * 0.05);
-    let fTraz = (c * 0.10) + (m * 0.25) + (b * 0.15);
-    let fAut  = (c * 0.30) + (m * 0.10) + (b * 0.05);
-    let fDisp = (c * 0.25) + (m * 0.15) + (b * 0.10);
+    // Calcular impacto real por dominio ENS usando clasificación individual
+    let dominios = {confidencialidad: 0, integridad: 0, trazabilidad: 0, autenticidad: 0, disponibilidad: 0};
+
+    if (vulnerabilidades && vulnerabilidades.length > 0) {
+        vulnerabilidades.forEach(v => {
+            let peso = 1.0;
+            let sev = (v.severidad || "").toUpperCase();
+            if (sev.includes("ERROR") || sev.includes("HIGH") || sev.includes("CRIT")) peso = 0.35;
+            else if (sev.includes("WARN") || sev.includes("MED")) peso = 0.15;
+            else peso = 0.05;
+
+            let ens = null;
+            try {
+                if (v.dominios_ens) ens = JSON.parse(v.dominios_ens);
+            } catch(e) {}
+
+            if (ens) {
+                // Clasificación individual real
+                if (ens.confidencialidad) dominios.confidencialidad += peso;
+                if (ens.integridad) dominios.integridad += peso;
+                if (ens.trazabilidad) dominios.trazabilidad += peso;
+                if (ens.autenticidad) dominios.autenticidad += peso;
+                if (ens.disponibilidad) dominios.disponibilidad += peso;
+            } else {
+                // Fallback: afecta a todos los dominios
+                dominios.confidencialidad += peso;
+                dominios.integridad += peso;
+                dominios.trazabilidad += peso;
+                dominios.autenticidad += peso;
+                dominios.disponibilidad += peso;
+            }
+        });
+    } else {
+        // Fallback antiguo si no hay vulnerabilidades individuales
+        dominios.confidencialidad = (c * 0.35) + (m * 0.15) + (b * 0.05);
+        dominios.integridad = (c * 0.40) + (m * 0.20) + (b * 0.05);
+        dominios.trazabilidad = (c * 0.10) + (m * 0.25) + (b * 0.15);
+        dominios.autenticidad = (c * 0.30) + (m * 0.10) + (b * 0.05);
+        dominios.disponibilidad = (c * 0.25) + (m * 0.15) + (b * 0.10);
+    }
 
     if (auditChartRadar) {
         auditChartRadar.data.datasets[0].data = [
-            Math.round(100 * Math.exp(-fConf)),
-            Math.round(100 * Math.exp(-fInt)),
-            Math.round(100 * Math.exp(-fTraz)),
-            Math.round(100 * Math.exp(-fAut)),
-            Math.round(100 * Math.exp(-fDisp))
+            Math.round(100 * Math.exp(-dominios.confidencialidad)),
+            Math.round(100 * Math.exp(-dominios.integridad)),
+            Math.round(100 * Math.exp(-dominios.trazabilidad)),
+            Math.round(100 * Math.exp(-dominios.autenticidad)),
+            Math.round(100 * Math.exp(-dominios.disponibilidad))
         ];
         auditChartRadar.update();
     }
-    
+
     if (auditChartDoughnut) {
         auditChartDoughnut.data.datasets[0].data = [c, m, b];
         auditChartDoughnut.update();

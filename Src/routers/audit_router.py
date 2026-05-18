@@ -138,6 +138,7 @@ def obtener_resultado_auditoria(
                 "referencias_legales": v.referencias_legales,
                 "modelo_llm": v.modelo_llm,
                 "regla_semgrep": v.regla_semgrep,
+                "dominios_ens": v.dominios_ens,
             }
         )
 
