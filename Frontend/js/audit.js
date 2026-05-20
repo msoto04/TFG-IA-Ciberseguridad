@@ -82,8 +82,9 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('modelo_ia', window.modeloIA || document.getElementById('model-select').value || 'llama3.2:3b');
+    formData.append('modelo_ia', window.modeloIA || document.getElementById('model-select').value || 'deepseek-r1:8b');
     formData.append('temperatura', window.temperaturaIA !== undefined ? window.temperaturaIA : 0.0);
+    formData.append('modo_inferencia', window.modoInferencia || document.getElementById('modo-inferencia').value || 'local');
 
     try {
    
@@ -300,7 +301,7 @@ function initCharts() {
                 maintainAspectRatio: false,
                 resizeDelay: 200,
                 scales: {
-                    r: { angleLines: { color: '#334155' }, grid: { color: '#334155' }, pointLabels: { color: '#94a3b8' }, ticks: { display: false }, suggestMin: 0, suggestMax: 100 }
+                    r: { angleLines: { color: '#334155' }, grid: { color: '#334155' }, pointLabels: { color: '#94a3b8' }, ticks: { display: false }, min: 0, max: 100}
                 },
                 plugins: { legend: { display: false } }
             }
@@ -442,6 +443,7 @@ function updateCharts(score, severities, vulnerabilidades) {
 
     // Calcular impacto real por dominio ENS usando clasificación individual
     let dominios = {confidencialidad: 0, integridad: 0, trazabilidad: 0, autenticidad: 0, disponibilidad: 0};
+
 
     if (vulnerabilidades && vulnerabilidades.length > 0) {
         vulnerabilidades.forEach(v => {

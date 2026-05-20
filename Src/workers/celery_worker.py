@@ -149,6 +149,7 @@ def procesar_auditoria_task(
     usuario_id,
     modelo_ia="llama3:8b",
     temperatura=0.0,
+    modo_inferencia="local",
 ):
     logger.info(f"[{audit_id}] Iniciando auditoría para el archivo: {file_name}")
     db = SessionLocal()
@@ -222,6 +223,7 @@ def procesar_auditoria_task(
                         "tiempos": {},
                         "modelo_ia": modelo_ia,
                         "temperatura": float(temperatura),
+                        "modo_inferencia": modo_inferencia,
                     }
                 )
                 analisis = respuesta.get("veredicto_final", "Sin análisis")

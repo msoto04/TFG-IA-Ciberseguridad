@@ -264,3 +264,202 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2026-05-15 17:39:52,788 - faiss.loader - INFO - Loading faiss with AVX2 support.
 2026-05-15 17:39:53,324 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
 2026-05-15 17:43:03,280 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-20 10:01:32,903 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:01:32,981 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-05-20 10:01:33,168 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-05-20 10:04:44,068 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-20 10:26:10,082 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:26:10,119 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2026-05-20 10:26:10,505 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2026-05-20 10:26:10,621 - SecureAudit_LangGraph - INFO - Usando modo API (Groq) con llama-3.3-70b-versatile
+2026-05-20 10:26:12,540 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-20 10:26:12,571 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-20 10:26:23,823 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:26:23,883 - SecureAudit_LangGraph - INFO - Usando modo API (Groq) con llama-3.3-70b-versatile
+2026-05-20 10:26:24,348 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-20 10:26:24,362 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-20 10:26:40,805 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:26:40,863 - SecureAudit_LangGraph - INFO - Usando modo API (Groq) con llama-3.3-70b-versatile
+2026-05-20 10:26:41,660 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-20 10:26:41,662 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-20 10:26:47,742 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:26:47,798 - SecureAudit_LangGraph - INFO - Usando modo API (Groq) con llama-3.3-70b-versatile
+2026-05-20 10:26:47,979 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-05-20 10:26:47,980 - Src.routers.chat_router - ERROR - Error inesperado en Chat: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01ks17j3y2ff9awxx8byzj41e3` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99949, Requested 1353. Please try again in 18m44.928s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+Traceback (most recent call last):
+  File "/app/Src/routers/chat_router.py", line 152, in chat_rag
+    respuesta = await asyncio.to_thread(rag_chain.invoke, {"input": request.mensaje})
+  File "/usr/local/lib/python3.10/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+  File "/usr/local/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 5057, in invoke
+    return self.bound.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 2875, in invoke
+    input = step.invoke(input, config)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/passthrough.py", line 495, in invoke
+    return self._call_with_config(self._invoke, input, config, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 1784, in _call_with_config
+    context.run(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/config.py", line 404, in call_func_with_variable_args
+    return func(input, **kwargs)  # type: ignore[call-arg]
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/passthrough.py", line 482, in _invoke
+    **self.mapper.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 3562, in invoke
+    output = {key: future.result() for key, future in zip(steps, futures)}
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 3562, in <dictcomp>
+    output = {key: future.result() for key, future in zip(steps, futures)}
+  File "/usr/local/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/usr/local/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/usr/local/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 5057, in invoke
+    return self.bound.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 2875, in invoke
+    input = step.invoke(input, config)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 270, in invoke
+    self.generate_prompt(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 703, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 560, in generate
+    raise e
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 550, in generate
+    self._generate_with_cache(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 775, in _generate_with_cache
+    result = self._generate(
+  File "/usr/local/lib/python3.10/site-packages/langchain_groq/chat_models.py", line 472, in _generate
+    response = self.client.create(messages=message_dicts, **params)
+  File "/usr/local/lib/python3.10/site-packages/groq/resources/chat/completions.py", line 461, in create
+    return self._post(
+  File "/usr/local/lib/python3.10/site-packages/groq/_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "/usr/local/lib/python3.10/site-packages/groq/_base_client.py", line 1044, in request
+    raise self._make_status_error_from_response(err.response) from None
+groq.RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01ks17j3y2ff9awxx8byzj41e3` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99949, Requested 1353. Please try again in 18m44.928s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+2026-05-20 10:30:55,526 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:30:55,586 - SecureAudit_LangGraph - INFO - Usando modo LOCAL (Ollama) con deepseek-r1:8b
+2026-05-20 10:35:05,806 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-20 10:40:13,767 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:40:17,127 - SecureAudit_LangGraph - INFO - Usando modo API (Groq) con llama-3.3-70b-versatile
+2026-05-20 10:40:34,873 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-05-20 10:40:34,948 - Src.routers.chat_router - ERROR - Error inesperado en Chat: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01ks17j3y2ff9awxx8byzj41e3` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 98993, Requested 1230. Please try again in 3m12.672s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+Traceback (most recent call last):
+  File "/app/Src/routers/chat_router.py", line 152, in chat_rag
+    respuesta = await asyncio.to_thread(rag_chain.invoke, {"input": request.mensaje})
+  File "/usr/local/lib/python3.10/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+  File "/usr/local/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 5057, in invoke
+    return self.bound.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 2875, in invoke
+    input = step.invoke(input, config)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/passthrough.py", line 495, in invoke
+    return self._call_with_config(self._invoke, input, config, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 1784, in _call_with_config
+    context.run(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/config.py", line 404, in call_func_with_variable_args
+    return func(input, **kwargs)  # type: ignore[call-arg]
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/passthrough.py", line 482, in _invoke
+    **self.mapper.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 3562, in invoke
+    output = {key: future.result() for key, future in zip(steps, futures)}
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 3562, in <dictcomp>
+    output = {key: future.result() for key, future in zip(steps, futures)}
+  File "/usr/local/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/usr/local/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/usr/local/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 5057, in invoke
+    return self.bound.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 2875, in invoke
+    input = step.invoke(input, config)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 270, in invoke
+    self.generate_prompt(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 703, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 560, in generate
+    raise e
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 550, in generate
+    self._generate_with_cache(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 775, in _generate_with_cache
+    result = self._generate(
+  File "/usr/local/lib/python3.10/site-packages/langchain_groq/chat_models.py", line 472, in _generate
+    response = self.client.create(messages=message_dicts, **params)
+  File "/usr/local/lib/python3.10/site-packages/groq/resources/chat/completions.py", line 461, in create
+    return self._post(
+  File "/usr/local/lib/python3.10/site-packages/groq/_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "/usr/local/lib/python3.10/site-packages/groq/_base_client.py", line 1044, in request
+    raise self._make_status_error_from_response(err.response) from None
+groq.RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01ks17j3y2ff9awxx8byzj41e3` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 98993, Requested 1230. Please try again in 3m12.672s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+2026-05-20 10:43:16,388 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:43:16,603 - SecureAudit_LangGraph - INFO - Usando modo LOCAL (Ollama) con deepseek-r1:8b
+2026-05-20 10:49:54,233 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-20 10:52:08,730 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:52:10,373 - SecureAudit_LangGraph - INFO - Usando modo API (Groq) con llama-3.3-70b-versatile
+2026-05-20 10:52:21,518 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-20 10:52:22,911 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.
+2026-05-20 10:53:04,673 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:53:04,749 - SecureAudit_LangGraph - INFO - Usando modo API (Groq) con llama-3.3-70b-versatile
+2026-05-20 10:53:05,135 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-05-20 10:53:05,142 - Src.routers.chat_router - ERROR - Error inesperado en Chat: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01ks17j3y2ff9awxx8byzj41e3` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99820, Requested 1765. Please try again in 22m49.44s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+Traceback (most recent call last):
+  File "/app/Src/routers/chat_router.py", line 152, in chat_rag
+    respuesta = await asyncio.to_thread(rag_chain.invoke, {"input": request.mensaje})
+  File "/usr/local/lib/python3.10/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+  File "/usr/local/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 5057, in invoke
+    return self.bound.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 2875, in invoke
+    input = step.invoke(input, config)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/passthrough.py", line 495, in invoke
+    return self._call_with_config(self._invoke, input, config, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 1784, in _call_with_config
+    context.run(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/config.py", line 404, in call_func_with_variable_args
+    return func(input, **kwargs)  # type: ignore[call-arg]
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/passthrough.py", line 482, in _invoke
+    **self.mapper.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 3562, in invoke
+    output = {key: future.result() for key, future in zip(steps, futures)}
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 3562, in <dictcomp>
+    output = {key: future.result() for key, future in zip(steps, futures)}
+  File "/usr/local/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/usr/local/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/usr/local/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 5057, in invoke
+    return self.bound.invoke(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/runnables/base.py", line 2875, in invoke
+    input = step.invoke(input, config)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 270, in invoke
+    self.generate_prompt(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 703, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 560, in generate
+    raise e
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 550, in generate
+    self._generate_with_cache(
+  File "/usr/local/lib/python3.10/site-packages/langchain_core/language_models/chat_models.py", line 775, in _generate_with_cache
+    result = self._generate(
+  File "/usr/local/lib/python3.10/site-packages/langchain_groq/chat_models.py", line 472, in _generate
+    response = self.client.create(messages=message_dicts, **params)
+  File "/usr/local/lib/python3.10/site-packages/groq/resources/chat/completions.py", line 461, in create
+    return self._post(
+  File "/usr/local/lib/python3.10/site-packages/groq/_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+  File "/usr/local/lib/python3.10/site-packages/groq/_base_client.py", line 1044, in request
+    raise self._make_status_error_from_response(err.response) from None
+groq.RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01ks17j3y2ff9awxx8byzj41e3` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99820, Requested 1765. Please try again in 22m49.44s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+2026-05-20 10:53:31,998 - Src.routers.chat_router - INFO - Petición Chat RAG recibida. Modelo: deepseek-r1:8b, Temperatura: 0.0
+2026-05-20 10:55:06,317 - SecureAudit_LangGraph - INFO - Usando modo LOCAL (Ollama) con deepseek-r1:8b
+2026-05-20 11:00:13,898 - Src.routers.chat_router - INFO - Respuesta del chat generada con éxito.

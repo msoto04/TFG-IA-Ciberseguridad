@@ -9,7 +9,7 @@ from Src.routers.auth_router import obtener_usuario_actual
 from Src.core.database import SessionLocal
 from Src.db_models.models import Usuario, Auditoria
 from Src.core.config import settings
-
+from Src.ai_engine.orquestador import crear_llm
 
 from langchain_community.chat_models import ChatOllama
 from langchain_community.embeddings import OllamaEmbeddings
@@ -41,7 +41,8 @@ def get_db():
 class ChatRequest(BaseModel):
     mensaje: str
     temperature: float = 0.0
-    modelo: str = "llama3.1:8b"
+    modelo: str = "deepseek-r1:8b"
+    modo_inferencia: str = "local"
 
 
 @router.websocket("/ws/progreso/{audit_id}")
@@ -126,7 +127,7 @@ async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener
                 detail="Error: No encuentro la base de conocimientos (FAISS).",
             )
 
-        llm_dinamico = ChatOllama(model=request.modelo, temperature=request.temperature, base_url=OLLAMA_URL)
+        llm_dinamico = crear_llm(modelo=request.modelo, temperatura=request.temperature, modo=request.modo_inferencia)
 
         prompt_template = ChatPromptTemplate.from_template("""
             Eres un Auditor IA Jefe experto en Ciberseguridad y normativas legales.

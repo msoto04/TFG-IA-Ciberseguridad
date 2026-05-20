@@ -34,6 +34,7 @@ async def auditar_zip(
     file: UploadFile = File(...),
     modelo_ia: str = Form("llama3:8b"),
     temperatura: float = Form(0.0),
+    modo_inferencia: str = Form("local"),
     current_user: Usuario = Depends(obtener_usuario_actual),
     db: Session = Depends(get_db),
 ):
@@ -102,6 +103,7 @@ async def auditar_zip(
             current_user.id,
             modelo_ia,
             temperatura,
+            modo_inferencia,
         ],
         countdown=2,
     )

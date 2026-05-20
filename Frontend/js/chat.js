@@ -57,7 +57,8 @@ async function enviarMensaje() {
             body: JSON.stringify({
                 mensaje: txt,
                 temperature: tempValue, 
-                modelo: modelValue     
+                modelo: modelValue,
+                modo_inferencia: window.modoInferencia || 'local'
             })
         });
 

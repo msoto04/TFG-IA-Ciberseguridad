@@ -222,3 +222,26 @@ h1, h2, h3 { font-family: 'JetBrains Mono', monospace; }
     background-color: var(--border);
     border-radius: 10px;
 }
+
+.modal-content {
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 25px;
+}
+
+.setting-group {
+    margin-bottom: 15px;
+}
+
+.setting-group select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95vw;
+        padding: 15px;
+    }
+}

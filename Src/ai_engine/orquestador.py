@@ -13,12 +13,33 @@ load_dotenv()
 DB_PATH = os.getenv("FAISS_PATH", "/app/faiss_index")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
 MODELO_ORQUESTADOR = os.getenv("MODELO_ORQUESTADOR", "deepseek-r1:8b")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+MODO_INFERENCIA = os.getenv("MODO_INFERENCIA", "local")  # "local" o "api"
 
 logger = logging.getLogger("SecureAudit_LangGraph")
 
-llm = ChatOllama(model=MODELO_ORQUESTADOR, temperature=0, base_url=OLLAMA_URL)
-
 embeddings = OllamaEmbeddings(model="mxbai-embed-large", base_url=OLLAMA_URL)
+
+
+def crear_llm(modelo: str = None, temperatura: float = 0.0, modo: str = "local"):
+    """
+    Crea el motor de inferencia según el modo seleccionado por el usuario.
+    """
+    if modo == "api" and GROQ_API_KEY:
+        try:
+            from langchain_groq import ChatGroq
+            logger.info(f"Usando modo API (Groq) con llama-3.3-70b-versatile")
+            return ChatGroq(
+                api_key=GROQ_API_KEY,
+                model_name="llama-3.3-70b-versatile",
+                temperature=temperatura
+            )
+        except ImportError:
+            logger.warning("langchain_groq no instalado, usando Ollama local como fallback")
+    
+    modelo_final = modelo or MODELO_ORQUESTADOR
+    logger.info(f"Usando modo LOCAL (Ollama) con {modelo_final}")
+    return ChatOllama(model=modelo_final, temperature=temperatura, base_url=OLLAMA_URL, timeout=300)
 
 
 class AuditoriaState(TypedDict):
@@ -31,6 +52,7 @@ class AuditoriaState(TypedDict):
     tiempos: dict
     modelo_ia: str
     temperatura: float
+    modo_inferencia: str
 
 TRADUCCION_CONOCIDAS = {
     "subprocess-injection": "ejecución remota de comandos no autorizados mediante inyección en procesos del sistema",
@@ -93,7 +115,8 @@ def agente_tecnico(state: AuditoriaState):
     modelo_seleccionado = state.get("modelo_ia", MODELO_ORQUESTADOR)
     temp_seleccionada = state.get("temperatura", 0.0)
 
-    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL, timeout=180)
+    modo = state.get("modo_inferencia", "local")
+    llm_dinamico = crear_llm(modelo=modelo_seleccionado, temperatura=temp_seleccionada, modo=modo)
 
     hallazgo = state["hallazgos_tecnicos"][0]
     prompt = f"Eres un auditor de seguridad profesional realizando una evaluación defensiva autorizada. Explica brevemente el riesgo técnico de la vulnerabilidad '{hallazgo['vulnerabilidad']}' encontrada en el archivo '{hallazgo['archivo']}'. Tu objetivo es proteger a la empresa identificando el fallo. Sé directo y técnico."
@@ -122,7 +145,8 @@ def agente_legal(state: AuditoriaState):
     modelo_seleccionado = state.get("modelo_ia", MODELO_ORQUESTADOR)
     temp_seleccionada = state.get("temperatura", 0.0)
 
-    llm_dinamico = ChatOllama(model=modelo_seleccionado, temperature=temp_seleccionada, base_url=OLLAMA_URL, timeout=180)
+    modo = state.get("modo_inferencia", "local")
+    llm_dinamico = crear_llm(modelo=modelo_seleccionado, temperatura=temp_seleccionada, modo=modo)
 
     h = state["hallazgos_tecnicos"][0]
     vulnerabilidad_real = h.get("vulnerabilidad", "Desconocida")
@@ -142,12 +166,14 @@ def agente_legal(state: AuditoriaState):
         docs_original = vectorstore.similarity_search_with_score(vulnerabilidad_real, k=4)
         docs_traducido = vectorstore.similarity_search_with_score(consulta_faiss, k=4)
         
-        # Combinar y ordenar por menor distancia (mejor similitud)
+# Combinar y ordenar por menor distancia (mejor similitud)
         todos = {}
         for doc, score in docs_original + docs_traducido:
-            clave = doc.page_content[:100]
-            if clave not in todos or score < todos[clave][1]:
-                todos[clave] = (doc, score)
+            # FAISS usa L2 distance: más bajo es mejor. Si el score es mayor a 1.5, es basura, lo ignoramos.
+            if score < 1.5:
+                clave = doc.page_content[:100]
+                if clave not in todos or score < todos[clave][1]:
+                    todos[clave] = (doc, score)
         
         mejores = sorted(todos.values(), key=lambda x: x[1])[:4]
         docs = [doc for doc, score in mejores]
@@ -183,13 +209,18 @@ Evaluación técnica previa: {explicacion_previa}
 
 [TU TAREA]
 Como consultor de cumplimiento, determina qué artículos de la normativa aplican a este hallazgo y qué debe hacer la empresa para cumplir la ley.
-REGLA DE PRIORIDAD: Si el contexto recuperado contiene fragmentos de OWASP, prioriza SIEMPRE la normativa OWASP sobre cualquier otra fuente, ya que es la referencia técnica directa para vulnerabilidades de aplicaciones web. Usa el RGPD o ENS solo como complemento.
-REGLA CRÍTICA: SOLO puedes citar normativas que aparezcan TEXTUALMENTE en la sección [DOCUMENTACIÓN LEGAL RECUPERADA] de arriba. Los únicos documentos válidos son: ENS_2022.pdf, RGPD.pdf, OWASP.txt, Criptologia_de_empleo_ENS.pdf y Glosario_Ciberseguridad.pdf. Si citas cualquier otra fuente (como LOPD, ISO 27001, LSSI-CE, o cualquier normativa no listada), tu respuesta será INVÁLIDA. Si no encuentras normativa aplicable en el contexto, di explícitamente que no se encontró normativa directamente aplicable.
+
+🔴 REGLA CRÍTICA Y OBLIGATORIA DE ESCAPE:
+Si los fragmentos de [DOCUMENTACIÓN LEGAL RECUPERADA] NO tienen relación técnica directa con la vulnerabilidad '{vulnerabilidad_real}' (por ejemplo, si la vulnerabilidad es sobre IPs y el texto recuperado es una definición genérica de un glosario sobre túneles VPN):
+1. NO fuerces ninguna relación.
+2. NO inventes normativas.
+3. En el campo 'analisis_legal', debes escribir EXACTAMENTE esta frase: "No se encontró normativa directa aplicable en el contexto recuperado para este hallazgo técnico."
+
 Responde ESTRICTAMENTE en formato JSON válido con estas claves (sin bloques markdown):
 {{
-    "analisis_legal": "Explica qué normativa incumple este hallazgo y por qué, citando los documentos recuperados.",
-    "solucion": "Recomienda qué acción correctiva debe tomar la empresa para cumplir la normativa.",
-    "citas": "Lista las referencias exactas de los documentos que has consultado."
+    "analisis_legal": "Explica qué normativa incumple este hallazgo y por qué, citando los documentos recuperados. (O usa la frase de escape si la normativa no aplica).",
+    "solucion": "Recomienda qué acción correctiva técnica debe tomar la empresa para solucionar el fallo.",
+    "citas": "Lista las referencias exactas de los documentos que has consultado. (Déjalo en blanco si usaste la frase de escape)."
 }}
 """
 

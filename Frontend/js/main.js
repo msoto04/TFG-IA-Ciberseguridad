@@ -150,14 +150,17 @@ async function cerrarSesion() {
 function guardarConfigIA() {
     const modelo = document.getElementById('model-select').value;
     const temperatura = document.querySelector('input[type="range"]').value;
+    const modo = document.getElementById('modo-inferencia').value;
     
-    // Guardar en variables globales accesibles por audit.js y chat.js
     window.modeloIA = modelo;
     window.temperaturaIA = parseFloat(temperatura);
+    window.modoInferencia = modo;
+    // Ocultar selector de modelo local si se elige API
+    const modelGroup = document.getElementById('model-select').closest('.setting-group');
+    modelGroup.style.display = modo === 'api' ? 'none' : 'block';
     
     toggleSettings();
     
-    // Feedback visual
     const btn = document.querySelector('.btn-primary');
     const textoOriginal = btn.innerText;
     btn.innerText = '✓ Guardado';
@@ -167,3 +170,8 @@ function guardarConfigIA() {
         btn.style.background = '';
     }, 1500);
 }
+
+document.getElementById('modo-inferencia').addEventListener('change', function() {
+    const modelGroup = document.getElementById('model-select').closest('.setting-group');
+    modelGroup.style.display = this.value === 'api' ? 'none' : 'block';
+});
