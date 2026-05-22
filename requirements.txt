@@ -54,7 +54,7 @@ slowapi==0.1.9
 
 
 langchain-groq
-
+langchain-openai
 
 
 

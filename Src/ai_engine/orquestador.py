@@ -59,19 +59,20 @@ TRADUCCION_CONOCIDAS = {
     "dangerous-system-call": "brecha de seguridad por ejecución de comandos del sistema operativo sin validación",
     "command-injection-os-system": "inyección de comandos maliciosos en el sistema operativo",
     "os-system-injection": "ejecución arbitraria de comandos del sistema operativo",
-    "tainted-sql-string": "inyección SQL por concatenación de datos de usuario sin sanitizar",
     "sqlalchemy-execute-raw-query": "inyección SQL mediante ejecución de consultas sin parametrizar",
     "insecure-hash-algorithm-md5": "uso de algoritmo hash criptográficamente débil MD5 para protección de datos",
     "md5-used-as-password": "uso de MD5 como función hash para almacenamiento de contraseñas",
     "secure-set-cookie": "configuración insegura de cookies sin protección HttpOnly ni Secure",
     "avoid-hardcoded-config-debug": "modo depuración activado en entorno de producción exponiendo configuración",
-    "avoid-app-run-with-bad-host": "servidor web expuesto en todas las interfaces de red sin restricción",
     "detected-stripe-api-key": "credenciales de API expuestas en el código fuente sin cifrar",
-    "path-traversal-open": "acceso no autorizado a archivos del sistema mediante manipulación de rutas",
     "hardcoded-password": "contraseñas almacenadas directamente en el código fuente",
     "ssrf-injection-requests": "falsificación de solicitudes del lado del servidor SSRF que permite enviar solicitudes manipuladas a destinos inesperados",
-    "ssrf-requests": "falsificación de solicitudes del lado del servidor SSRF que permite obtener recursos remotos sin validar la URL",
-    "insecure-deserialization": "deserialización insegura que permite la ejecución de código arbitrario y violación de integridad de datos",
+
+    "ssrf-requests": "Falsificación de Solicitudes del Lado del Servidor SSRF aplicación web obtiene un recurso remoto sin validar la URL",
+    "path-traversal-open": "Pérdida de Control de Acceso Broken Access Control ver archivos confidenciales",
+    "insecure-deserialization": "Fallas en el Software y en la Integridad de los Datos",
+    "tainted-render-template": "Inyección Injection envían datos no confiables a un intérprete",
+    "avoid-app-run-with-bad-host": "Configuración de Seguridad Incorrecta mensajes de error detallados información confidencial",
 }
 
 
@@ -138,6 +139,7 @@ def agente_tecnico(state: AuditoriaState):
     return {"explicacion_tecnica": explicacion, "tiempos": tiempos}
 
 
+
 def agente_legal(state: AuditoriaState):
     inicio = time.time()
     logger.info("--- [AGENTE LEGAL / RAG] ---")
@@ -170,7 +172,7 @@ def agente_legal(state: AuditoriaState):
         todos = {}
         for doc, score in docs_original + docs_traducido:
             # FAISS usa L2 distance: más bajo es mejor. Si el score es mayor a 1.5, es basura, lo ignoramos.
-            if score < 1.5:
+            if score < 1.7:
                 clave = doc.page_content[:100]
                 if clave not in todos or score < todos[clave][1]:
                     todos[clave] = (doc, score)
@@ -210,11 +212,10 @@ Evaluación técnica previa: {explicacion_previa}
 [TU TAREA]
 Como consultor de cumplimiento, determina qué artículos de la normativa aplican a este hallazgo y qué debe hacer la empresa para cumplir la ley.
 
-🔴 REGLA CRÍTICA Y OBLIGATORIA DE ESCAPE:
-Si los fragmentos de [DOCUMENTACIÓN LEGAL RECUPERADA] NO tienen relación técnica directa con la vulnerabilidad '{vulnerabilidad_real}' (por ejemplo, si la vulnerabilidad es sobre IPs y el texto recuperado es una definición genérica de un glosario sobre túneles VPN):
-1. NO fuerces ninguna relación.
-2. NO inventes normativas.
-3. En el campo 'analisis_legal', debes escribir EXACTAMENTE esta frase: "No se encontró normativa directa aplicable en el contexto recuperado para este hallazgo técnico."
+Si la documentación recuperada es claramente irrelevante para el tipo de vulnerabilidad detectada, indica "No se encontró normativa directa". En caso de duda, cita la normativa más cercana e indica que es una referencia aproximada.
+
+🔴 REGLA DE FORMATO (CRÍTICA):
+Responde ÚNICAMENTE con un objeto JSON válido. NO uses bloques de código (```json). NO escribas "Here is the response" ni ninguna otra palabra fuera de las llaves {{ }}.
 
 Responde ESTRICTAMENTE en formato JSON válido con estas claves (sin bloques markdown):
 {{

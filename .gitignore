@@ -27,3 +27,7 @@ faiss_index/
 # Archivos basura del sistema operativo
 .DS_Store
 Thumbs.db
+
+# Datos generados en tiempo de ejecución
+data/
+!data/.gitkeep

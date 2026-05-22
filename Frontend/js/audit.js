@@ -537,7 +537,7 @@ async function generarPDF() {
             ['Total Hallazgos', currentAuditData.total_vulnerabilidades],
             ['Puntuación de Seguridad', `${score}/100`],
             ['Estado del Sistema', score > 50 ? 'APROBADO (Con Riesgos)' : 'CRÍTICO'],
-            ['Modelo IA Utilizado', 'Llama 3.2 (Quantized 4-bit) Local']
+            ['Modelo IA Utilizado', window.modeloIA || document.getElementById('model-select')?.value || 'N/A']
         ],
         theme: 'striped',
         headStyles: { fillColor: colorPrimary },

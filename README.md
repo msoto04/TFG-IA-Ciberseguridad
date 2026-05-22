@@ -23,6 +23,12 @@ ollama run llama3.1:8b          # Modelo de razonamiento experto
 ollama run mxbai-embed-large   # Modelo de embeddings para normativa ENS
 ```
 
+# Alternativamente, para usar el modo API (Groq):
+# 1. Obtén una clave en https://console.groq.com/keys
+# 2. Añade GROQ_API_KEY=tu_clave en el archivo .env
+# 3. Establece MODO_INFERENCIA=api en el archivo .env
+# En este modo no se envía código fuente, solo metadatos de la vulnerabilidad.
+
 ### 3. Configuración del Entorno
 1. Copia el archivo de ejemplo: `cp .env.example .env`
 2. *(Opcional)* Revisa los valores en `.env`, aunque los valores por defecto están optimizados para el entorno Docker.
@@ -61,5 +67,5 @@ Para evitar "alucinaciones" y garantizar el cumplimiento normativo, el sistema i
 ## Características de Seguridad
 
 * **Análisis SAST Profesional:** Integración con reglas personalizadas de Semgrep para la detección profunda de vulnerabilidades.
-* **Privacidad Total:** No se envían datos a APIs externas (OpenAI, Anthropic, etc.). Todo el flujo de datos permanece en tu infraestructura.
+* **Privacidad Configurable:** El sistema ofrece dos modos de inferencia. En modo local, ningún dato sale de tu infraestructura. En modo API, únicamente se envían metadatos mínimos (tipo de vulnerabilidad, archivo y línea), nunca el código fuente.
 * **Trazabilidad y Evidencia:** Cada informe generado incluye el fragmento exacto de la normativa ENS recuperada por la IA como evidencia legal.

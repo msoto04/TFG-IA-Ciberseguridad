@@ -1,12 +1,31 @@
 import os
 import sys
 from langchain_community.vectorstores import FAISS
-
 from langchain_community.document_loaders import PyMuPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
-
 from langchain_community.embeddings import OllamaEmbeddings
+from langchain.schema import Document
+
+
+# ─────────────────────────────────────────────
+# CHUNKING ESPECIAL PARA OWASP.TXT
+# El OWASP está estructurado por secciones (A01, A02...).
+# Lo partimos manualmente por sección para que cada
+# vulnerabilidad quede en su propio chunk, sin mezclar A09 con A10.
+# ─────────────────────────────────────────────
+def split_owasp_por_seccion(texto: str, fuente: str) -> list:
+    import re
+    # Divide en cada "A0X:2021" que aparezca
+    secciones = re.split(r'(?=A\d{2}:2021)', texto)
+    docs = []
+    for seccion in secciones:
+        seccion = seccion.strip()
+        if len(seccion) > 30:  # ignorar fragmentos vacíos
+            docs.append(Document(
+                page_content=seccion,
+                metadata={"source": fuente, "page": 0}
+            ))
+    return docs
 
 
 def crear_base_datos():
@@ -14,7 +33,7 @@ def crear_base_datos():
     db_path = "/app/faiss_index"
 
     print("=" * 60)
-    print(" INICIANDO")
+    print(" INICIANDO INGESTA (chunking mejorado)")
     print("=" * 60)
 
     if not os.path.exists(docs_path):
@@ -22,69 +41,92 @@ def crear_base_datos():
         sys.exit(1)
 
     archivos_en_carpeta = os.listdir(docs_path)
-    print(f"\nArchivos detectados en la carpeta por Docker: \n{archivos_en_carpeta}\n")
+    print(f"\nArchivos detectados: {archivos_en_carpeta}\n")
 
     documentos_totales = []
+    documentos_owasp = []  # se procesan aparte con chunking especial
 
     for archivo in archivos_en_carpeta:
         ruta = os.path.join(docs_path, archivo)
 
         if archivo.endswith(".pdf"):
-            print(f" leer PDF: {archivo}...")
+            print(f"Leyendo PDF: {archivo}...")
             try:
                 loader = PyMuPDFLoader(ruta)
                 docs = loader.load()
                 caracteres = sum(len(d.page_content) for d in docs)
-                print(f"EXITO: Leídas {len(docs)} páginas, {caracteres} caracteres extraídos.")
+                print(f"  OK: {len(docs)} páginas, {caracteres} caracteres.")
                 documentos_totales.extend(docs)
             except Exception as e:
-                print(f"ERROR al leer PDF {archivo}: {e}")
+                print(f"  ERROR al leer PDF {archivo}: {e}")
 
         elif archivo.endswith(".txt"):
-            print(f"Intentando leer TXT: {archivo}...")
+            print(f"Leyendo TXT: {archivo}...")
             try:
                 try:
                     loader = TextLoader(ruta, encoding="utf-8")
                     docs = loader.load()
                 except UnicodeDecodeError:
-                    print("Aviso: Fall UTF-8, intentando con ISO-8859-1 (Latin-1)...")
                     loader = TextLoader(ruta, encoding="iso-8859-1")
                     docs = loader.load()
 
                 caracteres = sum(len(d.page_content) for d in docs)
-
                 if caracteres == 0:
-                    print(f"ERROR CRTICO: El archivo {archivo} está vacio (0 caracteres) para la IA.")
+                    print(f"  ERROR CRÍTICO: {archivo} está vacío.")
                 else:
-                    print(f"ÉXITO: {caracteres} caracteres extraidos perfectamente.")
+                    print(f"  OK: {caracteres} caracteres.")
 
-                documentos_totales.extend(docs)
+                # OWASP se procesa con chunking especial por sección
+                if "owasp" in archivo.lower():
+                    print(f"  → Aplicando chunking especial OWASP (por sección A0X)...")
+                    for doc in docs:
+                        chunks_owasp = split_owasp_por_seccion(doc.page_content, ruta)
+                        documentos_owasp.extend(chunks_owasp)
+                    print(f"  → {len(documentos_owasp)} secciones OWASP generadas.")
+                else:
+                    documentos_totales.extend(docs)
 
             except Exception as e:
-                print(f"ERROR al leer TXT {archivo}: {e}")
+                print(f"  ERROR al leer TXT {archivo}: {e}")
         else:
-            print(f"Omitiendo archivo no soportado o extensión oculta: {archivo}")
+            print(f"Omitiendo: {archivo}")
 
-    if not documentos_totales:
-        print("\nERROR FATAL: No se ha podido extraer texto de NINGÚN archivo. Abortando.")
+    if not documentos_totales and not documentos_owasp:
+        print("\nERROR FATAL: No se extrajo texto de ningún archivo.")
         sys.exit(1)
 
-    print("\nCortando texto en fragmentos...")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-    trozos = text_splitter.split_documents(documentos_totales)
-    print(f"Generados {len(trozos)} fragmentos en total.")
+    # ── Chunking general para PDFs y otros TXTs ──
+    # chunk_size=1000 y overlap=150 para que artículos del ENS/RGPD
+    # no queden partidos a mitad de párrafo
+    print("\nCortando documentos generales en fragmentos...")
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=600,
+        chunk_overlap=100,
+        separators=["\n\n", "\n", ". ", " ", ""]
+    )
+    trozos_generales = text_splitter.split_documents(documentos_totales)
+    print(f"  {len(trozos_generales)} fragmentos generales.")
 
-    print("\nGenerando Embeddings (Conectando a host.docker.internal)...")
+    # Combinar todo
+    trozos_totales = trozos_generales + documentos_owasp
+    print(f"\nTotal chunks a indexar: {len(trozos_totales)}")
+    print(f"  - Generales (PDFs): {len(trozos_generales)}")
+    print(f"  - OWASP (por sección): {len(documentos_owasp)}")
 
+    # Verificación rápida: mostrar los chunks de OWASP generados
+    print("\nChunks OWASP generados:")
+    for i, doc in enumerate(documentos_owasp):
+        print(f"  [{i+1}] {doc.page_content[:80].strip()}...")
+
+    print("\nGenerando embeddings...")
     ollama_url = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
-
     embeddings = OllamaEmbeddings(model="mxbai-embed-large", base_url=ollama_url)
 
-    vector_db = FAISS.from_documents(trozos, embeddings)
+    vector_db = FAISS.from_documents(trozos_totales, embeddings)
 
     print(f"\nGuardando índice en {db_path}...")
     vector_db.save_local(db_path)
-    print("¡Base de datos regenerada con éxito!.")
+    print("¡Índice regenerado con éxito!")
 
 
 if __name__ == "__main__":
