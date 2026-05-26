@@ -1,0 +1,258 @@
+[
+  {
+    "id": "a5beb293-c758-4aea-8f53-f1feabdf2572",
+    "nombre_archivo": "pyme_academiaeuropa_final.zip",
+    "fecha": "2026-05-20 19:07:42.653445",
+    "puntuacion": 24.0,
+    "estado": "completada",
+    "vulnerabilidades": [
+      {
+        "archivo_afectado": "/app/auditoria_temp/a5beb293-c758-4aea-8f53-f1feabdf2572/app.py",
+        "linea": 29,
+        "regla_semgrep": "python.django.security.injection.tainted-sql-string.tainted-sql-string | python.flask.security.injection.tainted-sql-string.tainted-sql-string",
+        "severidad": "ERROR",
+        "consulta_index": "tainted-sql-string",
+        "analisis_legal": "**Análisis:** La vulnerabilidad 'tainted-sql-string' detectada en el informe técnico corresponde a una Inyección SQL (SQL Injection), lo que implica una vulnerabilidad de diseño inseguro en el acceso a bases de datos. Esta vulnerabilidad se alinea con el artículo A03:2021 de OWASP (Inyección) y el concepto de Inyección de código definido en el Glosario de Ciberseguridad, específicamente en la normativa OWASP Top 10 2021 que aborda las inyecciones como una de las vulnerabilidades más críticas. La empresa incumple al no implementar medidas de mitigación como consultas parametrizadas o validación de entradas, lo que expone datos sensibles a riesgos de divulgación y alteración.\n\n**Solución:** La empresa debe parametrizar todas las consultas SQL utilizando marcadores de posición y bibliotecas seguras (como SQLAlchemy o psycopg2), validar y sanitizar todas las entradas de usuario, y implementar auditoría de entradas críticas para detectar intentos de inyección. Además, se recomienda utilizar herramientas de mapeo objeto-relacional (ORM) con métodos seguros para evitar el uso directo de cadenas formateadas.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: OWASP.txt (Pág N/A)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 52)\n\n*Extracto:* ['OWASP.txt (Pág N/A): A03:2021 - Inyección (Injection) Ocurre cuando se envían datos no confiables a un intérprete como parte de un comando o consulta. Los tipos más comunes son inyección SQL, NoSQL, OS...', 'OWASP.txt (Pág N/A): A04:2021 - Diseño Inseguro (Insecure Design) Se centra en los riesgos relacionados con defectos de diseño y arquitectura. Requiere el uso de modelado de amenazas, patrones de diseño seguro y arquitecturas de referencia.', 'Glosario_Ciberseguridad.pdf (Pág 52): 2.9.20. Inyección SQL Definición: Es un tipo de ataque que se aprovecha de una vulnerabilidad en la validación de los contenidos introducidos en un formulario web...']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/a5beb293-c758-4aea-8f53-f1feabdf2572/app.py",
+        "linea": 30,
+        "regla_semgrep": "python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query",
+        "severidad": "ERROR",
+        "consulta_index": "sqlalchemy-execute-raw-query",
+        "analisis_legal": "**Análisis:** No se encontró normativa directa aplicable en el contexto recuperado para este hallazgo técnico.\n\n**Solución:** La empresa debe reemplazar todas las consultas crudas en SQLAlchemy por consultas parametrizadas, validar estrictamente todas las entradas que interactúen con la base de datos, eliminar innecesariamente cualquier uso de `text()` en el código, y realizar auditorías de seguridad periódicas con pruebas de penetración enfocadas en escenarios de inyección SQL.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: OWASP.txt (Pág N/A)\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 43)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 52)\n\n*Extracto:* []",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/a5beb293-c758-4aea-8f53-f1feabdf2572/app.py",
+        "linea": 43,
+        "regla_semgrep": "python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5 | python.lang.security.audit.md5-used-as-password.md5-used-as-password",
+        "severidad": "WARNING",
+        "consulta_index": "insecure-hash-algorithm-md5",
+        "analisis_legal": "**Análisis:** La vulnerabilidad 'insecure-hash-algorithm-md5' no se menciona directamente en los fragmentos recuperados, pero la documentación establece que los esquemas MAC basados en funciones resumen deben ser HMAC basados en SHA-2 o SHA-3, con seguridad mayor o igual que SHA-256. MD5 no está incluido en las recomendaciones y es considerado obsoleto, lo que implica que su uso no está autorizado y, por tanto, incumple las normativas que exigen algoritmos modernos y seguros.\n\n**Solución:** La empresa debe reemplazar el algoritmo MD5 por uno de los recomendados, como HMAC basado en SHA-256 o SHA-3, en todas las funciones donde se utilice para garantizar la integridad y autenticidad de los datos. Además, debe auditar el código para identificar todas las dependencias de MD5 y reemplazarlas por algoritmos compatibles.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 24)\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 15)\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 51)\n\n*Extracto:* ['Criptologia_de_empleo_ENS.pdf (Pág 15): Autorización de esquemas MAC basados en funciones resumen SHA-2 y SHA-3.', 'Criptologia_de_empleo_ENS.pdf (Pág 51): Requisito de seguridad mínima de 128 bits con funciones resumen SHA-2 o SHA-3.']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/a5beb293-c758-4aea-8f53-f1feabdf2572/app.py",
+        "linea": 52,
+        "regla_semgrep": "python.flask.security.audit.secure-set-cookie.secure-set-cookie",
+        "severidad": "WARNING",
+        "consulta_index": "secure-set-cookie",
+        "analisis_legal": "**Análisis:** El hallazgo incumple la obligación de proteger datos personales mediante el uso de protocolos seguros, como HTTPS, según la definición de HTTPS en la referencia 2 y el artículo 10 de la LSSI-CE citado en la referencia 4. La vulnerabilidad 'secure-set-cookie' permite la transmisión no segura de cookies, lo que vulnera la confidencialidad de datos cuando se accede a la aplicación vía HTTP, directamente relacionado con la obligación de utilizar HTTPS para garantizar la privacidad de los datos personales conforme a lo establecido en el artículo 10 de la LSSI-CE.\n\n**Solución:** La empresa debe habilitar el atributo `Secure` en todas las cookies que contienen información sensible, como recomendado en el informe técnico. Esto asegura que las cookies solo se envíen a través de conexiones HTTPS, cumpliendo con los requisitos de protección de datos y evitando la exposición a ataques de interceptación.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Glosario_Ciberseguridad.pdf (Pág 48)\n- Documento: ENS_2022.pdf (Pág 70)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 18)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 68)\n\n*Extracto:* ['Documento: Glosario_Ciberseguridad.pdf (Pág 68)', 'Documento: Glosario_Ciberseguridad.pdf (Pág 48)', 'Documento: Glosario_Ciberseguridad.pdf (Pág 18)']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/a5beb293-c758-4aea-8f53-f1feabdf2572/app.py",
+        "linea": 70,
+        "regla_semgrep": "python.django.security.injection.command.command-injection-os-system.command-injection-os-system",
+        "severidad": "ERROR",
+        "consulta_index": "command-injection-os-system",
+        "analisis_legal": "**Análisis:** EXACTAMENTE esta frase: No se encontró normativa directa aplicable en el contexto recuperado para este hallazgo técnico.\n\n**Solución:** La empresa debe implementar las recomendaciones del informe técnico: validar estrictamente la entrada, usar subprocess con argumentos individuales, reemplazar por bibliotecas seguras y auditar todas las llamadas a funciones de sistema. Además, realizar pruebas de penetración para validar la mitigación.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: ENS_2022.pdf (Pág 72)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 48)\n- Documento: ENS_2022.pdf (Pág 19)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 22)\n\n*Extracto:* []",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/a5beb293-c758-4aea-8f53-f1feabdf2572/app.py",
+        "linea": 71,
+        "regla_semgrep": "python.flask.security.injection.os-system-injection.os-system-injection | python.lang.security.dangerous-system-call.dangerous-system-call",
+        "severidad": "ERROR",
+        "consulta_index": "os-system-injection",
+        "analisis_legal": "**Análisis:** No se encontró normativa directa aplicable en el contexto recuperado para este hallazgo técnico.\n\n**Solución:** La empresa debe implementar medidas de mitigación inmediatas: 1) Sanitizar y validar todas las entradas que alimentan funciones de sistema, 2) Reemplazar llamadas a os.system por métodos más seguros como subprocess con listas de argumentos, 3) Ejecutar procesos con mínimos permisos, 4) Realizar auditoría completa del código para identificar otras vulnerabilidades similares.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: ENS_2022.pdf (Pág 72)\n- Documento: ENS_2022.pdf (Pág 39)\n- Documento: RGPD.pdf (Pág 67)\n- Documento: RGPD.pdf (Pág 57)\n\n*Extracto:* []",
+        "modelo_llm": "deepseek-r1:8b"
+      }
+    ]
+  },
+  {
+    "id": "4c1aff40-291b-4654-9e2e-c083fbaa605f",
+    "nombre_archivo": "pyme_academiaeuropa_final.zip",
+    "fecha": "2026-05-20 22:35:20.141228",
+    "puntuacion": 24.0,
+    "estado": "completada",
+    "vulnerabilidades": [
+      {
+        "archivo_afectado": "/app/auditoria_temp/4c1aff40-291b-4654-9e2e-c083fbaa605f/app.py",
+        "linea": 29,
+        "regla_semgrep": "python.django.security.injection.tainted-sql-string.tainted-sql-string | python.flask.security.injection.tainted-sql-string.tainted-sql-string",
+        "severidad": "ERROR",
+        "consulta_index": "tainted-sql-string",
+        "analisis_legal": "**Análisis:** La vulnerabilidad de inyección SQL detectada en el informe del analista técnico incumple la normativa de seguridad relacionada con la inyección de código malicioso. Según el documento 'Glosario_Ciberseguridad.pdf' (pág 52), la inyección SQL se define como un tipo de ataque que se aprovecha de una vulnerabilidad en la validación de los contenidos introducidos en un formulario web y que puede permitir la obtención de forma ilegítima de los datos almacenados en la base de datos del sitio web. Además, el documento 'OWASP.txt' menciona la inyección SQL como un tipo de inyección (Injection) que ocurre cuando se envían datos no confiables a un intérprete como parte de un comando o consulta. Por lo tanto, la empresa incumple la normativa de seguridad al no tener medidas adecuadas para prevenir la inyección SQL.\n\n**Solución:** Para solucionar el fallo, se recomienda utilizar consultas SQL preparadas con parámetros, validar y escapar todas las cadenas de texto que se utilicen en consultas SQL, y utilizar un ORM (Object-Relational Mapping) para interactuar con la base de datos. Además, se recomienda realizar pruebas de penetración y pruebas de seguridad regulares para detectar vulnerabilidades similares.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: OWASP.txt (Pág N/A)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 52)\n\n*Extracto:* ['Glosario_Ciberseguridad.pdf (pág 52)', 'OWASP.txt']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/4c1aff40-291b-4654-9e2e-c083fbaa605f/app.py",
+        "linea": 30,
+        "regla_semgrep": "python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query",
+        "severidad": "ERROR",
+        "consulta_index": "sqlalchemy-execute-raw-query",
+        "analisis_legal": "**Análisis:** La vulnerabilidad de inyección de código SQL detectada en el informe del analista técnico incumple la normativa de seguridad relacionada con la protección de datos y la prevención de ataques de inyección de código. Según el documento 'Glosario_Ciberseguridad.pdf' (página 52), la inyección de código SQL se define como un tipo de ataque que se aprovecha de una vulnerabilidad en la validación de los contenidos introducidos en un formulario web y que puede permitir la obtención de forma ilegítima de los datos almacenados en la base de datos del sitio web. Además, el documento 'OWASP.txt' menciona la inyección SQL como un tipo de ataque que puede ser prevenido mediante el uso de consultas parametrizadas y la validación de la entrada de usuario.\n\n**Solución:** Para solucionar el fallo, se recomienda utilizar consultas preparadas con parámetros para evitar la inyección de código SQL, validar y sanitizar la entrada de usuario antes de utilizarla en una consulta SQL, y limitar los privilegios del usuario de la base de datos para evitar accesos no autorizados.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 43)\n- Documento: OWASP.txt (Pág N/A)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 52)\n\n*Extracto:* ['Glosario_Ciberseguridad.pdf (página 52)', 'OWASP.txt']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/4c1aff40-291b-4654-9e2e-c083fbaa605f/app.py",
+        "linea": 43,
+        "regla_semgrep": "python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5 | python.lang.security.audit.md5-used-as-password.md5-used-as-password",
+        "severidad": "WARNING",
+        "consulta_index": "insecure-hash-algorithm-md5",
+        "analisis_legal": "**Análisis:** El hallazgo de seguridad 'insecure-hash-algorithm-md5' incumple la normativa establecida en el documento 'Criptologia_de_empleo_ENS.pdf', específicamente en la página 51, donde se establece que se deben utilizar funciones resumen de las incluidas en la serie SHA-2 o SHA-3 con una seguridad mayor o igual que SHA-256. El uso de MD5 no cumple con esta normativa, ya que es un algoritmo de hash criptográfico que ha sido ampliamente criticado por su debilidad en términos de seguridad. Además, en la página 24 del mismo documento, se menciona que las opciones recomendadas para proteger la integridad y autenticidad de los mensajes son HMAC-SHA2, lo que también apoya la idea de que MD5 no es una opción segura.\n\n**Solución:** Para solucionar el fallo, se recomienda reemplazar el algoritmo de hash MD5 con un algoritmo más seguro, como SHA-256 o SHA-3, en el archivo 'app.py'. Además, se debe asegurar de que el algoritmo de hash se utilice de manera segura, utilizando técnicas como la sal y el estiramiento de la clave.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 51)\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 24)\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 15)\n\n*Extracto:* ['Criptologia_de_empleo_ENS.pdf (Pág 51)', 'Criptologia_de_empleo_ENS.pdf (Pág 24)']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/4c1aff40-291b-4654-9e2e-c083fbaa605f/app.py",
+        "linea": 52,
+        "regla_semgrep": "python.flask.security.audit.secure-set-cookie.secure-set-cookie",
+        "severidad": "WARNING",
+        "consulta_index": "secure-set-cookie",
+        "analisis_legal": "**Análisis:** La vulnerabilidad 'secure-set-cookie' incumple la normativa de seguridad y privacidad, específicamente en lo relacionado con la protección de datos personales y la seguridad de la información. Según el documento 'Glosario_Ciberseguridad.pdf' (Pág 48), el protocolo HTTPS es un protocolo de red basado en el protocolo HTTP, destinado a la transferencia segura de datos de hipertexto. La falta de configuración adecuada de la directiva 'Secure' en las cookies establecidas por la aplicación implica que las cookies se envían sin cifrar, lo que permite a un atacante interceptar y leer la información contenida en ellas, lo que podría incluir datos sensibles como tokens de autenticación o información de sesión. Esto incumple la normativa de protección de datos personales, como se establece en la LOPDGDD, mencionada en el documento 'Glosario_Ciberseguridad.pdf' (Pág 18).\n\n**Solución:** Para solucionar el fallo, se recomienda configurar la directiva 'Secure' en las cookies para garantizar que se envíen de manera segura a través de HTTPS. Además, se debe asegurar que la aplicación utilice HTTPS para cifrar la comunicación entre el cliente y el servidor. La revisión y actualización de la configuración de cookies también es necesaria para garantizar que se establezcan de manera segura y se envíen solo a través de HTTPS.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: ENS_2022.pdf (Pág 70)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 48)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 18)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 68)\n\n*Extracto:* ['Glosario_Ciberseguridad.pdf (Pág 48)', 'Glosario_Ciberseguridad.pdf (Pág 18)']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/4c1aff40-291b-4654-9e2e-c083fbaa605f/app.py",
+        "linea": 70,
+        "regla_semgrep": "python.django.security.injection.command.command-injection-os-system.command-injection-os-system",
+        "severidad": "ERROR",
+        "consulta_index": "command-injection-os-system",
+        "analisis_legal": "**Análisis:** No se encontró normativa directa aplicable en el contexto recuperado para este hallazgo técnico.\n\n**Solución:** Para mitigar esta vulnerabilidad, se recomienda validar y sanitizar todos los datos de entrada en la aplicación, utilizar métodos de ejecución de comandos seguros, limitar los privilegios de la aplicación y del usuario que la ejecuta, e implementar un sistema de detección y respuesta a incidentes de seguridad.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Glosario_Ciberseguridad.pdf (Pág 22)\n- Documento: ENS_2022.pdf (Pág 72)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 48)\n- Documento: ENS_2022.pdf (Pág 19)\n\n*Extracto:* ",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/4c1aff40-291b-4654-9e2e-c083fbaa605f/app.py",
+        "linea": 71,
+        "regla_semgrep": "python.flask.security.injection.os-system-injection.os-system-injection | python.lang.security.dangerous-system-call.dangerous-system-call",
+        "severidad": "ERROR",
+        "consulta_index": "os-system-injection",
+        "analisis_legal": "**Análisis:** No se encontró normativa directa aplicable en el contexto recuperado para este hallazgo técnico.\n\n**Solución:** La empresa debe implementar medidas para validar y sanitizar los datos de entrada en la aplicación, utilizar funciones y bibliotecas seguras para la ejecución de comandos del sistema operativo, implementar controles de acceso y autenticación, y realizar pruebas de penetración y análisis de código para identificar y corregir cualquier vulnerabilidad adicional.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: ENS_2022.pdf (Pág 39)\n- Documento: ENS_2022.pdf (Pág 72)\n- Documento: RGPD.pdf (Pág 57)\n- Documento: RGPD.pdf (Pág 67)\n\n*Extracto:* ",
+        "modelo_llm": "deepseek-r1:8b"
+      }
+    ]
+  },
+  {
+    "id": "d9415dc5-2ec8-47de-99d3-a10d60d93f65",
+    "nombre_archivo": "veterinaria.zip",
+    "fecha": "2026-05-21 16:30:51.218950",
+    "puntuacion": 0.0,
+    "estado": "completada",
+    "vulnerabilidades": [
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 21,
+        "regla_semgrep": "python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests",
+        "severidad": "ERROR",
+        "consulta_index": "ssrf-injection-requests",
+        "analisis_legal": "**Análisis:** El hallazgo de SSRF vulnerabilidad incumple el artículo 4(11) y 33 del RGPD, que exige que el tratamiento de datos personales sea transparente y se solicite el consentimiento cuando no se pueda determinar con certeza la finalidad al momento de su recogida. La vulnerabilidad expone datos personales a través de accesos no autorizados a sistemas internos, violando el principio de protección de datos adecuada (artículo 24) mediante la falta de medidas técnicas suficientes para prevenir el procesamiento no autorizado.\n\n**Solución:** 1. Implementar validación de entrada mediante lista blanca de dominios permitidos en el código de la API.\n2. Sanitizar todas las entradas que construyen URLs, bloqueando cualquier referencia a localhost o IP privadas.\n3. Auditar exhaustivamente todas las entradas que generan solicitudes HTTP.\n4. Establecer políticas de consentimiento explícito para cualquier acceso a datos personales mediante investigación científica, conforme al artículo 33 del RGPD.\n5. Documentar los controles técnicos implementados para demostrar el cumplimiento normativo.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: RGPD.pdf (Pág 5)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 54)\n- Documento: OWASP.txt (Pág 0)\n- Documento: RGPD.pdf (Pág 71)\n\n*Extracto:* ['Documento: RGPD.pdf (Pág 5)', 'Documento: RGPD.pdf (Pág 71)', 'Documento: OWASP.txt (Pág 0)']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 22,
+        "regla_semgrep": "python.flask.security.injection.ssrf-requests.ssrf-requests",
+        "severidad": "ERROR",
+        "consulta_index": "ssrf-requests",
+        "analisis_legal": "**Análisis:** El hallazgo detectado (SSRF) incumple la normativa OWASP A10, que define la falsificación de solicitudes del lado del servidor como una vulnerabilidad crítica donde la aplicación procesa recursos remotos sin validar adecuadamente la entrada del usuario. Esta vulnerabilidad permite a los atacantes acceder a recursos internos, exponiendo datos sensibles y comprometiendo la seguridad del sistema. La documentación recuperada no proporciona directrices específicas para este caso, por lo que se considera una referencia aproximada.\n\n**Solución:** La empresa debe implementar una capa de validación estricta de URLs en el código, permitiendo solo dominios o IP específicos y rechazando cualquier entrada que acceda a recursos locales o internos. Además, se debe evitar el procesamiento de entradas no verificadas y utilizar bibliotecas seguras para realizar solicitudes HTTP.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 33)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 17)\n- Documento: OWASP.txt (Pág 0)\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 52)\n\n*Extracto:* ['OWASP.txt (Pág 0)']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 32,
+        "regla_semgrep": "python.django.security.injection.path-traversal.path-traversal-open.path-traversal-open",
+        "severidad": "WARNING",
+        "consulta_index": "path-traversal-open",
+        "analisis_legal": "**Análisis:** El hallazgo detectado (vulnerabilidad 'path-traversal-open') incumple el artículo A01:2021 de OWASP (Pérdida de Control de Acceso), ya que permite a los atacantes acceder a archivos fuera de los permisos establecidos, lo que configura un 'exploit' de acceso no autorizado (Ref: OWASP.txt, Glosario_Ciberseguridad.pdf). La vulnerabilidad permite la exposición de datos sensibles y la escalada de privilegios, lo que se alinea con los riesgos definidos en la normativa como 'acceso ilegítimo' (Ref: Glosario_Ciberseguridad.pdf).\n\n**Solución:** La empresa debe implementar la sanitización de rutas mediante la función `os.path.normpath` y reemplazar separadores, además de validar que la ruta resultante comience con el directorio base (como se detalla en las acciones correctivas del informe técnico). También debe auditar todas las operaciones de E/S que utilicen entradas externas para construir rutas.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Glosario_Ciberseguridad.pdf (Pág 50)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 41)\n- Documento: OWASP.txt (Pág 0)\n\n*Extracto:* ['OWASP.txt (Pág 0): A01:2021 - Pérdida de Control de Acceso (Broken Access Control)', 'Glosario_Ciberseguridad.pdf (Pág 41): Exploit (definición y ejemplos de acceso ilegítimo)']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 33,
+        "regla_semgrep": "python.flask.security.injection.path-traversal-open.path-traversal-open",
+        "severidad": "ERROR",
+        "consulta_index": "path-traversal-open",
+        "analisis_legal": "**Análisis:** El hallazgo incumple el artículo OWASP A01 (Pérdida de Control de Acceso) porque permite a los atacantes acceder a archivos fuera del directorio intencionalmente restringido mediante manipulación de rutas, lo que configura una vulnerabilidad de acceso no autorizado (Ref: OWASP.txt). La vulnerabilidad facilita la exposición de datos sensibles y posibles escaladas de privilegios, violando los principios de control de acceso adecuados.\n\n**Solución:** La empresa debe implementar la sanitización de rutas mediante `os.path.normpath` y validar que las rutas generadas comiencen con el directorio base. Además, realizar auditorías exhaustivas en todo el código para identificar y corregir otras vulnerabilidades de acceso (siguiendo OWASP Top 10).",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Glosario_Ciberseguridad.pdf (Pág 50)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 41)\n- Documento: OWASP.txt (Pág 0)\n\n*Extracto:* ['OWASP.txt (Pág 0)']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 44,
+        "regla_semgrep": "python.flask.security.insecure-deserialization.insecure-deserialization | python.lang.security.deserialization.pickle.avoid-pickle",
+        "severidad": "ERROR",
+        "consulta_index": "insecure-deserialization",
+        "analisis_legal": "**Análisis:** El hallazgo de 'insecure-deserialization' incumple OWASP A03:2021 (Inyección) y OWASP A08:2021 (Fallas en el Software y en la Integridad de los Datos), ya que la deserialización no segura permite la ejecución de código malicioso (RCE) y compromete la integridad de los datos. Además, la vulnerabilidad afecta la protección de datos personales (GDPR), al permitir exfiltración de información confidencial. (Usa frase de escape si no aplica directamente).\n\n**Solución:** La empresa debe implementar validación estricta de entradas, evitar la deserialización de datos no controlados, utilizar bibliotecas seguras como JSON si los datos son simples, y auditar todo el código para identificar deserializaciones. Además, aplicar medidas de protección de datos según GDPR.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Glosario_Ciberseguridad.pdf (Pág 52)\n- Documento: RGPD.pdf (Pág 62)\n- Documento: OWASP.txt (Pág 0)\n\n*Extracto:* []",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 55,
+        "regla_semgrep": "python.flask.security.audit.render-template-string.render-template-string | python.django.security.injection.raw-html-format.raw-html-format | python.flask.security.injection.raw-html-concat.raw-html-format",
+        "severidad": "WARNING",
+        "consulta_index": "render-template-string",
+        "analisis_legal": "**Análisis:** El hallazgo de seguridad 'render-template-string' (inyección de plantillas) puede relacionarse con el Reglamento General de Protección de Datos (RGPD/Artículo 43, apartado 3) debido al riesgo de exposición de datos personales mediante ejecución remota de código o fugas de información. La vulnerabilidad implica que el controlador/procesador de datos no cumple con los principios de protección de datos (artículo 5), al no garantizar la seguridad de los datos. Asimismo, la normativa ENS_2022 (artículo 43, apartado 8) aplica, ya que la vulnerabilidad requiere refuerzos de seguridad que pasarían de categorías BÁSICA a MEDIA o ALTA (artículo 28). La empresa incumple al no implementar medidas adecuadas de seguridad que protejan los datos personales y al no ajustar la categoría de seguridad según el riesgo detectado.\n\n**Solución:** La empresa debe:\n1. Sanitizar y validar todas las entradas que ingresan a los sistemas de renderizado de plantillas.\n2. Implementar una lista blanca de plantillas permitidas.\n3. Desactivar la evaluación de expresiones en el motor de plantillas (ej: configurar `autoescape=True` en Flask).\n4. Auditar integralmente todas las funciones de renderizado en el sistema.\n5. Acreditarse en la categoría MEDIA o ALTA de seguridad según ENS_2022.\n6. Documentar los controles técnicos implementados para cumplir con el RGPD.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: ENS_2022.pdf (Pág 30)\n- Documento: RGPD.pdf (Pág 76)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 15)\n- Documento: ENS_2022.pdf (Pág 28)\n\n*Extracto:* ['Documento: RGPD.pdf (Pág 76) - Artículos 43 y 42 referidos a certificación y protección de datos.', 'Documento: ENS_2022.pdf (Pág 28 y 30) - Referencias a categorías de seguridad y medidas de protección.']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 73,
+        "regla_semgrep": "python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests",
+        "severidad": "ERROR",
+        "consulta_index": "ssrf-injection-requests",
+        "analisis_legal": "**Análisis:** El hallazgo de SSRF (A10:2021) permite a un atacante acceder a datos internos, lo que podría comprometer datos personales si estos están almacenados en servicios internos. Según el RGPD, los datos personales deben ser tratados con medidas de seguridad adecuadas (RGPD.pdf, Pág 71) y las solicitudes electrónicas deben ser claras y concisas (RGPD.pdf, Pág 5). La vulnerabilidad configura un riesgo de no cumplimiento en la protección de datos personales mediante medidas de seguridad inadecuadas.\n\n**Solución:** Implementar una lista blanca de dominios permitidos y bloquear cualquier URL que contenga IPs privadas o localhost. Realizar auditoría de todas las entradas que construyen URLs en peticiones HTTP.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: RGPD.pdf (Pág 5)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 54)\n- Documento: OWASP.txt (Pág 0)\n- Documento: RGPD.pdf (Pág 71)\n\n*Extracto:* ['OWASP.txt (Pág 0)', 'RGPD.pdf (Pág 5)', 'RGPD.pdf (Pág 71)']",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 79,
+        "regla_semgrep": "python.flask.security.injection.ssrf-requests.ssrf-requests",
+        "severidad": "ERROR",
+        "consulta_index": "ssrf-requests",
+        "analisis_legal": "**Análisis:** El hallazgo detectado incumple el artículo A10 del OWASP Top 20 2021 (Falsificación de Solicitudes del Lado del Servidor), que directamente describe la vulnerabilidad SSRF. La normativa mencionada no aplica directamente a la vulnerabilidad detectada, pero la empresa debe considerar el cumplimiento del Reglamento General de Protección de Datos (GDPR) si maneja datos personales de pacientes, ya que una explotación de SSRF podría comprometer dicha información.\n\n**Solución:** La empresa debe implementar una capa de validación estricta de URLs en el lado del servidor, permitiendo solo dominios o IP específicos. Además, debe evitar el procesamiento de entradas no verificadas y considerar el uso de bibliotecas seguras para realizar solicitudes HTTP.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 33)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 17)\n- Documento: OWASP.txt (Pág 0)\n- Documento: Criptologia_de_empleo_ENS.pdf (Pág 52)\n\n*Extracto:* []",
+        "modelo_llm": "deepseek-r1:8b"
+      },
+      {
+        "archivo_afectado": "/app/auditoria_temp/d9415dc5-2ec8-47de-99d3-a10d60d93f65/veterinaria/clinica_api.py",
+        "linea": 87,
+        "regla_semgrep": "python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host | python.flask.security.audit.debug-enabled.debug-enabled",
+        "severidad": "WARNING",
+        "consulta_index": "avoid_app_run_with_bad_host",
+        "analisis_legal": "**Análisis:** El hallazgo detectado incumple el artículo de OWASP A05 (Configuración de Seguridad Incorrecta) y la LOPDGDD (Ley Orgánica de Protección de Datos Personales y Garantía de los Derechos Digitales). OWASP A05 se refiere a configuraciones inseguras que en este caso incluyen el mal manejo del host, lo que puede generar vulnerabilidades como open redirects o suplantación de host (Ref 1). La LOPDGDD se activa cuando la vulnerabilidad conlleva el riesgo de filtración de datos personales (como registros médicos o datos de pacientes) debido a una configuración insegura (Ref 2).\n\n**Solución:** La empresa debe implementar una validación estricta del host en todas las entradas de solicitud y configuración. Esto incluye: 1) Validar el encabezado 'Host' contra una lista blanca permitida, 2) Usar técnicas de mitigación como la validación del host en todas las rutas, 3) Auditar configuraciones dinámicas para evitar el uso de datos externos no validados (como vars de entorno o archivos de configuración) (Ref 1).",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: Glosario_Ciberseguridad.pdf (Pág 54)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 22)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 41)\n- Documento: OWASP.txt (Pág 0)\n\n*Extracto:* ['REFERENCIA 1 (Documento: OWASP.txt (Pág 0))', 'REFERENCIA 2 (Documento: Glosario_Ciberseguridad.pdf (Pág 54))']",
+        "modelo_llm": "deepseek-r1:8b"
+      }
+    ]
+  },
+  {
+    "id": "763c6673-b405-4621-ae87-7830c8f7d1c5",
+    "nombre_archivo": "P-01.zip",
+    "fecha": "2026-05-21 21:58:51.208007",
+    "puntuacion": 85.0,
+    "estado": "completada",
+    "vulnerabilidades": [
+      {
+        "archivo_afectado": "/app/auditoria_temp/763c6673-b405-4621-ae87-7830c8f7d1c5/P-01/p01_sqli_vulnerable.py",
+        "linea": 11,
+        "regla_semgrep": "python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query",
+        "severidad": "ERROR",
+        "consulta_index": "sqlalchemy-execute-raw-query",
+        "analisis_legal": "**Análisis:** La vulnerabilidad detectada de 'sqlalchemy-execute-raw-query' incumple la normativa de seguridad de la información, específicamente en lo relacionado con la inyección de código SQL (SQL Injection). Según el documento 'Glosario_Ciberseguridad.pdf' (página 52), la inyección de código SQL se define como un tipo de ataque que se aprovecha de una vulnerabilidad en la validación de los contenidos introducidos en un formulario web y que puede permitir la obtención de forma ilegítima de los datos almacenados en la base de datos del sitio web. Además, el documento 'OWASP.txt' (página 0) menciona la inyección como un tipo de ataque que ocurre cuando se envían datos no confiables a un intérprete como parte de un comando o consulta. La empresa debe cumplir con las normativas de seguridad de la información para proteger la integridad y la confidencialidad de los datos.\n\n**Solución:** Para solucionar el fallo, se recomienda utilizar consultas preparadas (prepared statements) en lugar de ejecutar consultas raw, validar y sanitizar todos los parámetros de entrada antes de ejecutar consultas SQL, y utilizar la función 'text()' de SQLAlchemy para ejecutar consultas SQL con parámetros seguros.",
+        "referencias_legales": "Fuentes oficiales recuperadas:\n- Documento: OWASP.txt (Pág 0)\n- Documento: Glosario_Ciberseguridad.pdf (Pág 52)\n- Documento: RGPD.pdf (Pág 55)\n\n*Extracto:* ['Glosario_Ciberseguridad.pdf (página 52)', 'OWASP.txt (página 0)']",
+        "modelo_llm": "deepseek-r1:8b"
+      }
+    ]
+  }
+]
