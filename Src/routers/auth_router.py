@@ -90,6 +90,9 @@ def login(request: Request, usuario: UsuarioLogin, response: Response, db: Sessi
 
     access_token = crear_token_acceso(data={"sub": db_user.email})
 
+    # secure=False es intencional: el sistema opera sobre HTTP en red local
+    # o Intranet corporativa (sin TLS). En un despliegue con HTTPS bastará
+    # con cambiar este valor a True o leerlo desde una variable de entorno.
     response.set_cookie(
         key="access_token",
         value=f"Bearer {access_token}",
