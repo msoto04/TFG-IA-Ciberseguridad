@@ -16,6 +16,7 @@ services:
       - "8000:8000"
     volumes:
       - ./:/app
+      - secureaudit_data:/app/data
     env_file:
       - .env
     extra_hosts:
@@ -41,6 +42,7 @@ services:
     command: celery -A Src.workers.celery_worker.celery_app worker --loglevel=info
     volumes:
       - ./:/app
+      - secureaudit_data:/app/data
     env_file:
       - .env
     extra_hosts:
@@ -48,3 +50,7 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+
+volumes:
+  secureaudit_data:
+    driver: local

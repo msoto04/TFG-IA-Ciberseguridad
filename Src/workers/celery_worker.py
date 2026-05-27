@@ -155,6 +155,13 @@ def procesar_auditoria_task(
     db = SessionLocal()
 
     try:
+        # Marcar la auditoría como en proceso (puntuacion = -1)
+        # para distinguirla de una completada (0-100) en el historial
+        auditoria_inicio = db.query(Auditoria).filter(Auditoria.id == audit_id).first()
+        if auditoria_inicio:
+            auditoria_inicio.puntuacion = -1.0
+            db.commit()
+
         emitir_progreso(audit_id, "Descomprimiendo y analizando seguridad del ZIP...", 5)
 
         MAX_UNCOMPRESSED_SIZE = 400 * 1024 * 1024
@@ -192,6 +199,10 @@ def procesar_auditoria_task(
 
         if not hallazgos:
             logger.info(f"[{audit_id}] No se encontraron vulnerabilidades. Código seguro.")
+            auditoria_limpia = db.query(Auditoria).filter(Auditoria.id == audit_id).first()
+            if auditoria_limpia:
+                auditoria_limpia.puntuacion = 100.0
+                db.commit()
             emitir_progreso(audit_id, "No se encontraron vulnerabilidades. Código seguro.", 100)
             return
 
