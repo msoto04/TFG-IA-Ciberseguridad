@@ -5,6 +5,7 @@ import redis.asyncio as redis_async
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from fastapi import Depends
+from typing import List
 from Src.routers.auth_router import obtener_usuario_actual
 from Src.core.database import SessionLocal
 from Src.db_models.models import Usuario, Auditoria
@@ -38,8 +39,14 @@ def get_db():
         db.close()
 
 
+class MensajeHistorial(BaseModel):
+    rol: str   # "usuario" o "asistente"
+    texto: str
+
+
 class ChatRequest(BaseModel):
     mensaje: str
+    historial: List[MensajeHistorial] = []   # Conversación previa
     temperature: float = 0.0
     modelo: str = "deepseek-r1:8b"
     modo_inferencia: str = "local"
@@ -111,15 +118,44 @@ async def websocket_endpoint(websocket: WebSocket, audit_id: str):
         except Exception:
             pass
 
+
+def _construir_historial_texto(historial: List[MensajeHistorial]) -> str:
+    """
+    Convierte la lista de turnos anteriores en un bloque de texto plano
+    que se inyecta en el prompt para dar contexto conversacional al LLM.
+    Se limita a los últimos 6 turnos (3 intercambios) para no saturar
+    la ventana de contexto del modelo.
+    """
+    if not historial:
+        return ""
+
+    turnos_recientes = historial[-6:]
+    lineas = []
+    for turno in turnos_recientes:
+        prefijo = "Usuario" if turno.rol == "usuario" else "Asistente"
+        lineas.append(f"{prefijo}: {turno.texto}")
+
+    return "\n".join(lineas)
+
+
 @router.post("/chat")
-async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener_usuario_actual)):
+async def chat_rag(
+    request: ChatRequest,
+    current_user: Usuario = Depends(obtener_usuario_actual),
+):
     try:
-        logger.info(f"Petición Chat RAG recibida. Modelo: {request.modelo}, Temperatura: {request.temperature}")
+        logger.info(
+            f"Petición Chat RAG recibida. Modelo: {request.modelo}, "
+            f"Temperatura: {request.temperature}, "
+            f"Turnos de historial: {len(request.historial)}"
+        )
 
         embeddings = OllamaEmbeddings(model="mxbai-embed-large", base_url=OLLAMA_URL)
 
         try:
-            vector_db = FAISS.load_local(FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
+            vector_db = FAISS.load_local(
+                FAISS_PATH, embeddings, allow_dangerous_deserialization=True
+            )
         except Exception as e:
             logger.error(f"Error cargando FAISS: {e}")
             raise HTTPException(
@@ -127,40 +163,54 @@ async def chat_rag(request: ChatRequest, current_user: Usuario = Depends(obtener
                 detail="Error: No encuentro la base de conocimientos (FAISS).",
             )
 
-        llm_dinamico = crear_llm(modelo=request.modelo, temperatura=request.temperature, modo=request.modo_inferencia)
+        llm_dinamico = crear_llm(
+            modelo=request.modelo,
+            temperatura=request.temperature,
+            modo=request.modo_inferencia,
+        )
+
+        historial_texto = _construir_historial_texto(request.historial)
+
+        # El bloque de historial solo aparece en el prompt si hay turnos previos
+        bloque_historial = ""
+        if historial_texto:
+            bloque_historial = f"""
+            CONVERSACIÓN PREVIA (usa este contexto para responder preguntas de seguimiento):
+            {historial_texto}
+            """
 
         prompt_template = ChatPromptTemplate.from_template("""
             Eres un Auditor IA Jefe experto en Ciberseguridad y normativas legales.
 
             CONTEXTO RECUPERADO DE LOS DOCUMENTOS:
-            {context}
-
+            {{context}}
+            {bloque_historial}
             REGLAS DE COMPORTAMIENTO:
             1. Tu objetivo es responder la pregunta del usuario basándote ÚNICAMENTE en el contexto proporcionado arriba.
-            2. RESOLUCIÓN DE SIGLAS: Si el usuario usa siglas (como ENS, RGPD, OWASP, etc.), utiliza tu conocimiento técnico general para entender a qué se refiere, y busca ese concepto en el contexto.
-            3. Si la respuesta está en el contexto, explícala con claridad y profesionalidad.
-            4. Si el contexto NO contiene la respuesta, di explícitamente: "No encuentro esta información en la documentación normativa auditada."
+            2. Si hay conversación previa, tenla en cuenta para resolver referencias como "el artículo anterior", "lo que dijiste antes" o "¿y qué más?".
+            3. RESOLUCIÓN DE SIGLAS: Si el usuario usa siglas (como ENS, RGPD, OWASP, etc.), utiliza tu conocimiento técnico general para entender a qué se refiere, y busca ese concepto en el contexto.
+            4. Si la respuesta está en el contexto, explícala con claridad y profesionalidad.
+            5. Si el contexto NO contiene la respuesta, di explícitamente: "No encuentro esta información en la documentación normativa auditada."
 
             PREGUNTA DEL USUARIO:
-            {input}
-            """)
+            {{input}}
+            """.format(bloque_historial=bloque_historial))
 
         document_chain = create_stuff_documents_chain(llm_dinamico, prompt_template)
         retriever = vector_db.as_retriever(search_kwargs={"k": 10})
         rag_chain = create_retrieval_chain(retriever, document_chain)
 
-        respuesta = await asyncio.to_thread(rag_chain.invoke, {"input": request.mensaje})
+        respuesta = await asyncio.to_thread(
+            rag_chain.invoke, {"input": request.mensaje}
+        )
 
         logger.info("Respuesta del chat generada con éxito.")
 
         fuentes_usadas = []
         if "context" in respuesta:
             for doc in respuesta["context"][:3]:
-
                 nombre_archivo = doc.metadata.get("source", "Documento normativo")
-
                 nombre_archivo = nombre_archivo.split("/")[-1].split("\\")[-1]
-
                 fuentes_usadas.append(
                     {
                         "origen": nombre_archivo,
