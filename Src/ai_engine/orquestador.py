@@ -1,7 +1,7 @@
 import time
 import os
 import logging
-from typing import TypedDict, List
+from typing import TypedDict
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
 
@@ -18,7 +18,17 @@ MODO_INFERENCIA = os.getenv("MODO_INFERENCIA", "local")  # "local" o "api"
 
 logger = logging.getLogger("SecureAudit_LangGraph")
 
-embeddings = OllamaEmbeddings(model="mxbai-embed-large", base_url=OLLAMA_URL)
+# Los embeddings se crean bajo demanda (lazy) para no bloquear el arranque
+# del worker cuando Ollama no está disponible o se usa modo API.
+_embeddings_cache = None
+
+def _get_embeddings():
+    """Devuelve la instancia de embeddings, creándola solo la primera vez."""
+    global _embeddings_cache
+    if _embeddings_cache is None:
+        logger.info("Inicializando OllamaEmbeddings (primera llamada)...")
+        _embeddings_cache = OllamaEmbeddings(model="mxbai-embed-large", base_url=OLLAMA_URL)
+    return _embeddings_cache
 
 
 def crear_llm(modelo: str = None, temperatura: float = 0.0, modo: str = "local"):
@@ -28,22 +38,29 @@ def crear_llm(modelo: str = None, temperatura: float = 0.0, modo: str = "local")
     if modo == "api" and GROQ_API_KEY:
         try:
             from langchain_groq import ChatGroq
-            logger.info(f"Usando modo API (Groq) con llama-3.3-70b-versatile")
+            logger.info("Usando modo API (Groq) con llama-3.3-70b-versatile")
             return ChatGroq(
                 api_key=GROQ_API_KEY,
                 model_name="llama-3.3-70b-versatile",
                 temperature=temperatura
             )
         except ImportError:
-            logger.warning("langchain_groq no instalado, usando Ollama local como fallback")
-    
+            # langchain_groq no está instalado: caemos a Ollama con timeout corto
+            # para no bloquear el worker si Ollama tampoco está disponible.
+            logger.warning("langchain_groq no instalado, usando Ollama local como fallback (timeout=30s)")
+            modelo_final = modelo or MODELO_ORQUESTADOR
+            return ChatOllama(model=modelo_final, temperature=temperatura, base_url=OLLAMA_URL, timeout=30)
+
     modelo_final = modelo or MODELO_ORQUESTADOR
     logger.info(f"Usando modo LOCAL (Ollama) con {modelo_final}")
     return ChatOllama(model=modelo_final, temperature=temperatura, base_url=OLLAMA_URL, timeout=300)
 
 
 class AuditoriaState(TypedDict):
-    hallazgos_tecnicos: List[dict]
+    # Un único hallazgo por ejecución del grafo.
+    # El orquestador (Celery) invoca el grafo una vez por cada hallazgo,
+    # por lo que el estado siempre contiene exactamente un hallazgo.
+    hallazgo_actual: dict
     explicacion_tecnica: str
     articulos_legales: str
     veredicto_final: str
@@ -119,7 +136,7 @@ def agente_tecnico(state: AuditoriaState):
     modo = state.get("modo_inferencia", "local")
     llm_dinamico = crear_llm(modelo=modelo_seleccionado, temperatura=temp_seleccionada, modo=modo)
 
-    hallazgo = state["hallazgos_tecnicos"][0]
+    hallazgo = state["hallazgo_actual"]
     prompt = f"Eres un auditor de seguridad profesional realizando una evaluación defensiva autorizada. Explica brevemente el riesgo técnico de la vulnerabilidad '{hallazgo['vulnerabilidad']}' encontrada en el archivo '{hallazgo['archivo']}'. Tu objetivo es proteger a la empresa identificando el fallo. Sé directo y técnico."
 
     try:
@@ -150,7 +167,7 @@ def agente_legal(state: AuditoriaState):
     modo = state.get("modo_inferencia", "local")
     llm_dinamico = crear_llm(modelo=modelo_seleccionado, temperatura=temp_seleccionada, modo=modo)
 
-    h = state["hallazgos_tecnicos"][0]
+    h = state["hallazgo_actual"]
     vulnerabilidad_real = h.get("vulnerabilidad", "Desconocida")
     consulta_faiss = traducir_vulnerabilidad(vulnerabilidad_real, llm_dinamico)
     logger.info(f"Traducción FAISS: '{vulnerabilidad_real}' → '{consulta_faiss}'")
@@ -162,7 +179,7 @@ def agente_legal(state: AuditoriaState):
     referencias_encontradas = []
 
     try:
-        vectorstore = FAISS.load_local(DB_PATH, embeddings, allow_dangerous_deserialization=True)
+        vectorstore = FAISS.load_local(DB_PATH, _get_embeddings(), allow_dangerous_deserialization=True)
         
         # Búsqueda dual: sin traducir + traducido, se queda con los mejores
         docs_original = vectorstore.similarity_search_with_score(vulnerabilidad_real, k=4)

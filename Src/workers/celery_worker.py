@@ -219,7 +219,7 @@ def procesar_auditoria_task(
             try:
                 respuesta = grafo_agentes.invoke(
                     {
-                        "hallazgos_tecnicos": [h],
+                        "hallazgo_actual": h,
                         "tiempos": {},
                         "modelo_ia": modelo_ia,
                         "temperatura": float(temperatura),
@@ -294,4 +294,3 @@ def procesar_auditoria_task(
                 os.remove(zip_path)
         except Exception as e:
             logger.error(f"[{audit_id}] Error limpiando archivos temporales: {e}")
-
