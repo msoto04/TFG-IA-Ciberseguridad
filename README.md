@@ -19,15 +19,15 @@ Gracias a la arquitectura de contenedores, la plataforma se despliega con una in
 Antes de arrancar la aplicación, asegúrate de tener descargados los modelos necesarios ejecutando estos comandos en tu terminal:
 
 ```bash
-ollama run llama3.1:8b          # Modelo de razonamiento experto
+ollama run deepseek-r1:8b      # Modelo de razonamiento experto
 ollama run mxbai-embed-large   # Modelo de embeddings para normativa ENS
 ```
 
-# Alternativamente, para usar el modo API (Groq):
-# 1. Obtén una clave en https://console.groq.com/keys
-# 2. Añade GROQ_API_KEY=tu_clave en el archivo .env
-# 3. Establece MODO_INFERENCIA=api en el archivo .env
-# En este modo no se envía código fuente, solo metadatos de la vulnerabilidad.
+#### Alternativamente, para usar el modo API (Groq):
+1. Obtén una clave en https://console.groq.com/keys
+2. Añade GROQ_API_KEY=tu_clave en el archivo .env
+3. Establece MODO_INFERENCIA=api en el archivo .env
+En este modo no se envía código fuente, solo metadatos de la vulnerabilidad.
 
 ### 3. Configuración del Entorno
 1. Copia el archivo de ejemplo: `cp .env.example .env`
