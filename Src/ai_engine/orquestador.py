@@ -181,14 +181,14 @@ def agente_legal(state: AuditoriaState):
     try:
         vectorstore = FAISS.load_local(DB_PATH, _get_embeddings(), allow_dangerous_deserialization=True)
         
-        # Búsqueda dual: sin traducir + traducido, se queda con los mejores
+      
         docs_original = vectorstore.similarity_search_with_score(vulnerabilidad_real, k=4)
         docs_traducido = vectorstore.similarity_search_with_score(consulta_faiss, k=4)
         
-# Combinar y ordenar por menor distancia (mejor similitud)
+
         todos = {}
         for doc, score in docs_original + docs_traducido:
-            # FAISS usa L2 distance: más bajo es mejor. Si el score es mayor a 1.5, es basura, lo ignoramos.
+          
             if score < 1.7:
                 clave = doc.page_content[:100]
                 if clave not in todos or score < todos[clave][1]:
@@ -216,6 +216,10 @@ def agente_legal(state: AuditoriaState):
         logger.error(f"Fallo al consultar FAISS: {e}")
 
     explicacion_previa = state.get("explicacion_tecnica", "No disponible")
+
+    # NOTA DE PRIVACIDAD: Este prompt NO incluye 'codigo_completo' deliberadamente.
+    # Solo se envían metadatos del hallazgo (tipo, archivo, línea) para preservar
+    # la soberanía del código fuente incluso en modo API (Groq).
 
     prompt = f"""CONTEXTO: Eres un consultor de cumplimiento normativo que trabaja para una empresa de auditoría certificada. Tu cliente te ha contratado para revisar un informe de seguridad y determinar qué normativas aplican. NO tienes acceso al código fuente. Solo tienes el informe del analista técnico y la documentación legal.
 

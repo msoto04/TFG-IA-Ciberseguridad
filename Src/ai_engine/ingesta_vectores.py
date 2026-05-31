@@ -15,12 +15,12 @@ from langchain.schema import Document
 # ─────────────────────────────────────────────
 def split_owasp_por_seccion(texto: str, fuente: str) -> list:
     import re
-    # Divide en cada "A0X:2021" que aparezca
+
     secciones = re.split(r'(?=A\d{2}:2021)', texto)
     docs = []
     for seccion in secciones:
         seccion = seccion.strip()
-        if len(seccion) > 30:  # ignorar fragmentos vacíos
+        if len(seccion) > 30:  
             docs.append(Document(
                 page_content=seccion,
                 metadata={"source": fuente, "page": 0}
@@ -44,7 +44,7 @@ def crear_base_datos():
     print(f"\nArchivos detectados: {archivos_en_carpeta}\n")
 
     documentos_totales = []
-    documentos_owasp = []  # se procesan aparte con chunking especial
+    documentos_owasp = [] 
 
     for archivo in archivos_en_carpeta:
         ruta = os.path.join(docs_path, archivo)
@@ -76,7 +76,7 @@ def crear_base_datos():
                 else:
                     print(f"  OK: {caracteres} caracteres.")
 
-                # OWASP se procesa con chunking especial por sección
+           
                 if "owasp" in archivo.lower():
                     print(f"  → Aplicando chunking especial OWASP (por sección A0X)...")
                     for doc in docs:
@@ -95,14 +95,12 @@ def crear_base_datos():
         print("\nERROR FATAL: No se extrajo texto de ningún archivo.")
         sys.exit(1)
 
-    # ── Chunking general para PDFs y otros TXTs ──
-    # chunk_size=1000 y overlap=150 para que artículos del ENS/RGPD
-    # no queden partidos a mitad de párrafo
+
     print("\nCortando documentos generales en fragmentos...")
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=600,
+        chunk_size=500,
         chunk_overlap=100,
-        separators=["\n\n", "\n", ". ", " ", ""]
+        separators=["Artículo ", "\n\n", "\n", ". ", " ", ""]
     )
     trozos_generales = text_splitter.split_documents(documentos_totales)
     print(f"  {len(trozos_generales)} fragmentos generales.")

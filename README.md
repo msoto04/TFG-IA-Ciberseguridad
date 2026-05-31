@@ -3,7 +3,7 @@
 
 Esta plataforma combina el análisis estático de código (**SAST**) con un sistema de Inteligencia Artificial Soberana (**RAG**) para auditar software bajo el marco del **Esquema Nacional de Seguridad (ENS)**.
 
-Todo el procesamiento se realiza de forma **100% local**, garantizando la privacidad del código fuente y los datos auditados.
+Todo el procesamiento se realiza en infraestructura propia. El motor de inferencia (Ollama) se ejecuta en la máquina anfitriona; el resto de servicios operan completamente dentro de contenedores Docker aislados.
 
 ---
 
