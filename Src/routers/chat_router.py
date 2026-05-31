@@ -11,8 +11,6 @@ from Src.core.database import SessionLocal
 from Src.db_models.models import Usuario, Auditoria
 from Src.core.config import settings
 from Src.ai_engine.orquestador import crear_llm
-
-from langchain_community.chat_models import ChatOllama
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate

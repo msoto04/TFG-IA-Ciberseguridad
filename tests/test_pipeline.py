@@ -21,6 +21,9 @@ import tempfile
 import pytest
 import sys
 from unittest.mock import patch, MagicMock
+from fastapi.testclient import TestClient
+from Src.api import app
+from Src.core.database import engine, Base
 
 # ── Stubs de módulos pesados — deben registrarse ANTES de importar la app ─────
 _langgraph_stub = MagicMock()
@@ -56,9 +59,7 @@ os.environ.setdefault("UPLOAD_DIR",    "./uploads_test")
 os.environ.setdefault("EXTRACT_DIR",   "./extract_test")
 os.makedirs("data", exist_ok=True)
 
-from fastapi.testclient import TestClient
-from Src.api import app
-from Src.core.database import engine, Base
+
 
 Base.metadata.create_all(bind=engine)
 client = TestClient(app)

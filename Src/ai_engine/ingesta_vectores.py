@@ -78,7 +78,7 @@ def crear_base_datos():
 
            
                 if "owasp" in archivo.lower():
-                    print(f"  → Aplicando chunking especial OWASP (por sección A0X)...")
+                    print("  → Aplicando chunking especial OWASP (por sección A0X)...")
                     for doc in docs:
                         chunks_owasp = split_owasp_por_seccion(doc.page_content, ruta)
                         documentos_owasp.extend(chunks_owasp)
