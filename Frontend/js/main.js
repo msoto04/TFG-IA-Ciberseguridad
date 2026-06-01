@@ -152,7 +152,7 @@ function guardarConfigIA() {
     const temperatura = document.querySelector('input[type="range"]').value;
     const modo = document.getElementById('modo-inferencia').value;
     
-    window.modeloIA = modelo;
+    window.modeloIA = modo === 'api' ? 'Llama 3.3 70B (API)' : modelo;
     window.temperaturaIA = parseFloat(temperatura);
     window.modoInferencia = modo;
     // Ocultar selector de modelo local si se elige API
